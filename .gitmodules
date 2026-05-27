@@ -1,0 +1,15 @@
+[submodule "sentinel"]
+	path = sentinel
+	url = https://github.com/zafrem/bastion-sentinel
+[submodule "vault"]
+	path = vault
+	url = https://github.com/zafrem/bastion-vault
+[submodule "anchor"]
+	path = anchor
+	url = https://github.com/zafrem/bastion-anchor
+[submodule "navigator"]
+	path = navigator
+	url = https://github.com/zafrem/bastion-navigator
+[submodule "tracker"]
+	path = tracker
+	url = https://github.com/zafrem/bastion-tracker

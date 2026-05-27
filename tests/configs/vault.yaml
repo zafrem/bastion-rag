@@ -1,0 +1,23 @@
+version: "1.0"
+server:
+  host: "localhost"
+  http_port: 8081
+  grpc_port: 9091
+kms:
+  provider: "local"
+  local:
+    key_dir: "./tests/keys"
+    master_key: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+opa:
+  policy_dir: "./vault/policies"
+audit:
+  output_dir: "./tests/audit"
+  signing_enabled: false
+token_store:
+  driver: "memory"
+cache:
+  address: ""
+rate_limit:
+  enabled: false
+auth:
+  skip_auth: true
