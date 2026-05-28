@@ -211,10 +211,11 @@ Bastion's entire security wrapper adds less than 1% to the total round-trip time
 |---|---|---|
 | Sentinel (Go) | 12 | ~140 |
 | Vault (Go) | 18 | ~120 |
-| Tracker (Go) | 3 | ~25 |
+| Tracker (Go) | 13 | ~277 |
 | Navigator (Python) | 3 | 61 |
+| Anchor (Python) | 4 | 129 |
 | End-to-end (Go) | 5 | ~60 |
-| **Total** | **60** | **~440** |
+| **Total** | **55** | **~787** |
 
 Test suites include: unit tests, HTTP integration tests, end-to-end pipeline scenario tests (8 scenarios), latency benchmarks, and system tests that exercise the full stack without mocking.
 
