@@ -56,7 +56,7 @@ Security is applied **symmetrically** — every module that processes input also
 
 ## The Five Modules
 
-### 🛡️ Sentinel — Bidirectional Validation Gateway
+### Sentinel — Bidirectional Validation Gateway
 *Language: Go &nbsp;·&nbsp; Latency: ~0.3 ms (IN), ~0.9 ms (OUT)*
 
 Sentinel is the first and last line of defence. It runs the same engine in both directions, configured differently for each.
@@ -75,7 +75,7 @@ Sentinel is the first and last line of defence. It runs the same engine in both 
 
 ---
 
-### 🔐 Vault — Privacy Shield (Two-Phase)
+### Vault — Privacy Shield (Two-Phase)
 *Language: Go &nbsp;·&nbsp; Pattern: tokenize → process → detokenize*
 
 Vault ensures the AI model never sees real personal data. It replaces sensitive values with structured, recognisable tokens before the query reaches the LLM, and restores them (for authorised users) after the response returns.
@@ -100,7 +100,7 @@ User gets:    "Hong Gildong's balance is ₩5,000,000"   ← Vault decoded it
 
 ---
 
-### 🧭 Navigator — Tenant-Isolated Hybrid Search
+### Navigator — Tenant-Isolated Hybrid Search
 *Language: Python &nbsp;·&nbsp; Models: BGE-M3 (embed), BGE-reranker-v2-m3 (rerank)*
 
 Navigator handles vector search with two properties that distinguish it from a standard RAG retrieval layer:
@@ -121,7 +121,7 @@ Multiple Bastion deployments in different data centres can collaborate on a sing
 
 ---
 
-### 📊 Tracker — Observability and Human-in-the-Loop
+### Tracker — Observability and Human-in-the-Loop
 *Language: Go + React &nbsp;·&nbsp; Transport: NATS event bus, WebSocket*
 
 Tracker is an observer — it touches no data in the pipeline, but records everything that happens to it.
@@ -154,7 +154,7 @@ Real-time updates are pushed over WebSocket so operator dashboards update withou
 
 ---
 
-### ⚓ Anchor — Embedding Security
+### Anchor — Embedding Security
 *Language: Python &nbsp;·&nbsp; Techniques: differential noise, WEAT bias analysis*
 
 Anchor protects the vector embeddings that power search — the mathematical fingerprints that represent document meaning.
@@ -169,7 +169,7 @@ Uses Word Embedding Association Test (WEAT) statistics to detect whether the sys
 
 ## Cross-Cutting Features
 
-### 🍯 Honey-Token Intrusion Detection
+### Honey-Token Intrusion Detection
 
 Bastion plants invisible decoy records — fake customers, fake API keys, fake emails — throughout the data. No legitimate query ever touches them. When one is accessed, it proves the querier has prior knowledge of data they should not know.
 
@@ -184,7 +184,7 @@ Tenant isolation is enforced **independently** in every module:
 
 If any single layer's isolation fails, the others still hold. This is defence-in-depth applied to the multi-tenancy problem.
 
-### 🌐 Federated Search
+### Federated Search
 
 Multiple Bastion deployments can collaborate on a single query across data centres or organisational boundaries. Each deployment shares only what its own policy permits. Hop-depth counters prevent circular query loops. Result sets are merged using RRF at the coordinating node.
 
