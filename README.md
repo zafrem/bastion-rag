@@ -2,7 +2,7 @@
 
 > *"We don't block data. We govern its safe flow."*
 
-**Version 3.0** &nbsp;·&nbsp; Go 1.22+ / Python 3.11+ &nbsp;·&nbsp; Apache 2.0
+**Version 0.1.0** &nbsp;·&nbsp; Go 1.22+ / Python 3.11+ &nbsp;·&nbsp; Apache 2.0
 
 ---
 
