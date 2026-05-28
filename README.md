@@ -40,8 +40,8 @@ It works in both directions, like an airport that screens passengers on the way 
       │         │ (Go)            │   │  (Go)         │                  │  (Python)    │
       │         │ PII / hallucin. │   │ detokenize    │                  │ bias detect  │
       ▼         └─────────────────┘   └───────────────┘                  └──────────────┘
-  Safe Response          │                   │                   │               │
-                         └───────────────────┴───────────────────┴───────────────┘
+  Safe Response          │                   │                                   │
+                         └───────────────────┴───────────────────────────────────┘
                                                       │
                                           ┌───────────────────────┐
                                           │  Tracker  (Go)        │
