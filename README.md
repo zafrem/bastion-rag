@@ -175,7 +175,7 @@ Bastion plants invisible decoy records — fake customers, fake API keys, fake e
 
 Detection is multi-layer: Vault detects honey tokens in the query, Navigator detects them in search results, Sentinel detects them in the LLM response. Tracker correlates across all three. A single hit might be coincidence; the same user triggering all three layers simultaneously is a confirmed breach.
 
-### 🏢 Multi-Tenant Isolation
+### Multi-Tenant Isolation
 
 Tenant isolation is enforced **independently** in every module:
 - Vault: per-tenant encryption key derivation
