@@ -297,6 +297,7 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 | Honey-token SRS | [docs/20_extension_sentinel_industry_v1.md](./docs/20_extension_sentinel_industry_v1.md) |
 | Multi-tenancy SRS | [docs/21_extension_vault_cloud_llm_v1.md](./docs/21_extension_vault_cloud_llm_v1.md) |
 | Data lineage SRS | [docs/22_extension_navigator_federation_v1.md](./docs/22_extension_navigator_federation_v1.md) |
+| Pipeline execution examples | [docs/pipeline_execution_examples.md](./docs/pipeline_execution_examples.md) |
 
 ---
 
