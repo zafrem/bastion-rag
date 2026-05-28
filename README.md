@@ -110,7 +110,7 @@ Most multi-tenant search implementations retrieve broadly and then filter out wh
 
 **Hybrid search with RRF fusion**
 ```
-Vector search (BGE-M3 dense embeddings)  ─┐
+Vector search (BGE-M3 dense embeddings)   ─┐
                                            ├─▶ RRF merge ──▶ Cross-encoder rerank ──▶ Results
 BM25 keyword search                       ─┘
 ```
