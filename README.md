@@ -276,6 +276,8 @@ bastion-rag/
 └── docker-compose.yml
 ```
 
+Example source documents (customer, manufacturing, HR records with PII) used by the demo scenarios: [`navigator/tests/fixtures/source_documents.jsonl`](./navigator/tests/fixtures/source_documents.jsonl)
+
 ---
 
 ## Documentation
