@@ -287,6 +287,7 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 | Non-technical stakeholders | [BASTION_OVERVIEW.md](./BASTION_OVERVIEW.md) |
 | Architecture overview | [docs/30_integration_master_overview.md](./docs/30_integration_master_overview.md) |
 | Architecture principles | [docs/01_foundation_architecture_principles.md](./docs/01_foundation_architecture_principles.md) |
+
 | Event schema standard | [docs/02_foundation_event_schema_standard.md](./docs/02_foundation_event_schema_standard.md) |
 | Module interaction map | [docs/03_foundation_module_interaction_map.md](./docs/03_foundation_module_interaction_map.md) |
 | Sentinel SRS v3.0 | [docs/10_module_sentinel_srs_v3.md](./docs/10_module_sentinel_srs_v3.md) |
@@ -298,6 +299,7 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 | Multi-tenancy SRS | [docs/21_extension_vault_cloud_llm_v1.md](./docs/21_extension_vault_cloud_llm_v1.md) |
 | Data lineage SRS | [docs/22_extension_navigator_federation_v1.md](./docs/22_extension_navigator_federation_v1.md) |
 | Pipeline execution examples | [docs/pipeline_execution_examples.md](./docs/pipeline_execution_examples.md) |
+| Modular RAG requirements | [docs/31_modular_rag_requirements.md](./docs/31_modular_rag_requirements.md) |
 
 ---
 

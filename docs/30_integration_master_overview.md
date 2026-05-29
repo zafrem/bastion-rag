@@ -262,6 +262,7 @@ Understanding data flow?
 | 1 | 01-architecture-principles | v3.0 | ✅ |
 | 1 | 02-event-schema-standard | v2.0 | ✅ |
 | 1 | 03-module-interaction-map | v2.0 | ✅ |
+
 | 2 | 10-sentinel-srs | v3.0 | ✅ |
 | 2 | 11-vault-srs | v3.0 | ✅ |
 | 2 | 12-navigator-srs | v3.0 | ✅ |
@@ -270,6 +271,7 @@ Understanding data flow?
 | 3 | 20-honey-token-srs | v2.0 | ✅ |
 | 3 | 21-multi-tenancy-srs | v2.0 | ✅ |
 | 3 | 22-data-lineage-srs | v2.0 | ✅ |
+| 3 | 31-modular-rag-requirements | v1.1 | Active (P1+P2 implemented) |
 | 4 | 30-master-overview | v2.0 | ✅ |
 
 Archive: docs/archive/v2/ (all v2 and earlier documents)
