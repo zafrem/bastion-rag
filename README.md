@@ -300,6 +300,7 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 | Data lineage SRS | [docs/22_extension_navigator_federation_v1.md](./docs/22_extension_navigator_federation_v1.md) |
 | Pipeline execution examples | [docs/pipeline_execution_examples.md](./docs/pipeline_execution_examples.md) |
 | Modular RAG requirements | [docs/31_modular_rag_requirements.md](./docs/31_modular_rag_requirements.md) |
+| Injection defense architecture | [docs/32_injection_defense_architecture.md](./docs/32_injection_defense_architecture.md) |
 
 ---
 

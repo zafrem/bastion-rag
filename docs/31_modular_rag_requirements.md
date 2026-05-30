@@ -4,9 +4,9 @@
 **Document Type:** Cross-Cutting SRS (Tier 3)
 **Document ID:** 31-modular-rag-requirements
 **Feature:** Modular RAG Architecture
-**Version:** 1.1
+**Version:** 1.2
 **Date:** 2026-05-29
-**Status:** Active (Priority 1 + Priority 2 implemented)
+**Status:** Active (Priority 1 + 2 + 3 implemented)
 
 **Foundation References:**
 - 01-architecture-principles (Progressive Enhancement model)
@@ -933,13 +933,14 @@ Priority 2 — ✅ COMPLETE (2026-05-29)
                                                         event_loop_completed)
   FR-MR-05-003  Query-result binding (Tracker)       🔲 Pending — Tracker endpoint not yet built
 
-Priority 3 — 🔲 PENDING (cross-module coordination required)
+Priority 3 — ✅ COMPLETE (2026-05-29)
 
-  FR-MR-04-001  Document purpose tagging
-  FR-MR-04-002  Request purpose declaration
-  FR-MR-04-003  Purpose × RBAC conjunction
-  FR-MR-02-002  HyDE
-  FR-MR-05-004  Staleness tracking
+  FR-MR-04-001  Document purpose tagging        ✅ IndexRequest.permitted_purposes + Qdrant payload
+  FR-MR-04-002  Request purpose declaration     ✅ SearchRequest.purpose + purpose pre-filter
+  FR-MR-04-003  Purpose × RBAC conjunction      ✅ Vault access/controller.go:DecideWithPurpose()
+  FR-MR-02-002  HyDE                            ✅ navigator/hyde.py + orchestrator wiring
+  FR-MR-05-003  Query-result binding (Tracker)  ✅ GET /v1/lineage/{trace_id}/sources
+  FR-MR-05-004  Staleness tracking              ✅ _check_staleness() + event_chunk_stale
 
 Priority 4 — 🔲 PENDING (infrastructure dependency)
 
@@ -960,22 +961,22 @@ Priority 4 — 🔲 PENDING (infrastructure dependency)
 | FR-MR-01-003 | Domain-aware collection selection | ✅ | `router.py` · `Router._select_collections()` (keyword proxy) |
 | FR-MR-01-004 | Routing audit event | ✅ | `events.py` · `event_query_routed()` |
 | FR-MR-02-001 | Faker token rewriting | ✅ | `navigator/navigator/token_rewriter.py` · `TokenRewriter` |
-| FR-MR-02-002 | HyDE | 🔲 | — |
+| FR-MR-02-002 | HyDE | ✅ | `navigator/navigator/hyde.py` · `HyDETransformer`; wired in `orchestrator.py` |
 | FR-MR-02-003 | Sub-query decomposition | 🔲 | — |
 | FR-MR-02-004 | Transformation audit event | ✅ | Covered by `event_query_routed` (routing step) |
 | FR-MR-03-001 | Retrieval quality evaluator | ✅ | `navigator/navigator/evaluator.py` · `Evaluator.evaluate()` |
 | FR-MR-03-002 | Query refinement | ✅ | `evaluator.py` · `Evaluator.refine_query()` |
 | FR-MR-03-003 | Circuit breaker | ✅ | `orchestrator.py` · `search()` loop (max_iter / timeout / duplicate) |
 | FR-MR-03-004 | Loop audit events | ✅ | `events.py` · `event_search_iteration()`, `event_loop_completed()` |
-| FR-MR-04-001 | Document purpose tagging | 🔲 | — |
-| FR-MR-04-002 | Request purpose declaration | 🔲 | — |
-| FR-MR-04-003 | Purpose × RBAC conjunction | 🔲 | — |
+| FR-MR-04-001 | Document purpose tagging | ✅ | `models.py` · `IndexRequest.permitted_purposes`; stored in Qdrant payload |
+| FR-MR-04-002 | Request purpose declaration | ✅ | `models.py` · `SearchRequest.purpose`; `orchestrator.py` · `_filter_by_purpose()` |
+| FR-MR-04-003 | Purpose × RBAC conjunction | ✅ | `vault/internal/access/controller.go` · `DecideWithPurpose()`, `purposeMatrix` |
 | FR-MR-04-004 | Data steward role | 🔲 | — |
-| FR-MR-04-005 | Purpose audit event | 🔲 | — |
+| FR-MR-04-005 | Purpose audit event | ✅ | `events.py` · `event_purpose_filtered()` |
 | FR-MR-05-001 | Chunk retrieved event | ✅ | `events.py` · `event_chunk_retrieved()`; emitted per result in `orchestrator.py` |
 | FR-MR-05-002 | Source attribution in SearchResult | ✅ | `models.py` · `SearchResult` (chunk_id, heading_path, char_start, char_end, last_indexed); `searcher.py` · `_to_search_result()` |
-| FR-MR-05-003 | Query-result binding (Tracker endpoint) | 🔲 | — |
-| FR-MR-05-004 | Document staleness tracking | 🔲 | — |
+| FR-MR-05-003 | Query-result binding (Tracker endpoint) | ✅ | `tracker/internal/store/memory.go` · `AddChunkLineage/GetLineageSources`; `GET /v1/lineage/{trace_id}/sources` |
+| FR-MR-05-004 | Document staleness tracking | ✅ | `orchestrator.py` · `_check_staleness()`; `events.py` · `event_chunk_stale()` |
 | FR-MR-06-001 | Source connector interface | 🔲 | — |
 | FR-MR-06-002 | Delta indexing / CDC | 🔲 | — |
 | FR-MR-06-003 | Document content hash storage | 🔲 | — |
@@ -991,6 +992,7 @@ Priority 4 — 🔲 PENDING (infrastructure dependency)
 |---|---|---|
 | 1.0 | 2026-05-28 | Initial draft — 6 capability areas, 24 functional requirements |
 | 1.1 | 2026-05-29 | Priority 1 + Priority 2 implemented; §12 updated with completion status; §13 Implementation Status table added; status changed to Active |
+| 1.2 | 2026-05-29 | Priority 3 implemented: FR-MR-04-001/002/003 (purpose tagging + filter + Vault conjunction), FR-MR-02-002 (HyDE), FR-MR-05-003 (Tracker lineage sources endpoint), FR-MR-05-004 (staleness tracking) |
 
 ---
 

@@ -70,9 +70,11 @@ Wire contract: JSON-over-gRPC (language-transparent).
 
 ### Tier 3: Cross-Cutting SRS
 ```
-20-honey-token-srs    → Intrusion detection (Vault-owned, multi-layer)
-21-multi-tenancy-srs  → Tenant isolation (CRITICAL)
-22-data-lineage-srs   → Data journey tracking (Tracker-led)
+20-honey-token-srs              → Intrusion detection (Vault-owned, multi-layer)
+21-multi-tenancy-srs            → Tenant isolation (CRITICAL)
+22-data-lineage-srs             → Data journey tracking (Tracker-led)
+31-modular-rag-requirements     → Adaptive routing, re-search loop, source attribution
+32-injection-defense-architecture → All 20 defenses across 6 layers; attack map
 ```
 
 ### Tier 4: Integration
@@ -272,6 +274,7 @@ Understanding data flow?
 | 3 | 21-multi-tenancy-srs | v2.0 | ✅ |
 | 3 | 22-data-lineage-srs | v2.0 | ✅ |
 | 3 | 31-modular-rag-requirements | v1.1 | Active (P1+P2 implemented) |
+| 3 | 32-injection-defense-architecture | v1.0 | ✅ |
 | 4 | 30-master-overview | v2.0 | ✅ |
 
 Archive: docs/archive/v2/ (all v2 and earlier documents)
