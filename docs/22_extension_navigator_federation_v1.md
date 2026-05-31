@@ -1,6 +1,6 @@
 # Bastion-Navigator Federation Extension SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module Extension SRS (Tier 2.5)
 **Document ID:** 22-navigator-federation-ext
 **Module:** C - Navigator (extension)
@@ -375,19 +375,19 @@ Peer queries are always executed in parallel via `asyncio.gather`. The added lat
 All use Foundation BastionEvent schema (`module: "navigator"`, `module_version: "3.0.0"`).
 
 ```
-bastion.events.navigator.federation_started
+bastion-rag.events.navigator.federation_started
   → query_id, peers_queried, local_confidence
 
-bastion.events.navigator.federation_completed
+bastion-rag.events.navigator.federation_completed
   → query_id, total_results, local_count, remote_count, latency_ms
 
-bastion.events.navigator.peer_timeout
+bastion-rag.events.navigator.peer_timeout
   → peer_id, timeout_ms, query_id
 
-bastion.events.navigator.peer_skipped_loop
+bastion-rag.events.navigator.peer_skipped_loop
   → peer_id, reason (origin_id_match | max_depth_reached)
 
-bastion.events.navigator.agent_generated
+bastion-rag.events.navigator.agent_generated
   → peer_id, model, confidence, latency_ms
 ```
 

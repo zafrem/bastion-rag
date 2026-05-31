@@ -1,12 +1,12 @@
-# Bastion — Modular RAG Requirements
+# Bastion-RAG — Modular RAG Requirements
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Cross-Cutting SRS (Tier 3)
 **Document ID:** 31-modular-rag-requirements
 **Feature:** Modular RAG Architecture
-**Version:** 1.2
-**Date:** 2026-05-29
-**Status:** Active (Priority 1 + 2 + 3 implemented)
+**Version:** 1.3
+**Date:** 2026-05-31
+**Status:** Active (Priority 1 + 2 + 3 + 4 implemented — all FRs complete)
 
 **Foundation References:**
 - 01-architecture-principles (Progressive Enhancement model)
@@ -26,7 +26,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the requirements for evolving Bastion's pipeline from a
+This document specifies the requirements for evolving Bastion-RAG's pipeline from a
 **linear single-pass architecture** into a **Modular RAG architecture** that supports
 adaptive routing, query transformation, iterative re-search, purpose-based data
 governance, and enterprise-grade data integration.
@@ -38,7 +38,7 @@ and fully functional when no modular capabilities are configured.
 ### 1.2 Why Modular RAG
 
 ```
-Current state (Bastion v0.1.0):
+Current state (Bastion-RAG v0.1.0):
 
   User → [Sentinel-IN] → [Vault P1] → [Navigator] → [Anchor] → LLM
                                            ↑
@@ -60,7 +60,7 @@ Target state (Modular RAG):
                                           (bounded loop, security on every iteration)
 ```
 
-### 1.3 Bastion Invariant
+### 1.3 Bastion-RAG Invariant
 
 All new capabilities in this document are **constrained** by the following invariant
 that must not be violated:
@@ -477,7 +477,7 @@ Decomposition method: rule-based splitting at conjunctions and temporal/
 conditional clauses. No LLM call required for decomposition.
 
 Security constraint: each sub-query is an independent security surface
-(Bastion Invariant, §1.3).
+(Bastion-RAG Invariant, §1.3).
 
 Sub-query count limit (N ≤ 4) is a circuit breaker against decomposition
 explosion from adversarial inputs.
@@ -542,7 +542,7 @@ On insufficient verdict:
      low diversity     → diversify: add "different aspect" instruction to query
 
   2. Refined query passes through Sentinel-IN and Vault Phase 1 independently
-     (Bastion Invariant, §1.3)
+     (Bastion-RAG Invariant, §1.3)
 
   3. Execute retrieval with refined query
 
@@ -867,7 +867,7 @@ overridable per connector configuration.
 ## 9. Security Constraints Summary
 
 Every capability in this document is subject to the following constraints,
-derived from the Bastion Invariant (§1.3) and the existing security architecture:
+derived from the Bastion-RAG Invariant (§1.3) and the existing security architecture:
 
 | # | Constraint | Applies to |
 |---|---|---|
@@ -942,7 +942,7 @@ Priority 3 — ✅ COMPLETE (2026-05-29)
   FR-MR-05-003  Query-result binding (Tracker)  ✅ GET /v1/lineage/{trace_id}/sources
   FR-MR-05-004  Staleness tracking              ✅ _check_staleness() + event_chunk_stale
 
-Priority 4 — 🔲 PENDING (infrastructure dependency)
+Priority 4 — ✅ COMPLETE
 
   FR-MR-06-001  Source connector interface
   FR-MR-06-002  Delta indexing
@@ -962,7 +962,7 @@ Priority 4 — 🔲 PENDING (infrastructure dependency)
 | FR-MR-01-004 | Routing audit event | ✅ | `events.py` · `event_query_routed()` |
 | FR-MR-02-001 | Faker token rewriting | ✅ | `navigator/navigator/token_rewriter.py` · `TokenRewriter` |
 | FR-MR-02-002 | HyDE | ✅ | `navigator/navigator/hyde.py` · `HyDETransformer`; wired in `orchestrator.py` |
-| FR-MR-02-003 | Sub-query decomposition | 🔲 | — |
+| FR-MR-02-003 | Sub-query decomposition | ✅ | `navigator/navigator/decomposer.py` · `QueryDecomposer`; parallel execution via `ThreadPoolExecutor`; RRF merge in `orchestrator._search_decomposed()` |
 | FR-MR-02-004 | Transformation audit event | ✅ | Covered by `event_query_routed` (routing step) |
 | FR-MR-03-001 | Retrieval quality evaluator | ✅ | `navigator/navigator/evaluator.py` · `Evaluator.evaluate()` |
 | FR-MR-03-002 | Query refinement | ✅ | `evaluator.py` · `Evaluator.refine_query()` |
@@ -971,16 +971,16 @@ Priority 4 — 🔲 PENDING (infrastructure dependency)
 | FR-MR-04-001 | Document purpose tagging | ✅ | `models.py` · `IndexRequest.permitted_purposes`; stored in Qdrant payload |
 | FR-MR-04-002 | Request purpose declaration | ✅ | `models.py` · `SearchRequest.purpose`; `orchestrator.py` · `_filter_by_purpose()` |
 | FR-MR-04-003 | Purpose × RBAC conjunction | ✅ | `vault/internal/access/controller.go` · `DecideWithPurpose()`, `purposeMatrix` |
-| FR-MR-04-004 | Data steward role | 🔲 | — |
+| FR-MR-04-004 | Data steward role | ✅ | `vault/internal/access/controller.go` · `CanActAsSteward()`, `RegisterSteward()`, `data_steward` in `rbacMatrix`; `navigator/navigator/orchestrator.py` · `update_document_purposes()`; `PATCH /v1/navigator/documents/{id}/purposes` |
 | FR-MR-04-005 | Purpose audit event | ✅ | `events.py` · `event_purpose_filtered()` |
 | FR-MR-05-001 | Chunk retrieved event | ✅ | `events.py` · `event_chunk_retrieved()`; emitted per result in `orchestrator.py` |
 | FR-MR-05-002 | Source attribution in SearchResult | ✅ | `models.py` · `SearchResult` (chunk_id, heading_path, char_start, char_end, last_indexed); `searcher.py` · `_to_search_result()` |
 | FR-MR-05-003 | Query-result binding (Tracker endpoint) | ✅ | `tracker/internal/store/memory.go` · `AddChunkLineage/GetLineageSources`; `GET /v1/lineage/{trace_id}/sources` |
 | FR-MR-05-004 | Document staleness tracking | ✅ | `orchestrator.py` · `_check_staleness()`; `events.py` · `event_chunk_stale()` |
-| FR-MR-06-001 | Source connector interface | 🔲 | — |
-| FR-MR-06-002 | Delta indexing / CDC | 🔲 | — |
-| FR-MR-06-003 | Document content hash storage | 🔲 | — |
-| FR-MR-06-004 | Schema-aware chunking profiles | 🔲 | — |
+| FR-MR-06-001 | Source connector interface | ✅ | `navigator/navigator/connector.py` · `SourceConnector` ABC; `JsonlConnector`, `DirectoryConnector`, `RestPullConnector`; `build_connector()` factory |
+| FR-MR-06-002 | Delta indexing / CDC | ✅ | `orchestrator.delta_index_document()`; SHA-256 hash comparison; `QdrantSearcher.delete_by_document()` (FilterSelector); SC-10 sequential delete-then-upsert; `POST /v1/navigator/index/delta` |
+| FR-MR-06-003 | Document content hash storage | ✅ | `content_hash` field in Qdrant payload via `index_document()`; `IndexResponse.content_hash`; `DeltaIndexResponse.content_hash` |
+| FR-MR-06-004 | Schema-aware chunking profiles | ✅ | `navigator/navigator/chunker.py` · `PROFILE_*` constants; `profile_for_mime()`, `config_for_profile()`, `chunk_by_profile()`; `chunk_csv()`, `chunk_json()`, `chunk_html()` |
 
 **Note on FR-MR-01-003:** The SRS specifies collection-level topic embeddings pre-computed at index time. The current implementation uses keyword-based domain affinity scoring as a practical proxy. The embedding-based version (requiring Qdrant collection metadata for topic vectors) is deferred to the next iteration.
 
@@ -993,6 +993,7 @@ Priority 4 — 🔲 PENDING (infrastructure dependency)
 | 1.0 | 2026-05-28 | Initial draft — 6 capability areas, 24 functional requirements |
 | 1.1 | 2026-05-29 | Priority 1 + Priority 2 implemented; §12 updated with completion status; §13 Implementation Status table added; status changed to Active |
 | 1.2 | 2026-05-29 | Priority 3 implemented: FR-MR-04-001/002/003 (purpose tagging + filter + Vault conjunction), FR-MR-02-002 (HyDE), FR-MR-05-003 (Tracker lineage sources endpoint), FR-MR-05-004 (staleness tracking) |
+| 1.3 | 2026-05-31 | Priority 4 implemented: FR-MR-06-001 (SourceConnector ABC + JsonlConnector + DirectoryConnector + RestPullConnector), FR-MR-06-002 (delta indexing with SHA-256 hash comparison + Qdrant FilterSelector delete), FR-MR-06-003 (content_hash in Qdrant payload), FR-MR-06-004 (markdown/plain_text/csv/json/html profiles), FR-MR-02-003 (QueryDecomposer + parallel ThreadPoolExecutor + RRF merge), FR-MR-04-004 (data_steward role in Vault RBAC + CanActAsSteward + PATCH /purposes endpoint). Tracker enhancements: anomaly detector (5 pattern rules + σ baseline), management dashboard, cursor-based log pagination, JSONL export, login audit trail, JWT refresh. |
 
 ---
 

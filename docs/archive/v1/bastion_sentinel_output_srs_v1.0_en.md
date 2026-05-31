@@ -1,6 +1,6 @@
 # Bastion-Sentinel Output Validation SRS v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module A - Sentinel (Output Validation Extension)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -78,7 +78,7 @@ Sentinel-OUT mirrors Vault's Two-Phase design:
 | **Vault** | Anonymization (storage) | Re-application (use) |
 | **Anchor** | Embedding noise | Bias check on response |
 
-This creates a consistent **bidirectional security pattern** across the entire Bastion framework.
+This creates a consistent **bidirectional security pattern** across the entire Bastion-RAG framework.
 
 ### 1.4 Scope
 
@@ -319,7 +319,7 @@ Sentinel-OUT uses the same interfaces as Sentinel-IN, with **mode parameter** di
 ```protobuf
 // sentinel.proto (extended)
 syntax = "proto3";
-package bastion.sentinel.v1;
+package bastion-rag.sentinel.v1;
 
 service SentinelService {
   // Existing input methods
@@ -493,7 +493,7 @@ POST /v1/validate                           # Mode in body
 
 ```http
 POST /v1/validate/output HTTP/1.1
-Host: sentinel.bastion.local
+Host: sentinel.bastion-rag.local
 Content-Type: application/json
 Authorization: Bearer <jwt-token>
 
@@ -1424,7 +1424,7 @@ Sentinel runs as a single service handling both input and output:
 ```yaml
 # Docker Compose - no change to deployment structure
 sentinel:
-  image: bastion/sentinel:1.1.0  # Version bumped for output support
+  image: bastion-rag/sentinel:1.1.0  # Version bumped for output support
   ports:
     - "8080:8080"    # REST (both input and output)
     - "9090:9090"    # gRPC

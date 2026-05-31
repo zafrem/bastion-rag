@@ -1,6 +1,6 @@
-# Bastion PoC Demo Scenarios
+# Bastion-RAG PoC Demo Scenarios
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Demo Guide  
 **Version:** 1.0  
 **Date:** 2026-05-17  
@@ -13,7 +13,7 @@
 
 ### 1.1 Purpose
 
-Demonstrate Bastion's RAG security through live, visual scenarios using the Tracker dashboard. Each scenario tells a story and reveals a specific security capability.
+Demonstrate Bastion-RAG's RAG security through live, visual scenarios using the Tracker dashboard. Each scenario tells a story and reveals a specific security capability.
 
 ### 1.2 Demo Philosophy
 
@@ -35,7 +35,7 @@ Full Demo (25 min):  Scenarios 1-8
 ### 1.4 Setup
 
 ```bash
-# Start full Bastion
+# Start full Bastion-RAG
 $ docker-compose up
 
 # Open Tracker dashboard
@@ -54,7 +54,7 @@ $ tracker-cli demo-mode --enable
 
 ```
 Act 1: Understanding (Scenario 1)
-  → How Bastion works normally
+  → How Bastion-RAG works normally
 
 Act 2: Input Defense (Scenarios 2-3)
   → Blocking attacks, protecting PII
@@ -87,7 +87,7 @@ Pipeline: Full (A→B→C→E→LLM)
 ### Script
 
 ```
-PRESENTER: "Let's see a normal request flow through Bastion."
+PRESENTER: "Let's see a normal request flow through Bastion-RAG."
 
 [Tracker /flow - speed 0.5x]
 
@@ -415,7 +415,7 @@ Output Pipeline:
 
 ### Key Takeaway
 ```
-"Bastion is bidirectional. Even if the AI makes a mistake,
+"Bastion-RAG is bidirectional. Even if the AI makes a mistake,
  the output is validated before reaching the user."
 ```
 
@@ -513,7 +513,7 @@ Demonstrate: same query through different configurations
 ### Script
 
 ```
-PRESENTER: "A key Bastion principle: each module is valuable alone.
+PRESENTER: "A key Bastion-RAG principle: each module is valuable alone.
             You don't need everything at once. Let me show you."
 
 [Configuration 1: Sentinel only]
@@ -620,7 +620,7 @@ PRESENTER: "Security team sees all threats in one place."
 
 ### Tracker Screen
 ```
-🏛️ Bastion Control Center
+🏛️ Bastion-RAG Control Center
 
 Throughput: 89/s | Latency: 1.2s | Health: 🟢
 
@@ -718,7 +718,7 @@ A: Graceful degradation. Demonstrate killing Tracker -
 
 ### Q: "Can we use our existing RAG?"
 ```
-A: Yes. Bastion can wrap existing RAG (serial)
+A: Yes. Bastion-RAG can wrap existing RAG (serial)
    or integrate inline. Navigator is optional
    if you have your own search.
 ```
@@ -819,7 +819,7 @@ End the demo with:
  together they form complete protection,
  with no single point of failure.
 
- That's Bastion - we don't block data,
+ That's Bastion-RAG - we don't block data,
  we govern its safe flow."
 ```
 

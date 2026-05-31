@@ -1,6 +1,6 @@
 # Bastion-Anchor Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module SRS (Tier 2)
 **Document ID:** 13-anchor-srs
 **Module:** E - Anchor (Embedding Security)
@@ -20,7 +20,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Anchor** module, the embedding security layer of Bastion. v3 reflects the migration from Go to Python, enabling numerical computing algorithms via `numpy`/`scipy` with no manual implementation of mathematical primitives.
+This document specifies the **Anchor** module, the embedding security layer of Bastion-RAG. v3 reflects the migration from Go to Python, enabling numerical computing algorithms via `numpy`/`scipy` with no manual implementation of mathematical primitives.
 
 Anchor operates bidirectionally:
 - **Phase 1 (Input):** Inject noise into embeddings before they reach the LLM
@@ -381,7 +381,7 @@ Phase 2:
 ✅ Drift detection
 ✅ Status determination + insights
 
-Works without other Bastion modules.
+Works without other Bastion-RAG modules.
 No ML models required.
 ```
 
@@ -436,7 +436,7 @@ anchor.bias.measured
 **Contract:**
 ```
 On high-severity bias:
-→ NATS event: bastion.events.anchor.bias_detected
+→ NATS event: bastion-rag.events.anchor.bias_detected
 → HookEvent: EVENT_BIAS_DETECTED
   data: {"category": "gender", "bias_score": 0.74}
 → Tracker aggregates pipeline bias metrics
@@ -448,11 +448,11 @@ Full logic: cross-cutting SRS
 
 ```
 After SecureEmbedding:
-→ NATS event: bastion.events.anchor.embedding_secured
+→ NATS event: bastion-rag.events.anchor.embedding_secured
 → HookEvent: EVENT_EMBEDDING_SECURED
 
 After VerifyResponse:
-→ NATS event: bastion.events.anchor.response_verified
+→ NATS event: bastion-rag.events.anchor.response_verified
 → HookEvent: EVENT_RESPONSE_VERIFIED
 
 Detail: see Data Lineage SRS (Tier 3)
@@ -474,7 +474,7 @@ Detail: see Data Lineage SRS (Tier 3)
 
 ```
 Wire format: JSON-over-gRPC (GenericRpcHandler, JSON codec)
-Service: bastion.anchor.v1.AnchorService
+Service: bastion-rag.anchor.v1.AnchorService
 
 Methods:
   SecureEmbedding(SecureRequest) → SecureResponse
@@ -580,12 +580,12 @@ $ anchor-cli server
 
 ```
 Operational (NATS):
-  bastion.events.anchor.embedding_secured
-  bastion.events.anchor.response_verified
+  bastion-rag.events.anchor.embedding_secured
+  bastion-rag.events.anchor.response_verified
 
 Via hooks:
-  bastion.events.anchor.bias_detected
-  bastion.events.anchor.anomaly_detected
+  bastion-rag.events.anchor.bias_detected
+  bastion-rag.events.anchor.anomaly_detected
 ```
 
 ---

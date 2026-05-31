@@ -1,4 +1,4 @@
-# Bastion — RAG Security Governance Framework
+# Bastion-RAG — RAG Security Governance Framework
 
 > *"We don't block data. We govern its safe flow."*
 
@@ -18,9 +18,9 @@ When an organisation deploys an AI assistant powered by its own documents — a 
 | Hallucination | The AI states facts that don't exist in any source document |
 | Intrusion | An attacker queries specific records, revealing they already know data they shouldn't |
 
-**Bastion is the security layer that wraps your RAG pipeline and prevents all of these — in under 3 milliseconds of added latency.**
+**Bastion-RAG is the security layer that wraps your RAG pipeline and prevents all of these — in under 3 milliseconds of added latency.**
 
-It works in both directions, like an airport that screens passengers on the way in *and* inspects luggage on the way out. Most security tools only check input. Bastion checks both.
+It works in both directions, like an airport that screens passengers on the way in *and* inspects luggage on the way out. Most security tools only check input. Bastion-RAG checks both.
 
 ---
 
@@ -117,7 +117,7 @@ BM25 keyword search                       ─┘
 Reciprocal Rank Fusion (RRF) combines ranked lists from vector and keyword search without requiring score normalisation. The BGE cross-encoder reranker then re-scores the merged set for semantic relevance.
 
 **Federated search**
-Multiple Bastion deployments in different data centres can collaborate on a single query. A hop-depth counter prevents circular queries. Each node shares only what its own policy permits.
+Multiple Bastion-RAG deployments in different data centres can collaborate on a single query. A hop-depth counter prevents circular queries. Each node shares only what its own policy permits.
 
 ---
 
@@ -171,7 +171,7 @@ Uses Word Embedding Association Test (WEAT) statistics to detect whether the sys
 
 ### Honey-Token Intrusion Detection
 
-Bastion plants invisible decoy records — fake customers, fake API keys, fake emails — throughout the data. No legitimate query ever touches them. When one is accessed, it proves the querier has prior knowledge of data they should not know.
+Bastion-RAG plants invisible decoy records — fake customers, fake API keys, fake emails — throughout the data. No legitimate query ever touches them. When one is accessed, it proves the querier has prior knowledge of data they should not know.
 
 Detection is multi-layer: Vault detects honey tokens in the query, Navigator detects them in search results, Sentinel detects them in the LLM response. Tracker correlates across all three. A single hit might be coincidence; the same user triggering all three layers simultaneously is a confirmed breach.
 
@@ -186,7 +186,7 @@ If any single layer's isolation fails, the others still hold. This is defence-in
 
 ### Federated Search
 
-Multiple Bastion deployments can collaborate on a single query across data centres or organisational boundaries. Each deployment shares only what its own policy permits. Hop-depth counters prevent circular query loops. Result sets are merged using RRF at the coordinating node.
+Multiple Bastion-RAG deployments can collaborate on a single query across data centres or organisational boundaries. Each deployment shares only what its own policy permits. Hop-depth counters prevent circular query loops. Result sets are merged using RRF at the coordinating node.
 
 ---
 
@@ -198,10 +198,10 @@ Measured in-process across all five modules (latency test: 20 iterations, p50/p9
 |---|---|---|
 | Sentinel-IN | 0.14 ms | ~0.3 ms |
 | Sentinel-OUT | 0.59 ms | ~0.9 ms |
-| **Full pipeline (Bastion only)** | **~1.2 ms** | **~1–3 ms** |
+| **Full pipeline (Bastion-RAG only)** | **~1.2 ms** | **~1–3 ms** |
 | *(LLM API call, not included)* | — | *(200–800 ms)* |
 
-Bastion's entire security wrapper adds less than 1% to the total round-trip time.
+Bastion-RAG's entire security wrapper adds less than 1% to the total round-trip time.
 
 ---
 

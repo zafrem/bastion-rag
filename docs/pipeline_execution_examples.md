@@ -1,6 +1,6 @@
 # Pipeline Execution Examples
 
-**Project:** Bastion — RAG Security Governance Framework  
+**Project:** Bastion-RAG — RAG Security Governance Framework  
 **Document Type:** Execution Reference  
 **Version:** 1.1  
 **Date:** 2026-05-29

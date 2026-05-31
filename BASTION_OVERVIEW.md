@@ -1,10 +1,10 @@
-# Bastion — AI Security That Works Both Ways
+# Bastion-RAG — AI Security That Works Both Ways
 
 > *"We don't block data. We govern its safe flow."*
 
 ---
 
-## What is Bastion?
+## What is Bastion-RAG?
 
 When your organisation uses an AI assistant powered by your own documents and databases — a technology called RAG (Retrieval-Augmented Generation) — the AI needs to read your private data to answer questions. That creates real risks:
 
@@ -13,15 +13,15 @@ When your organisation uses an AI assistant powered by your own documents and da
 - One customer could accidentally see another customer's data
 - The AI could make up facts and present them as real
 
-**Bastion is the security layer that sits around your AI and makes sure none of those things happen.**
+**Bastion-RAG is the security layer that sits around your AI and makes sure none of those things happen.**
 
-It works silently in the background. Users ask questions normally. Bastion checks every request going *in* to the AI, and every response coming *back out* — in under 2 milliseconds of added delay.
+It works silently in the background. Users ask questions normally. Bastion-RAG checks every request going *in* to the AI, and every response coming *back out* — in under 2 milliseconds of added delay.
 
 ---
 
 ## The Core Idea: Security in Both Directions
 
-Most security systems only check what goes *in*. Bastion checks both directions — like an airport that screens passengers on the way in *and* inspects luggage on the way out.
+Most security systems only check what goes *in*. Bastion-RAG checks both directions — like an airport that screens passengers on the way in *and* inspects luggage on the way out.
 
 ```
                         YOUR AI SYSTEM
@@ -37,13 +37,13 @@ Most security systems only check what goes *in*. Bastion checks both directions 
          └──────────── everything ──────────────┘
 ```
 
-This matters because even if the AI itself makes a mistake — reconstructing a name it shouldn't have, including private data in a response — Bastion catches it on the way *out* before the user ever sees it.
+This matters because even if the AI itself makes a mistake — reconstructing a name it shouldn't have, including private data in a response — Bastion-RAG catches it on the way *out* before the user ever sees it.
 
 ---
 
 ## The Five Guardians
 
-Bastion is built from five specialised modules. Each one does a specific job. Each one works independently, and they stack to form complete protection.
+Bastion-RAG is built from five specialised modules. Each one does a specific job. Each one works independently, and they stack to form complete protection.
 
 ---
 
@@ -89,9 +89,9 @@ Navigator searches your document library to find the most relevant information f
 
 The isolation is applied *before* searching, not after. This distinction matters:
 - **Wrong approach (post-filter):** Search everything, then hide what they shouldn't see. The data was still accessed.
-- **Bastion's approach (pre-filter):** Only search within what they're allowed to see in the first place.
+- **Bastion-RAG's approach (pre-filter):** Only search within what they're allowed to see in the first place.
 
-Navigator also supports *federation* — safely distributing searches across multiple Bastion deployments in different locations, with loop prevention to stop searches from bouncing between systems indefinitely.
+Navigator also supports *federation* — safely distributing searches across multiple Bastion-RAG deployments in different locations, with loop prevention to stop searches from bouncing between systems indefinitely.
 
 ---
 
@@ -161,37 +161,37 @@ Real-time updates (new steps and checkpoint decisions) are pushed over the exist
 
 ### 🍯 Honey-Token Intrusion Detection
 
-Bastion plants invisible decoy records inside the data — fake customers, fake API keys, fake emails — that no legitimate user would ever query. These are called honey-tokens.
+Bastion-RAG plants invisible decoy records inside the data — fake customers, fake API keys, fake emails — that no legitimate user would ever query. These are called honey-tokens.
 
 If anyone queries a honey-token, it means only one thing: they have prior knowledge of data they should not know about. That's evidence of a breach that already happened.
 
-Bastion detects honey-token references at every layer — in the question, in the search results, and in the AI's response — and correlates them. A single trigger might be coincidence. The same user triggering multiple layers simultaneously is a confirmed intrusion.
+Bastion-RAG detects honey-token references at every layer — in the question, in the search results, and in the AI's response — and correlates them. A single trigger might be coincidence. The same user triggering multiple layers simultaneously is a confirmed intrusion.
 
 ### 🏢 Multi-Tenant Isolation
 
-For SaaS products and shared platforms, multiple clients (tenants) may share the same Bastion installation. Each tenant's data is completely invisible to every other tenant — at the database level, the search level, the cryptography level, and the validation level.
+For SaaS products and shared platforms, multiple clients (tenants) may share the same Bastion-RAG installation. Each tenant's data is completely invisible to every other tenant — at the database level, the search level, the cryptography level, and the validation level.
 
 This is enforced independently in every module. If any single module failed to filter, the others would still hold the boundary.
 
 ### 🌐 Federated Search
 
-Multiple Bastion deployments can collaborate on searches across different data centres or business units, with each deployment only sharing what it's permitted to share. A hop counter prevents circular queries and ensures no single deployment is overwhelmed.
+Multiple Bastion-RAG deployments can collaborate on searches across different data centres or business units, with each deployment only sharing what it's permitted to share. A hop counter prevents circular queries and ensures no single deployment is overwhelmed.
 
 ---
 
 ## Performance
 
-Security does not mean slow. Bastion's protection adds approximately **1–3 milliseconds** to each round-trip, measured across all five modules in production conditions. For comparison, a typical internet round-trip to a cloud AI provider takes 200–800 milliseconds.
+Security does not mean slow. Bastion-RAG's protection adds approximately **1–3 milliseconds** to each round-trip, measured across all five modules in production conditions. For comparison, a typical internet round-trip to a cloud AI provider takes 200–800 milliseconds.
 
 | Stage | Typical Latency |
 |---|---|
 | Input security check (Sentinel-IN) | ~0.3 ms |
 | Document search (Navigator) | depends on your database |
 | Output security check (Sentinel-OUT) | ~0.9 ms |
-| **Total Bastion overhead** | **~1–3 ms** |
+| **Total Bastion-RAG overhead** | **~1–3 ms** |
 | *(Real LLM call, not included)* | *(200–800 ms)* |
 
-The AI call itself takes hundreds of milliseconds. Bastion's entire security wrapper is less than 1% of that.
+The AI call itself takes hundreds of milliseconds. Bastion-RAG's entire security wrapper is less than 1% of that.
 
 ---
 
@@ -210,13 +210,13 @@ Tracker offline   → data still flows, events buffer ✅
 
 ---
 
-## What Bastion Is Not
+## What Bastion-RAG Is Not
 
-**Bastion is not an AI.** It does not generate responses — it protects the ones your AI generates.
+**Bastion-RAG is not an AI.** It does not generate responses — it protects the ones your AI generates.
 
-**Bastion is not a content filter.** It does not decide what topics your AI can discuss — it ensures that whatever your AI discusses does not leak private data or fall for manipulation.
+**Bastion-RAG is not a content filter.** It does not decide what topics your AI can discuss — it ensures that whatever your AI discusses does not leak private data or fall for manipulation.
 
-**Bastion is not an all-or-nothing deployment.** You can start with one module and expand. Each deployment configuration is fully supported.
+**Bastion-RAG is not an all-or-nothing deployment.** You can start with one module and expand. Each deployment configuration is fully supported.
 
 ---
 
@@ -236,7 +236,7 @@ Tracker offline   → data still flows, events buffer ✅
 
 *(For technical readers)*
 
-Bastion is a polyglot system — different modules use the language best suited to their job.
+Bastion-RAG is a polyglot system — different modules use the language best suited to their job.
 
 | Module | Language | Why |
 |---|---|---|
@@ -252,14 +252,14 @@ All modules communicate over gRPC (for speed) and REST (for compatibility). Even
 
 ## The One-Sentence Summary
 
-**Bastion is a security wrapper for AI systems that checks every question on the way in and every answer on the way out, protects personal data throughout, keeps customers isolated from each other, and provides complete audit visibility — all in under 3 milliseconds.**
+**Bastion-RAG is a security wrapper for AI systems that checks every question on the way in and every answer on the way out, protects personal data throughout, keeps customers isolated from each other, and provides complete audit visibility — all in under 3 milliseconds.**
 
 ---
 
 ## Getting Started
 
 ```bash
-# Start the full Bastion stack
+# Start the full Bastion-RAG stack
 docker-compose up
 
 # Open the live operations dashboard
@@ -273,5 +273,5 @@ For technical documentation, implementation guides, and the full specification l
 
 ---
 
-*Bastion — RAG Security Governance Framework*
+*Bastion-RAG — RAG Security Governance Framework*
 *Apache License 2.0*

@@ -1,6 +1,6 @@
-# Bastion Event Schema Standard
+# Bastion-RAG Event Schema Standard
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Foundation (Tier 1)  
 **Document ID:** 02-event-schema-standard  
 **Version:** 1.0  
@@ -13,12 +13,12 @@
 
 ### 1.1 Purpose
 
-This document defines the **standard event schema** that all Bastion modules use to communicate. Events are the **only** mechanism for inter-module communication, enabling loose coupling while supporting cross-cutting features.
+This document defines the **standard event schema** that all Bastion-RAG modules use to communicate. Events are the **only** mechanism for inter-module communication, enabling loose coupling while supporting cross-cutting features.
 
 ### 1.2 Why Events Matter
 
 ```
-Events are the glue of Bastion:
+Events are the glue of Bastion-RAG:
 
 - Modules stay independent (loose coupling)
 - Cross-cutting features observe events
@@ -67,35 +67,35 @@ Alternatives:
 ### 2.2 Subject Hierarchy
 
 ```
-bastion.events.{module}.{event_type}
+bastion-rag.events.{module}.{event_type}
 
 Examples:
-bastion.events.sentinel.input_validated
-bastion.events.vault.anonymized
-bastion.events.navigator.search_completed
-bastion.events.anchor.bias_detected
-bastion.events.tracker.incident_created
+bastion-rag.events.sentinel.input_validated
+bastion-rag.events.vault.anonymized
+bastion-rag.events.navigator.search_completed
+bastion-rag.events.anchor.bias_detected
+bastion-rag.events.tracker.incident_created
 
 Wildcard subscriptions:
-bastion.events.>              # All events
-bastion.events.sentinel.>     # All Sentinel events
-bastion.events.*.honey_token_* # Honey-token from any module
+bastion-rag.events.>              # All events
+bastion-rag.events.sentinel.>     # All Sentinel events
+bastion-rag.events.*.honey_token_* # Honey-token from any module
 ```
 
 ### 2.3 Subscription Patterns
 
 ```
 Tracker subscribes to:
-bastion.events.>              # Everything
+bastion-rag.events.>              # Everything
 
 Honey-token Coordinator:
-bastion.events.*.honey_token_*
+bastion-rag.events.*.honey_token_*
 
 Lineage Coordinator:
-bastion.events.>              # All, builds trace
+bastion-rag.events.>              # All, builds trace
 
 Module-specific:
-bastion.events.vault.>        # Vault's own events
+bastion-rag.events.vault.>        # Vault's own events
 ```
 
 ---
@@ -104,11 +104,11 @@ bastion.events.vault.>        # Vault's own events
 
 ### 3.1 Common Event Structure
 
-Every Bastion event MUST include these fields:
+Every Bastion-RAG event MUST include these fields:
 
 ```protobuf
 syntax = "proto3";
-package bastion.events.v1;
+package bastion-rag.events.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
@@ -220,7 +220,7 @@ message BastionEvent {
 
 ### 4.1 W3C Trace Context Standard
 
-Bastion follows W3C Trace Context for distributed tracing:
+Bastion-RAG follows W3C Trace Context for distributed tracing:
 
 ```
 traceparent header format:
@@ -599,7 +599,7 @@ func (p *EventPublisher) Publish(
         Data:          structpb.NewStruct(data),
     }
     
-    subject := fmt.Sprintf("bastion.events.%s.%s", 
+    subject := fmt.Sprintf("bastion-rag.events.%s.%s", 
         p.module, eventType)
     
     payload, _ := proto.Marshal(event)
@@ -634,7 +634,7 @@ func (s *EventSubscriber) Subscribe(
 }
 
 // Usage
-subscriber.Subscribe("bastion.events.>", func(e *BastionEvent) {
+subscriber.Subscribe("bastion-rag.events.>", func(e *BastionEvent) {
     // Tracker processes all events
 })
 ```

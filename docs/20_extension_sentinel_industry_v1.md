@@ -1,6 +1,6 @@
 # Bastion-Sentinel Industry Filter Extension SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module Extension SRS (Tier 2.5)
 **Document ID:** 20-sentinel-industry-ext
 **Module:** A - Sentinel (extension)
@@ -172,7 +172,7 @@ POST /v1/sentinel/validate/input
 3. For each blocking filter (sorted by Priority):
      a. result = filter.Filter(ctx, req)
      b. if !result.Allowed && result.Action == FilterBlock:
-            emit bastion.events.sentinel.industry_filter_blocked
+            emit bastion-rag.events.sentinel.industry_filter_blocked
             return HTTP 422 immediately
      c. if result.Action == FilterRedact:
             req.Text = result.Modified
@@ -247,13 +247,13 @@ ML-based blocking filters must use GPU or a pre-warmed batch queue to satisfy Se
 All use Foundation BastionEvent schema (`module: "sentinel"`, `module_version: "3.0.0"`).
 
 ```
-bastion.events.sentinel.industry_filter_blocked
+bastion-rag.events.sentinel.industry_filter_blocked
   → filter_id, tenant_id, reason
 
-bastion.events.sentinel.industry_filter_redacted
+bastion-rag.events.sentinel.industry_filter_redacted
   → filter_id, tenant_id, fields_redacted
 
-bastion.events.sentinel.industry_filter_flagged
+bastion-rag.events.sentinel.industry_filter_flagged
   → filter_id, tenant_id, flag_reason
 ```
 

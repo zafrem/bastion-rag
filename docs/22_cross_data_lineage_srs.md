@@ -1,6 +1,6 @@
-# Bastion Data Lineage Cross-Cutting SRS
+# Bastion-RAG Data Lineage Cross-Cutting SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Cross-Cutting SRS (Tier 3)  
 **Document ID:** 22-data-lineage-srs  
 **Feature:** Data Lineage Tracking  
@@ -23,7 +23,7 @@
 
 ### 1.1 Purpose
 
-Data Lineage tracks the **complete journey** of a request/data through the Bastion pipeline. It answers:
+Data Lineage tracks the **complete journey** of a request/data through the Bastion-RAG pipeline. It answers:
 - Where did this data come from?
 - How was it transformed at each stage?
 - Where did it go?
@@ -130,7 +130,7 @@ func lineageHook(operation, traceContext, details) {
         transformation: details.What,
         timestamp:   now(),
     }
-    publish("bastion.events." + module + ".lineage", event)
+    publish("bastion-rag.events." + module + ".lineage", event)
 }
 ```
 
@@ -256,7 +256,7 @@ Full transformation history preserved.
 ```
 ┌────────────────────────────────────┐
 │  Lineage Coordinator (in Tracker)  │
-│  - Subscribe: bastion.events.>     │
+│  - Subscribe: bastion-rag.events.>     │
 │  - Group by trace_id               │
 │  - Build span tree                 │
 │  - Store lineage graph             │

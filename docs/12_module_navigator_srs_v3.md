@@ -1,10 +1,10 @@
 # Bastion-Navigator Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module SRS (Tier 2)
 **Document ID:** 12-navigator-srs
 **Module:** C - Navigator (Search & Ranking)
-**Version:** 3.0
+**Version:** 3.1
 **Date:** 2026-05-26
 **Status:** Active
 **Supersedes:** v2.0 (2026-05-17) — archived at docs/archive/v2/
@@ -20,7 +20,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Navigator** module, the search and ranking layer of Bastion. v3 reflects the migration from Go to Python, enabling in-process ML model serving with no separate model microservice.
+This document specifies the **Navigator** module, the search and ranking layer of Bastion-RAG. v3 reflects the migration from Go to Python, enabling in-process ML model serving with no separate model microservice.
 
 ### 1.2 Module Identity
 
@@ -338,7 +338,7 @@ Standalone capabilities (Qdrant + Python):
 ✅ Hybrid (RRF fusion)
 ✅ In-process reranking (bge-reranker, no model server)
 
-Quality RAG search without other Bastion modules.
+Quality RAG search without other Bastion-RAG modules.
 No external model services required.
 ```
 
@@ -469,7 +469,7 @@ Detail: see Data Lineage SRS (Tier 3)
 
 ```
 Wire format: JSON-over-gRPC (GenericRpcHandler, JSON codec)
-Service: bastion.navigator.v1.NavigatorService
+Service: bastion-rag.navigator.v1.NavigatorService
 
 Methods:
   Search(SearchRequest) → SearchResponse
@@ -567,14 +567,14 @@ $ navigator-cli server
 
 ```
 Operational (NATS):
-  bastion.events.navigator.search_started
-  bastion.events.navigator.search_completed
+  bastion-rag.events.navigator.search_started
+  bastion-rag.events.navigator.search_completed
 
 Enhanced:
-  bastion.events.navigator.permission_filtered
+  bastion-rag.events.navigator.permission_filtered
 
 Via hooks:
-  bastion.events.navigator.honey_token_retrieved
+  bastion-rag.events.navigator.honey_token_retrieved
 ```
 
 ---
@@ -782,6 +782,56 @@ Language change: Go → Python (internal implementation detail only)
 
 ---
 
+## 11b. Enterprise Data Integration (MR-06, v3.1)
+
+### Source Connectors (FR-MR-06-001)
+
+Abstract `SourceConnector` interface with three built-in implementations:
+
+| Connector | Type string | Trigger |
+|---|---|---|
+| `JsonlConnector` | `"jsonl"` | Reads a JSONL file; supports `since` timestamp filter |
+| `DirectoryConnector` | `"directory"` | Walks a directory; `.md/.txt/.csv/.json/.html` by default; uses file mtime |
+| `RestPullConnector` | `"rest"` | `GET {endpoint}/documents?since=...`; `Authorization` header from Vault KMS (SC-09) |
+
+`build_connector(cfg: ConnectorConfig)` is the factory; disabled connectors return `None`.
+
+### Delta Indexing (FR-MR-06-002/003)
+
+`Orchestrator.delta_index_document(req: DeltaIndexRequest)`:
+1. Computes SHA-256 of `req.content` as `new_hash`
+2. Retrieves stored `content_hash` from Qdrant chunk payload
+3. If `new_hash == stored_hash` and `req.force == False`: returns `indexed=False` (no-op)
+4. Otherwise: `delete_by_document()` (Qdrant `FilterSelector` delete) → `index_document()` (SC-10: delete before insert)
+
+`content_hash`, `source_version`, `mime_type` are stored in every Qdrant chunk payload (FR-MR-06-003).
+
+New endpoints:
+- `POST /v1/navigator/index/delta` — delta index with hash comparison
+- `PATCH /v1/navigator/documents/{document_id}/purposes` — steward updates purposes (MR-04-004)
+
+### Schema-Aware Chunking Profiles (FR-MR-06-004)
+
+| Profile | MIME | max_chars | Strategy |
+|---|---|---|---|
+| `markdown` | `text/markdown` | 1200 | Heading-boundary, table-atomic |
+| `plain_text` | `text/plain` | 800 | Sentence-boundary (NLTK) |
+| `structured_csv` | `text/csv` | — | One chunk per data row; header prepended |
+| `json_record` | `application/json` | — | One chunk per top-level array element |
+| `html` | `text/html` | 1200 | Tag-stripped, then markdown strategy |
+
+`profile_for_mime(mime_type, filename)` auto-selects profile; `chunk_by_profile()` dispatches to the correct chunker.
+
+### Sub-Query Decomposition (FR-MR-02-003)
+
+`QueryDecomposer.decompose(query, intent)` fires only on `intent=multi_hop`:
+1. Split at English/Korean conjunctions (`and also`, `as well as`, `그리고`, `또한`, etc.)
+2. Fallback: split at temporal/conditional clause boundaries
+3. Fallback: split at sentence boundaries
+4. Maximum 4 sub-queries (hard cap, SC-04 circuit breaker)
+
+`Orchestrator._search_decomposed()` executes sub-queries in parallel via `ThreadPoolExecutor` and merges result sets using equal-weight RRF. SC-04 (per-sub-query Sentinel/Vault re-entry) is deferred pending cross-service client infrastructure.
+
 ## 12. Change History
 
 | Version | Date | Changes |
@@ -789,6 +839,7 @@ Language change: Go → Python (internal implementation detail only)
 | 1.0 | 2026-05-17 | Initial |
 | 2.0 | 2026-05-17 | Foundation-aligned, layer classification |
 | 3.0 | 2026-05-26 | **Python rewrite**: in-process ML via sentence-transformers; qdrant-client Python SDK; FastAPI + grpcio |
+| 3.1 | 2026-05-31 | MR-06: SourceConnector ABC + JsonlConnector + DirectoryConnector + RestPullConnector; delta indexing with SHA-256 hash comparison + Qdrant FilterSelector delete; content_hash in Qdrant payload; markdown/plain_text/csv/json/html chunking profiles; QueryDecomposer + parallel ThreadPoolExecutor sub-search + RRF merge; PATCH /purposes endpoint for data steward |
 
 ---
 

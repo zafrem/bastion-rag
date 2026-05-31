@@ -1,11 +1,11 @@
 # Bastion-Vault Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module SRS (Tier 2)
 **Document ID:** 11-vault-srs
 **Module:** B - Vault (Data Isolation & Anonymization)
-**Version:** 3.0 (Foundation-aligned, Phase1+2 integrated)
-**Date:** 2026-05-26
+**Version:** 3.1
+**Date:** 2026-05-31
 **Status:** Active
 **Supersedes:** v2.0 (2026-05-17) — archived at docs/archive/v2/
 
@@ -20,7 +20,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Vault** module, the data protection core of Bastion. Vault operates bidirectionally:
+This document specifies the **Vault** module, the data protection core of Bastion-RAG. Vault operates bidirectionally:
 - **Phase 1 (Input/Storage):** Anonymize data before storage
 - **Phase 2 (Output/Use):** Apply permissions on retrieval
 
@@ -324,7 +324,40 @@ Graceful degradation:
 - Core transform still works on direct data
 ```
 
-### 4.3 Enhanced Summary
+### 4.3 Data Steward Role (FR-MR-04-004, v3.1)
+
+**Separation of authority for purpose-based access control.**
+
+```
+A new role "data_steward" is defined in the RBAC model with these properties:
+
+  - May set and update permitted_purposes on documents in their assigned domain
+  - May NOT read document content directly (AccessNone for all data categories)
+  - Domain-scoped: a steward for "hr_docs" cannot act on "customer_docs"
+  - All steward actions emit audit events to Tracker
+
+Implementation (internal/access/controller.go):
+  - rbacMatrix entries "hr:data_steward" and "audit:data_steward"
+    grant AccessNone for every data category (content-blind by construction)
+  - stewardRegistry: tenantID → department → []domain
+  - RegisterSteward(tenantID, department, domains) — startup wiring
+  - LoadStewardsFromTenant(cfg) — reads TenantConfig.StewardDomains
+  - CanActAsSteward(user, domain) — authorization check for purpose updates
+
+TenantConfig.StewardDomains (internal/model/types.go):
+  maps department → list of domains the department may steward, per tenant.
+
+The actual purpose update happens in Navigator (which owns the Qdrant payload):
+  PATCH /v1/navigator/documents/{document_id}/purposes
+  → Orchestrator.update_document_purposes() → Qdrant set_payload()
+  → no re-embedding required; emits steward_purposes_updated audit event.
+
+Graceful degradation:
+- Without Navigator: steward role defined but no documents to update
+- Core RBAC and purpose conjunction (DecideWithPurpose) still work
+```
+
+### 4.4 Enhanced Summary
 
 ```
 🟡 Permission provision (+ Navigator — Python service)
@@ -406,7 +439,7 @@ Detail: see Data Lineage SRS
 
 ```
 Wire format: JSON-over-gRPC (Go encoding.RegisterCodec JSONCodec)
-Service: bastion.vault.v1.VaultService
+Service: bastion-rag.vault.v1.VaultService
 
 Methods:
   Anonymize(AnonymizeRequest) → AnonymizeResponse
@@ -449,17 +482,17 @@ $ vault-cli server --kms local
 
 ```
 Operational:
-  bastion.events.vault.anonymized
-  bastion.events.vault.transform_executed
+  bastion-rag.events.vault.anonymized
+  bastion-rag.events.vault.transform_executed
 
 Security:
-  bastion.events.vault.access_denied
-  bastion.events.vault.deanonymization_performed
-  bastion.events.vault.k_anonymity_enforced
+  bastion-rag.events.vault.access_denied
+  bastion-rag.events.vault.deanonymization_performed
+  bastion-rag.events.vault.k_anonymity_enforced
 
 Via hooks:
-  bastion.events.vault.honey_token_accessed
-  bastion.events.vault.cross_tenant_attempt
+  bastion-rag.events.vault.honey_token_accessed
+  bastion-rag.events.vault.cross_tenant_attempt
 ```
 
 ---
@@ -641,6 +674,7 @@ Polyglot note: Navigator (consumer of GetPermissions) is now Python;
 | 1.0 | 2026-05-17 | Initial (separate Phase docs) |
 | 2.0 | 2026-05-17 | Foundation-aligned, Phase1+2 integrated |
 | 3.0 | 2026-05-26 | Go 1.22+; polyglot context (Navigator/Anchor → Python); foundation ref v3 |
+| 3.1 | 2026-05-31 | Data steward role (FR-MR-04-004): `data_steward` in RBAC matrix (content-blind, AccessNone); `stewardRegistry` + `RegisterSteward`/`LoadStewardsFromTenant`/`CanActAsSteward`; `TenantConfig.StewardDomains`; domain-scoped purpose-update authority with Tracker audit events |
 
 ---
 

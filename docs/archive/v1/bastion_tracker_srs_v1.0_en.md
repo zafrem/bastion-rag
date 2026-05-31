@@ -1,6 +1,6 @@
 # Bastion-Tracker System Requirements Specification (SRS) v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module D - Tracker (Observability & Visualization)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -14,7 +14,7 @@
 
 ### 1.1 Purpose
 
-This document defines the functional and non-functional requirements for the **Bastion-Tracker** module. Unlike traditional audit logging modules, Tracker serves as the **central observability platform** and **visual control center** of the entire Bastion framework, providing:
+This document defines the functional and non-functional requirements for the **Bastion-Tracker** module. Unlike traditional audit logging modules, Tracker serves as the **central observability platform** and **visual control center** of the entire Bastion-RAG framework, providing:
 
 1. **Real-time Request Flow Visualization** (Primary Focus)
 2. **System Topology Display** with health status
@@ -26,9 +26,9 @@ This document defines the functional and non-functional requirements for the **B
 ### 1.2 Scope
 
 **In Scope:**
-- Real-time visualization of request flow through Bastion modules
+- Real-time visualization of request flow through Bastion-RAG modules
 - Support for multiple pipeline variations (full, lite, bypass)
-- Event collection from all Bastion modules (A, B, C, E)
+- Event collection from all Bastion-RAG modules (A, B, C, E)
 - Audit log storage and querying
 - Honey-token management and triggering detection
 - Operations dashboard with key metrics
@@ -49,7 +49,7 @@ This document defines the functional and non-functional requirements for the **B
 
 ```
 Traditional Tracker:  "Log everything, query later"
-Bastion Tracker:      "Show everything happening NOW + log for later"
+Bastion-RAG Tracker:      "Show everything happening NOW + log for later"
 
 Focus Priorities:
 1. ⭐ Real-time visualization (primary)
@@ -68,7 +68,7 @@ Focus Priorities:
 | **DevOps** | Performance metrics, debugging | Web Dashboard, Grafana |
 | **Developers** | Request tracing, debugging | Web Dashboard, CLI |
 | **PoC Demo Audience** | System understanding | Web Dashboard ⭐ |
-| **Bastion Modules** | Event submission | gRPC, NATS |
+| **Bastion-RAG Modules** | Event submission | gRPC, NATS |
 
 ### 1.5 Definitions and Acronyms
 
@@ -102,7 +102,7 @@ Focus Priorities:
 
 ### 2.1 Product Perspective
 
-Tracker is the **observability hub** that all other Bastion modules feed into.
+Tracker is the **observability hub** that all other Bastion-RAG modules feed into.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -188,7 +188,7 @@ Any combination based on:
 ### 2.3 Product Functions
 
 1. **F1: Event Collection**
-   - Receive events from all Bastion modules via NATS
+   - Receive events from all Bastion-RAG modules via NATS
    - Standardized event schema
    - Handle high throughput (10,000+ events/s)
 
@@ -250,7 +250,7 @@ Any combination based on:
 ### 2.5 Assumptions and Dependencies
 
 **Assumptions:**
-- All Bastion modules publish standardized events
+- All Bastion-RAG modules publish standardized events
 - NATS is the central event bus
 - Operations team uses modern browsers
 - PoC demos run in controlled environments
@@ -272,7 +272,7 @@ Any combination based on:
 
 | Category | Interface | Target Users |
 |---|---|---|
-| **Input** | NATS (event subscription) | Bastion modules |
+| **Input** | NATS (event subscription) | Bastion-RAG modules |
 | **Input** | gRPC (event submission) | Modules (fallback) |
 | **Input** | REST API | External integrations |
 | **Input** | CLI | Admins, operators |
@@ -285,12 +285,12 @@ Any combination based on:
 
 **Subjects (Topics):**
 ```
-bastion.events.sentinel.>     # All Sentinel events
-bastion.events.vault.>         # All Vault events
-bastion.events.navigator.>     # All Navigator events
-bastion.events.anchor.>        # All Anchor events
-bastion.events.security.>      # Cross-module security events
-bastion.events.system.>        # System-level events
+bastion-rag.events.sentinel.>     # All Sentinel events
+bastion-rag.events.vault.>         # All Vault events
+bastion-rag.events.navigator.>     # All Navigator events
+bastion-rag.events.anchor.>        # All Anchor events
+bastion-rag.events.security.>      # Cross-module security events
+bastion-rag.events.system.>        # System-level events
 ```
 
 **Event Schema (Common):**
@@ -403,7 +403,7 @@ service TrackerService {
 
 **URL Structure:**
 ```
-https://tracker.bastion.local/
+https://tracker.bastion-rag.local/
 
 Pages:
 ├── /                          # Main Dashboard
@@ -526,7 +526,7 @@ $ tracker-cli demo inject --type cross_tenant_attempt
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  🏛️ Bastion Control Center          ⚠️ 2 Alerts  👤 ops    │
+│  🏛️ Bastion-RAG Control Center          ⚠️ 2 Alerts  👤 ops    │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐          │
@@ -875,7 +875,7 @@ Blocked Request:
 
 ### 4.8 PoC Demo Mode ⭐
 
-**Purpose:** Controlled demonstration of Bastion capabilities
+**Purpose:** Controlled demonstration of Bastion-RAG capabilities
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1025,7 +1025,7 @@ Action: Verify pipeline configuration
 ### 6.1 Event Collection (FR-EC)
 
 **FR-EC-001: NATS Subscription**
-- Subscribe to all `bastion.events.>` subjects
+- Subscribe to all `bastion-rag.events.>` subjects
 - Handle 10,000+ events/s
 - Buffer for slow consumers
 
@@ -1284,7 +1284,7 @@ Action: Verify pipeline configuration
                           │ events from          │ - Jaeger       │
                           │                      │ - Redis        │
                     ┌─────▼──────────┐           └────────────────┘
-                    │ Bastion Modules │
+                    │ Bastion-RAG Modules │
                     │ A, B, C, E      │
                     └─────────────────┘
 ```
@@ -1469,7 +1469,7 @@ server:
 nats:
   url: nats://nats:4222
   subjects:
-    - "bastion.events.>"
+    - "bastion-rag.events.>"
   max_pending: 100000
 
 # Storage
@@ -1511,7 +1511,7 @@ alerting:
     email:
       smtp_host: smtp.example.com
       smtp_port: 587
-      from: tracker@bastion.local
+      from: tracker@bastion-rag.local
   
   rules:
     - name: high_latency
@@ -1573,7 +1573,7 @@ version: '3.8'
 
 services:
   tracker-backend:
-    image: bastion/tracker-backend:1.0.0
+    image: bastion-rag/tracker-backend:1.0.0
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -1586,7 +1586,7 @@ services:
       - redis
   
   tracker-frontend:
-    image: bastion/tracker-frontend:1.0.0
+    image: bastion-rag/tracker-frontend:1.0.0
     ports:
       - "3000:3000"
     environment:

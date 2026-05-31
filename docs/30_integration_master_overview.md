@@ -1,20 +1,20 @@
-# Bastion Master Overview
+# Bastion-RAG Master Overview
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Integration (Tier 4)
 **Document ID:** 30-master-overview
-**Version:** 2.0
-**Date:** 2026-05-26
-**Status:** Active
+**Version:** 2.1
+**Date:** 2026-05-31
+**Status:** Active — all Modular RAG priorities (1–4) complete; Tracker management layer added
 **Supersedes:** v1.0 (2026-05-17) — archived at docs/archive/v2/
 
 > This is a **thin** integration document. It provides the map; detailed specifications live in their respective documents.
 
 ---
 
-## 1. What is Bastion?
+## 1. What is Bastion-RAG?
 
-Bastion is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems.
+Bastion-RAG is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems.
 
 ```
 Philosophy: "We don't block data; we govern its safe flow."
@@ -216,7 +216,7 @@ Shared:
 ## 11. Quick Start (PoC)
 
 ```bash
-# Full Bastion via Docker Compose
+# Full Bastion-RAG via Docker Compose
 $ docker-compose up
 
 Services started:
@@ -239,7 +239,7 @@ BAAI/bge-reranker-v2-m3 from HuggingFace (~2.3GB, cached after).
 ## 12. Reading Guide
 
 ```
-New to Bastion?
+New to Bastion-RAG?
 → Start: 01-architecture-principles
 → Then: this overview
 
@@ -266,16 +266,16 @@ Understanding data flow?
 | 1 | 03-module-interaction-map | v2.0 | ✅ |
 
 | 2 | 10-sentinel-srs | v3.0 | ✅ |
-| 2 | 11-vault-srs | v3.0 | ✅ |
-| 2 | 12-navigator-srs | v3.0 | ✅ |
+| 2 | 11-vault-srs | v3.1 | ✅ data steward role added |
+| 2 | 12-navigator-srs | v3.1 | ✅ connectors, delta indexing, profiles, decomposer added |
 | 2 | 13-anchor-srs | v3.0 | ✅ |
-| 2 | 14-tracker-srs | v3.0 | ✅ |
+| 2 | 14-tracker-srs | v3.1 | ✅ management layer added (dashboard, anomaly, auth, log browser) |
 | 3 | 20-honey-token-srs | v2.0 | ✅ |
 | 3 | 21-multi-tenancy-srs | v2.0 | ✅ |
 | 3 | 22-data-lineage-srs | v2.0 | ✅ |
-| 3 | 31-modular-rag-requirements | v1.1 | Active (P1+P2 implemented) |
+| 3 | 31-modular-rag-requirements | v1.3 | ✅ All priorities (1–4) complete |
 | 3 | 32-injection-defense-architecture | v1.0 | ✅ |
-| 4 | 30-master-overview | v2.0 | ✅ |
+| 4 | 30-master-overview | v2.1 | ✅ |
 
 Archive: docs/archive/v2/ (all v2 and earlier documents)
 
@@ -287,6 +287,7 @@ Archive: docs/archive/v2/ (all v2 and earlier documents)
 |---|---|---|
 | 1.0 | 2026-05-17 | Initial master overview |
 | 2.0 | 2026-05-26 | Polyglot architecture: Navigator and Anchor → Python; technology stack updated; module table adds language column; pipeline diagram adds language labels; Quick Start notes model download |
+| 2.1 | 2026-05-31 | All Modular RAG priorities complete (P1–P4); Tracker management layer (dashboard, anomaly detection, login audit, cursor pagination, JWT refresh); Navigator: SourceConnector interface, delta indexing, schema-aware chunking profiles, sub-query decomposition; Vault: data steward role; document map versions updated |
 
 ---
 
@@ -294,7 +295,7 @@ Archive: docs/archive/v2/ (all v2 and earlier documents)
 
 ---
 
-## Appendix: The Bastion Story in One Page
+## Appendix: The Bastion-RAG Story in One Page
 
 ```
 A user sends a query to a RAG system.
@@ -317,5 +318,5 @@ Throughout:
 
 Each module works alone.
 Together, they form complete protection.
-That's Bastion.
+That's Bastion-RAG.
 ```

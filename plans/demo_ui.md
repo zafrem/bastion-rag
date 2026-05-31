@@ -1,7 +1,7 @@
-# Design Document: Bastion RAG Interactive Demo
+# Design Document: Bastion-RAG Interactive Demo
 
 ## Overview
-A visual demonstration platform for the Bastion RAG security framework. It allows users to see exactly how their prompts are handled across the multi-layered security pipeline.
+A visual demonstration platform for the Bastion-RAG security framework. It allows users to see exactly how their prompts are handled across the multi-layered security pipeline.
 
 ## System Architecture
 

@@ -1,6 +1,6 @@
 # Bastion-Anchor System Requirements Specification (SRS) v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module E - Anchor (Embedding Security)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -88,7 +88,7 @@ Anchor demonstrates how to mitigate these risks at the embedding layer.
 
 ### 2.1 Product Perspective
 
-Anchor sits between Navigator (search) and the LLM in the Bastion pipeline.
+Anchor sits between Navigator (search) and the LLM in the Bastion-RAG pipeline.
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -172,7 +172,7 @@ Query → Embedding Model → Query Embedding
    - Strategy hot-reload
 
 5. **F5: Standalone Operation**
-   - Work without other Bastion modules
+   - Work without other Bastion-RAG modules
    - Mock mode for testing
    - Local development support
 
@@ -223,7 +223,7 @@ Query → Embedding Model → Query Embedding
 
 ### 3.1 Interface Overview
 
-Anchor follows the same interface pattern as other Bastion modules.
+Anchor follows the same interface pattern as other Bastion-RAG modules.
 
 | Category | Interface | Purpose |
 |---|---|---|
@@ -238,7 +238,7 @@ Anchor follows the same interface pattern as other Bastion modules.
 
 ```protobuf
 syntax = "proto3";
-package bastion.anchor.v1;
+package bastion-rag.anchor.v1;
 
 service AnchorService {
   // Phase 1: Embedding Security (Anchor-IN)
@@ -287,7 +287,7 @@ GET  /v1/metrics                        # Prometheus metrics
 
 ```http
 POST /v1/anchor/secure HTTP/1.1
-Host: anchor.bastion.local
+Host: anchor.bastion-rag.local
 Content-Type: application/json
 
 {
@@ -1018,7 +1018,7 @@ embedding:
 tracker:
   enabled: true
   nats_url: nats://nats:4222
-  event_subject: bastion.events.anchor
+  event_subject: bastion-rag.events.anchor
 
 # Logging
 logging:
@@ -1040,7 +1040,7 @@ metrics:
 ```yaml
 services:
   anchor:
-    image: bastion/anchor:1.0.0
+    image: bastion-rag/anchor:1.0.0
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -1204,4 +1204,4 @@ This SRS intentionally simplifies advanced topics like:
 - Embedding inversion defense techniques
 - Adversarial robustness
 
-The goal of this module in the Bastion PoC is to **demonstrate that embedding security matters** and provide a working implementation that can be expanded based on production needs. The full complexity of embedding security is a research-level topic that warrants dedicated study and is beyond the scope of an initial PoC.
+The goal of this module in the Bastion-RAG PoC is to **demonstrate that embedding security matters** and provide a working implementation that can be expanded based on production needs. The full complexity of embedding security is a research-level topic that warrants dedicated study and is beyond the scope of an initial PoC.

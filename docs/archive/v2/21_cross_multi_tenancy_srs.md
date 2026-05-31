@@ -1,6 +1,6 @@
-# Bastion Multi-Tenancy Cross-Cutting SRS
+# Bastion-RAG Multi-Tenancy Cross-Cutting SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Cross-Cutting SRS (Tier 3)  
 **Document ID:** 21-multi-tenancy-srs  
 **Feature:** Multi-Tenancy (Tenant Isolation)  
@@ -25,7 +25,7 @@
 
 ### 1.1 Purpose
 
-Multi-tenancy ensures **complete isolation** between tenants in a shared Bastion deployment. Tenant A must never access Tenant B's data — through storage, search, or any other path.
+Multi-tenancy ensures **complete isolation** between tenants in a shared Bastion-RAG deployment. Tenant A must never access Tenant B's data — through storage, search, or any other path.
 
 ### 1.2 Why This is the Most Critical Cross-Cutting Feature
 
@@ -224,7 +224,7 @@ results := qdrant.Search(query, filter)  // tenant-scoped
 ### 3.4 Tracker: Cross-Tenant Aggregation
 
 ```
-Subscribes: bastion.events.*.cross_tenant_attempt
+Subscribes: bastion-rag.events.*.cross_tenant_attempt
 
 func onCrossTenantAttempt(event) {
     // Aggregate by user

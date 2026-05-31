@@ -1,6 +1,6 @@
-# Bastion Module Interaction Map
+# Bastion-RAG Module Interaction Map
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Foundation (Tier 1)  
 **Document ID:** 03-module-interaction-map  
 **Version:** 1.0  
@@ -13,7 +13,7 @@
 
 ### 1.1 Purpose
 
-This document maps **how modules interact** within Bastion. It defines:
+This document maps **how modules interact** within Bastion-RAG. It defines:
 - Module interfaces (what each exposes)
 - Hooks (cross-cutting extension points)
 - Composition relationships (which modules enhance each other)
@@ -363,7 +363,7 @@ Registers hooks in:
 - All modules (operation tracking)
 
 Subscribes to events:
-- bastion.events.> (everything)
+- bastion-rag.events.> (everything)
 
 Responsibilities:
 - Reconstruct request path via trace_id
@@ -794,7 +794,7 @@ For Lineage, hook at:
 - *.completed (all modules)
 
 For Tracker, subscribe to:
-- bastion.events.> (all)
+- bastion-rag.events.> (all)
 ```
 
 ---

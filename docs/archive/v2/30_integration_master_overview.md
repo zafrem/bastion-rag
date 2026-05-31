@@ -1,6 +1,6 @@
-# Bastion Master Overview
+# Bastion-RAG Master Overview
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Integration (Tier 4)  
 **Document ID:** 30-master-overview  
 **Version:** 1.0  
@@ -11,9 +11,9 @@
 
 ---
 
-## 1. What is Bastion?
+## 1. What is Bastion-RAG?
 
-Bastion is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems.
+Bastion-RAG is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems.
 
 ```
 Philosophy: "We don't block data; we govern its safe flow."
@@ -198,7 +198,7 @@ KMS: AWS/HashiCorp/Local
 ## 11. Quick Start (PoC)
 
 ```bash
-# Full Bastion via Docker Compose
+# Full Bastion-RAG via Docker Compose
 $ docker-compose up
 
 Services started:
@@ -218,7 +218,7 @@ Services started:
 ## 12. Reading Guide
 
 ```
-New to Bastion?
+New to Bastion-RAG?
 → Start: 01-architecture-principles
 → Then: this overview
 
@@ -267,7 +267,7 @@ Understanding data flow?
 
 ---
 
-## Appendix: The Bastion Story in One Page
+## Appendix: The Bastion-RAG Story in One Page
 
 ```
 A user sends a query to a RAG system.
@@ -290,5 +290,5 @@ Throughout:
 
 Each module works alone.
 Together, they form complete protection.
-That's Bastion.
+That's Bastion-RAG.
 ```

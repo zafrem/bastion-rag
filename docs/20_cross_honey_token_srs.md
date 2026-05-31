@@ -1,6 +1,6 @@
-# Bastion Honey-Token Cross-Cutting SRS
+# Bastion-RAG Honey-Token Cross-Cutting SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Cross-Cutting SRS (Tier 3)  
 **Document ID:** 20-honey-token-srs  
 **Feature:** Honey-Token (Intrusion Detection)  
@@ -25,7 +25,7 @@
 
 ### 1.1 Purpose
 
-This document redefines the **Honey-Token** capability within the Bastion framework. Originally conceived as a Tracker-only feature, analysis reveals that honey-tokens are a **cross-cutting concern** spanning multiple modules.
+This document redefines the **Honey-Token** capability within the Bastion-RAG framework. Originally conceived as a Tracker-only feature, analysis reveals that honey-tokens are a **cross-cutting concern** spanning multiple modules.
 
 This document:
 1. Explains why honey-tokens cannot be a single-module responsibility

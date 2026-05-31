@@ -1,6 +1,6 @@
 # Bastion-Vault Cloud LLM Connector Extension SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module Extension SRS (Tier 2.5)
 **Document ID:** 21-vault-cloud-llm-ext
 **Modules:** B - Vault (primary), A - Sentinel (required upstream)
@@ -161,7 +161,7 @@ The `content` in the response shows `Hong Gildong` because this caller holds `fu
 
 ### 4.2 gRPC
 
-New method added to `bastion.vault.v1.VaultService`:
+New method added to `bastion-rag.vault.v1.VaultService`:
 
 ```
 rpc CallAnonymized(LLMCallRequest) returns (LLMCallResponse);
@@ -210,12 +210,12 @@ Tokens that appear in the LLM response are recognized by Vault's token store (Po
 Every cloud LLM call emits a mandatory audit event. **This event cannot be disabled.**
 
 ```
-bastion.events.vault.cloud_llm_called
+bastion-rag.events.vault.cloud_llm_called
 ```
 
 ```json
 {
-  "subject": "bastion.events.vault.cloud_llm_called",
+  "subject": "bastion-rag.events.vault.cloud_llm_called",
   "data": {
     "provider": "openai",
     "model": "gpt-4o",

@@ -1,6 +1,6 @@
 # Bastion-Vault Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Module SRS (Tier 2)  
 **Document ID:** 11-vault-srs  
 **Module:** B - Vault (Data Isolation & Anonymization)  
@@ -19,7 +19,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Vault** module, the data protection core of Bastion. Vault operates bidirectionally:
+This document specifies the **Vault** module, the data protection core of Bastion-RAG. Vault operates bidirectionally:
 - **Phase 1 (Input/Storage):** Anonymize data before storage
 - **Phase 2 (Output/Use):** Apply permissions on retrieval
 

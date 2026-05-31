@@ -1,6 +1,6 @@
-# Integration Testing Guide: Bastion RAG
+# Integration Testing Guide: Bastion-RAG
 
-This document outlines the strategy and procedures for performing full integration testing of the Bastion RAG framework. Since the framework consists of multiple distributed modules, integration testing focuses on verifying the bidirectional data flow and the security handshakes between them.
+This document outlines the strategy and procedures for performing full integration testing of the Bastion-RAG framework. Since the framework consists of multiple distributed modules, integration testing focuses on verifying the bidirectional data flow and the security handshakes between them.
 
 ## 1. Testing Architecture
 
@@ -53,7 +53,7 @@ make test-communication
 ```
 
 #### B. Full Bidirectional Flow Demonstration
-This test traces a prompt through all 10 steps of the Bastion RAG security lifecycle.
+This test traces a prompt through all 10 steps of the Bastion-RAG security lifecycle.
 ```bash
 make test-flow
 ```

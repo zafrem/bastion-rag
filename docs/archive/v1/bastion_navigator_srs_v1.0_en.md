@@ -1,6 +1,6 @@
 # Bastion-Navigator System Requirements Specification (SRS) v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module C - Navigator (Search & Ranking Layer)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -58,7 +58,7 @@ This SRS is optimized for:
 
 | Term | Definition |
 |---|---|
-| **Navigator** | Module C of the Bastion framework (search layer) |
+| **Navigator** | Module C of the Bastion-RAG framework (search layer) |
 | **RAG** | Retrieval-Augmented Generation |
 | **Vector DB** | Database optimized for vector similarity search |
 | **Embedding** | Numerical vector representation of text |
@@ -87,7 +87,7 @@ This SRS is optimized for:
 
 ### 2.1 Product Perspective
 
-Navigator is the third module in the Bastion framework pipeline.
+Navigator is the third module in the Bastion-RAG framework pipeline.
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -233,7 +233,7 @@ Navigator follows the same interface pattern as Sentinel and Vault.
 
 ```protobuf
 syntax = "proto3";
-package bastion.navigator.v1;
+package bastion-rag.navigator.v1;
 
 service NavigatorService {
   // Main search operations
@@ -335,7 +335,7 @@ GET  /v1/metrics                         # Prometheus metrics
 
 ```http
 POST /v1/navigator/search HTTP/1.1
-Host: navigator.bastion.local
+Host: navigator.bastion-rag.local
 Content-Type: application/json
 Authorization: Bearer <jwt-token>
 
@@ -1271,7 +1271,7 @@ version: '3.8'
 
 services:
   navigator:
-    image: bastion/navigator:1.0.0
+    image: bastion-rag/navigator:1.0.0
     ports:
       - "8080:8080"
       - "9090:9090"
@@ -1302,7 +1302,7 @@ services:
           memory: 32G
   
   embedder:
-    image: bastion/embedder-bge-m3:1.0.0
+    image: bastion-rag/embedder-bge-m3:1.0.0
     ports:
       - "8000:8000"
     volumes:
@@ -1313,7 +1313,7 @@ services:
           memory: 8G
   
   reranker:
-    image: bastion/reranker-bge:1.0.0
+    image: bastion-rag/reranker-bge:1.0.0
     ports:
       - "8001:8001"
     volumes:

@@ -1,6 +1,6 @@
-# Bastion — Injection Defense Architecture
+# Bastion-RAG — Injection Defense Architecture
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Cross-Cutting SRS (Tier 3)
 **Document ID:** 32-injection-defense-architecture
 **Version:** 1.0
@@ -27,7 +27,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the injection defense mechanisms implemented across all five Bastion modules. It serves as the authoritative reference for:
+This document specifies the injection defense mechanisms implemented across all five Bastion-RAG modules. It serves as the authoritative reference for:
 
 - Which defenses exist, what they protect against, and where in the code they live
 - The layered structure that means no single layer needs to be perfect

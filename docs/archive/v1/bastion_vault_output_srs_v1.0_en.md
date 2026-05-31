@@ -1,6 +1,6 @@
 # Bastion-Vault Output Validation SRS v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module B - Vault (Output Validation / Phase 2)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -339,7 +339,7 @@ Vault-OUT shares interface infrastructure with Vault-IN, distinguished by endpoi
 
 ```protobuf
 syntax = "proto3";
-package bastion.vault.v1;
+package bastion-rag.vault.v1;
 
 service VaultService {
   // Phase 1 methods (existing)
@@ -513,7 +513,7 @@ POST /v1/vault/process                 # Phase 1 or 2 via mode
 
 ```http
 POST /v1/vault/apply-permissions HTTP/1.1
-Host: vault.bastion.local
+Host: vault.bastion-rag.local
 Content-Type: application/json
 Authorization: Bearer <jwt-token>
 
@@ -1506,7 +1506,7 @@ mode: output  # phase 2
 permissions:
   opa:
     endpoint: http://opa:8181
-    policy_package: bastion.vault.access
+    policy_package: bastion-rag.vault.access
   
   cache:
     ttl: 5m

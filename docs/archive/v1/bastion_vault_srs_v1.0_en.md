@@ -1,6 +1,6 @@
 # Bastion-Vault System Requirements Specification (SRS) v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module B - Vault (Data Isolation & Anonymization)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -46,7 +46,7 @@ This document provides a reference baseline for development, operations, securit
 
 | Term | Definition |
 |---|---|
-| **Vault** | Module B of the Bastion framework (data isolation layer) |
+| **Vault** | Module B of the Bastion-RAG framework (data isolation layer) |
 | **PII** | Personally Identifiable Information |
 | **KMS** | Key Management Service |
 | **DEK** | Data Encryption Key |
@@ -101,7 +101,7 @@ This document is organized as follows:
 
 ### 2.1 Product Perspective
 
-Vault is the second module in the Bastion framework's defense pipeline.
+Vault is the second module in the Bastion-RAG framework's defense pipeline.
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -269,7 +269,7 @@ Vault supports **4 input methods** and **4 output formats** (consistent with Sen
 // vault.proto
 syntax = "proto3";
 
-package bastion.vault.v1;
+package bastion-rag.vault.v1;
 
 service VaultService {
   // Anonymization operations
@@ -419,7 +419,7 @@ POST /v1/config/reload                # Hot reload
 
 ```http
 POST /v1/vault/anonymize HTTP/1.1
-Host: vault.bastion.local
+Host: vault.bastion-rag.local
 Content-Type: application/json
 Authorization: Bearer <jwt-token>
 
@@ -1328,7 +1328,7 @@ kms:
   provider: hashicorp
   hashicorp:
     address: https://vault.example.com:8200
-    namespace: bastion
+    namespace: bastion-rag
     mount_path: transit/
     role: bastion-vault-role
     auth_method: kubernetes
@@ -1526,7 +1526,7 @@ roles:
 ### 10.2 OPA Policy Examples
 
 ```rego
-package bastion.vault.access
+package bastion-rag.vault.access
 
 import future.keywords.if
 import future.keywords.in
@@ -1738,7 +1738,7 @@ func (v *KAnonymityValidator) AutoGeneralize(
 
 ### 12.1 Independence Principle
 
-Vault must be runnable, testable, and operable independently of other Bastion modules.
+Vault must be runnable, testable, and operable independently of other Bastion-RAG modules.
 
 ### 12.2 Standalone Execution Modes
 
@@ -2043,7 +2043,7 @@ access_control:
   provider: opa
   opa:
     url: http://opa:8181
-    policy_path: /v1/data/bastion/vault/access
+    policy_path: /v1/data/bastion-rag/vault/access
     
   hot_reload: true
   reload_interval: 60s
@@ -2130,7 +2130,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bastion-vault
-  namespace: bastion
+  namespace: bastion-rag
 spec:
   replicas: 3
   selector:
@@ -2144,7 +2144,7 @@ spec:
       serviceAccountName: vault-service-account
       containers:
       - name: vault
-        image: bastion/vault:1.0.0
+        image: bastion-rag/vault:1.0.0
         ports:
         - containerPort: 8080
           name: rest
@@ -2276,7 +2276,7 @@ spec:
 
 ```bash
 # Marketing system stores new customer
-$ curl -X POST https://vault.bastion.local/v1/vault/anonymize \
+$ curl -X POST https://vault.bastion-rag.local/v1/vault/anonymize \
     -H "Authorization: Bearer $TOKEN" \
     -d '{
         "tenant_id": "tenant-acme",

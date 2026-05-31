@@ -1,4 +1,4 @@
-# Bastion RAG — Integration Flow Log
+# Bastion-RAG — Integration Flow Log
 
 **Date:** 2026-05-23  
 **Environment:** localhost (Mock LLM on `:11435`, Vault on `:8081`)  
@@ -82,7 +82,7 @@ The retrieved context is already stored in plain form inside the secure document
 **Verified live (Vault ↔ Navigator communication test):**
 ```
 ╔══════════════════════════════╗
-║  Bastion Vault Server        ║
+║  Bastion-RAG Vault Server        ║
 ╠══════════════════════════════╣
 ║  HTTP    : localhost:8081    ║
 ║  gRPC    : localhost:9091    ║

@@ -1,6 +1,6 @@
 # Bastion-Tracker Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Module SRS (Tier 2)  
 **Document ID:** 14-tracker-srs  
 **Module:** D - Tracker (Observability & Visualization)  
@@ -19,7 +19,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Tracker** module, the observability and visualization layer of Bastion. Unlike data-path modules (Sentinel/Vault/Navigator/Anchor), Tracker is a **cross-cutting observer** — it watches the entire pipeline without touching data flow.
+This document specifies the **Tracker** module, the observability and visualization layer of Bastion-RAG. Unlike data-path modules (Sentinel/Vault/Navigator/Anchor), Tracker is a **cross-cutting observer** — it watches the entire pipeline without touching data flow.
 
 ### 1.2 Module Identity
 
@@ -114,7 +114,7 @@ Answer: YES
 │                                              │
 │  ┌──────────────────────────────┐            │
 │  │  Event Collector (NATS sub)  │            │
-│  │  Subscribes: bastion.events.>│            │
+│  │  Subscribes: bastion-rag.events.>│            │
 │  └────────────┬─────────────────┘            │
 │               ▼                              │
 │  ┌──────────────────────────────┐            │
@@ -213,7 +213,7 @@ Note: Tracker's failure must NOT affect data path
 
 **FR-CORE-EC-001: NATS Subscription**
 ```
-Subscribe: bastion.events.>
+Subscribe: bastion-rag.events.>
 Handle: 10,000+ events/s
 Per Foundation event schema (02)
 Dependency: NATS only
@@ -368,7 +368,7 @@ Detail: see Honey-Token SRS (Tier 3).
 
 **Brief Contract:**
 ```
-Subscribes: bastion.events.*.honey_token_*
+Subscribes: bastion-rag.events.*.honey_token_*
 
 On correlated detection:
 - Same trace_id across layers
@@ -395,7 +395,7 @@ Detail: see Data Lineage SRS (Tier 3).
 
 **Brief Contract:**
 ```
-Subscribes: bastion.events.>
+Subscribes: bastion-rag.events.>
 
 For each trace_id:
 - Collect all events
@@ -450,7 +450,7 @@ Other modules emit; Tracker correlates.
 ### 6.1 Input: Event Subscription (NATS)
 
 ```
-Subscribe: bastion.events.>
+Subscribe: bastion-rag.events.>
 Per Foundation event schema (02)
 
 All modules publish; Tracker consumes.
@@ -656,7 +656,7 @@ version: 2.0
 core:
   nats:
     url: nats://nats:4222
-    subjects: ["bastion.events.>"]
+    subjects: ["bastion-rag.events.>"]
   storage:
     postgresql: postgresql://...
     retention_days: 30

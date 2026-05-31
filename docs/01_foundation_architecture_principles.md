@@ -1,6 +1,6 @@
-# Bastion Architecture & Design Principles
+# Bastion-RAG Architecture & Design Principles
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Foundation (Tier 1)
 **Document ID:** 01-architecture-principles
 **Version:** 3.0
@@ -14,7 +14,7 @@
 
 ### 1.1 Purpose
 
-This document establishes the foundational architecture and design principles for the Bastion RAG Security Governance Framework. It is the **single source of truth** for architectural decisions that all module and cross-cutting specifications must follow.
+This document establishes the foundational architecture and design principles for the Bastion-RAG Security Governance Framework. It is the **single source of truth** for architectural decisions that all module and cross-cutting specifications must follow.
 
 ### 1.2 What Changed in v3
 
@@ -44,9 +44,9 @@ Tier 4: Integration (master overview)
 
 ## 2. System Overview
 
-### 2.1 What is Bastion?
+### 2.1 What is Bastion-RAG?
 
-Bastion is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems.
+Bastion-RAG is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems.
 
 ```
 Philosophy:
@@ -232,7 +232,7 @@ gRPC: JSON codec (both Go and Python servers use JSON-over-gRPC,
 REST: JSON over HTTP/1.1
 
 Events: JSON payload on NATS subjects
-        bastion.events.{module}.{event_type}
+        bastion-rag.events.{module}.{event_type}
 ```
 
 ### 7.2 Why Python for Navigator and Anchor

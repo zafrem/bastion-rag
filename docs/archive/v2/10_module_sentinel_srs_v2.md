@@ -1,6 +1,6 @@
 # Bastion-Sentinel Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Module SRS (Tier 2)  
 **Document ID:** 10-sentinel-srs  
 **Module:** A - Sentinel (Validation Gateway)  
@@ -19,7 +19,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Sentinel** module, the bidirectional validation gateway of the Bastion framework. Sentinel validates both **input** (queries entering the pipeline) and **output** (responses leaving the pipeline).
+This document specifies the **Sentinel** module, the bidirectional validation gateway of the Bastion-RAG framework. Sentinel validates both **input** (queries entering the pipeline) and **output** (responses leaving the pipeline).
 
 This SRS follows the Foundation's three-layer model:
 - **🟢 Core**: Standalone validation (no dependencies)
@@ -299,7 +299,7 @@ Output:
 ✅ Format validation
 
 These ALWAYS work, even if Sentinel is
-the only Bastion module deployed.
+the only Bastion-RAG module deployed.
 ```
 
 ---
@@ -481,7 +481,7 @@ Per Foundation interaction map:
 
 ```protobuf
 syntax = "proto3";
-package bastion.sentinel.v1;
+package bastion-rag.sentinel.v1;
 
 service SentinelService {
   // Core - always available

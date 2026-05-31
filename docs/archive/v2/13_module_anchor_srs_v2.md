@@ -1,6 +1,6 @@
 # Bastion-Anchor Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Module SRS (Tier 2)  
 **Document ID:** 13-anchor-srs  
 **Module:** E - Anchor (Embedding Security)  
@@ -20,7 +20,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Anchor** module, the embedding security layer of Bastion. Anchor operates bidirectionally:
+This document specifies the **Anchor** module, the embedding security layer of Bastion-RAG. Anchor operates bidirectionally:
 - **Phase 1 (Input):** Inject noise into embeddings
 - **Phase 2 (Output):** Analyze response for bias/anomaly
 
@@ -248,7 +248,7 @@ Phase 2:
 ✅ Anomaly detection
 ✅ Coherence check
 
-Works without other Bastion modules.
+Works without other Bastion-RAG modules.
 ```
 
 ---

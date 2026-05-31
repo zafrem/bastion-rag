@@ -1,6 +1,6 @@
 # Bastion-Navigator Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Module SRS (Tier 2)  
 **Document ID:** 12-navigator-srs  
 **Module:** C - Navigator (Search & Ranking)  
@@ -19,7 +19,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Navigator** module, the search and ranking layer of Bastion. Unlike Sentinel/Vault/Anchor, Navigator is **single-direction** (search happens on input path; output validation is delegated to Sentinel-OUT).
+This document specifies the **Navigator** module, the search and ranking layer of Bastion-RAG. Unlike Sentinel/Vault/Anchor, Navigator is **single-direction** (search happens on input path; output validation is delegated to Sentinel-OUT).
 
 ### 1.2 Module Identity
 
@@ -242,7 +242,7 @@ Standalone capabilities (Qdrant+models):
 ✅ Hybrid (RRF)
 ✅ Reranking
 
-Quality RAG search without other Bastion modules.
+Quality RAG search without other Bastion-RAG modules.
 ```
 
 ---

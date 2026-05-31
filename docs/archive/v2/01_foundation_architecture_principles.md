@@ -1,6 +1,6 @@
-# Bastion Architecture & Design Principles
+# Bastion-RAG Architecture & Design Principles
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Document Type:** Foundation (Tier 1)  
 **Document ID:** 01-architecture-principles  
 **Version:** 1.0  
@@ -13,7 +13,7 @@
 
 ### 1.1 Purpose
 
-This document establishes the foundational architecture and design principles for the Bastion RAG Security Governance Framework. It serves as the **single source of truth** for architectural decisions that all module and cross-cutting specifications must follow.
+This document establishes the foundational architecture and design principles for the Bastion-RAG Security Governance Framework. It serves as the **single source of truth** for architectural decisions that all module and cross-cutting specifications must follow.
 
 ### 1.2 Audience
 
@@ -38,15 +38,15 @@ Tier 4: Integration (master overview)
 
 ## 2. System Overview
 
-### 2.1 What is Bastion?
+### 2.1 What is Bastion-RAG?
 
-Bastion is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems. Despite the name suggesting a fortress, Bastion does not simply block data—it **governs the safe flow** of data through the RAG pipeline.
+Bastion-RAG is a **data governance framework** for RAG (Retrieval-Augmented Generation) systems. Despite the name suggesting a fortress, Bastion-RAG does not simply block data—it **governs the safe flow** of data through the RAG pipeline.
 
 ```
 Philosophy:
 "We don't block data; we govern its safe flow."
 
-Bastion ensures data flows freely but safely,
+Bastion-RAG ensures data flows freely but safely,
 transforming and protecting it at each stage
 rather than simply blocking access.
 ```
@@ -90,7 +90,7 @@ rather than simply blocking access.
 
 ### 3.1 The Central Idea
 
-Bastion is built on **Progressive Security Enhancement**:
+Bastion-RAG is built on **Progressive Security Enhancement**:
 
 ```
 Each module provides value INDEPENDENTLY.
@@ -111,7 +111,7 @@ Traditional monolithic security:
 - One failure breaks everything
 - Hard to adopt incrementally
 
-Bastion's progressive approach:
+Bastion-RAG's progressive approach:
 - Each piece adds value
 - Failures are isolated
 - Incremental adoption
@@ -144,7 +144,7 @@ Anchor → LLM: ✅ Provides embedding protection
 
 ### 4.1 Layer Definitions
 
-Every feature in Bastion belongs to one of three layers:
+Every feature in Bastion-RAG belongs to one of three layers:
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -291,7 +291,7 @@ Each module's features are classified:
 
 ### 6.1 Three Types of Independence
 
-Bastion maintains three distinct types of independence:
+Bastion-RAG maintains three distinct types of independence:
 
 ```
 1. Deployment Independence
@@ -431,7 +431,7 @@ Identified cross-cutting features (Layer 3):
 
 ### 8.1 Progressive Deployment
 
-Bastion supports incremental deployment:
+Bastion-RAG supports incremental deployment:
 
 ```
 Minimal (1 module):

@@ -1,6 +1,6 @@
 # Bastion-Sentinel Software Requirements Specification (SRS) v1.0
 
-**Project:** Bastion - AI Security Governance Framework
+**Project:** Bastion-RAG - AI Security Governance Framework
 
 **Module:** Sentinel (Input Gateway Security)
 
@@ -44,7 +44,7 @@ This specification serves as the baseline reference for the development, operati
 
 | Term / Acronym | Definition |
 | --- | --- |
-| **Sentinel** | Module A of the Bastion framework (Input Gateway) |
+| **Sentinel** | Module A of the Bastion-RAG framework (Input Gateway) |
 | **Prompt Injection** | An attack vector that injects unauthorized instructions to bypass LLM behavioral constraints |
 | **Metadata** | Contextual information accompanying a request (e.g., tenant_id, user_id) |
 | **Tenant** | An isolated, independent organization or customer using the system |
@@ -84,7 +84,7 @@ This document is organized as follows:
 
 ### 2.1 Product Perspective
 
-Sentinel is the first line of defense within the five-module Bastion framework.
+Sentinel is the first line of defense within the five-module Bastion-RAG framework.
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -226,7 +226,7 @@ Sentinel supports **4 distinct input methods** and produces **4 interchangeable 
 
 | Category | Interface / Format | Target Audience / Use Case |
 | --- | --- | --- |
-| **Input** | gRPC | AI pipelines, internal Bastion modules |
+| **Input** | gRPC | AI pipelines, internal Bastion-RAG modules |
 | **Input** | REST API (JSON) | External services, web clients |
 | **Input** | CLI | Developers, operators (manual execution) |
 | **Input** | File Input (JSONL/CSV) | Batch processing, QA regression testing |
@@ -247,7 +247,7 @@ Sentinel supports **4 distinct input methods** and produces **4 interchangeable 
 // sentinel.proto
 syntax = "proto3";
 
-package bastion.sentinel.v1;
+package bastion-rag.sentinel.v1;
 
 service SentinelService {
   // Synchronous validation (Main entrypoint)
@@ -335,7 +335,7 @@ POST /v1/config/reload           # Trigger an immediate config hot-reload
 
 ```http
 POST /v1/validate HTTP/1.1
-Host: sentinel.bastion.local
+Host: sentinel.bastion-rag.local
 Content-Type: application/json
 Authorization: Bearer <jwt-token>
 
@@ -1511,7 +1511,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bastion-sentinel
-  namespace: bastion
+  namespace: bastion-rag
 spec:
   replicas: 3
   selector:
@@ -1524,7 +1524,7 @@ spec:
     spec:
       containers:
       - name: sentinel
-        image: bastion/sentinel:1.0.0
+        image: bastion-rag/sentinel:1.0.0
         ports:
         - containerPort: 8080
           name: rest
@@ -1592,7 +1592,7 @@ spec:
 ```bash
 # Initialize target container version adjustments via Canary routes
 $ kubectl apply -f k8s/deployment-canary.yaml
-$ kubectl set image deployment/sentinel-canary sentinel=bastion/sentinel:1.1.0
+$ kubectl set image deployment/sentinel-canary sentinel=bastion-rag/sentinel:1.1.0
 
 # Scale traffic allocation across infrastructure validation phases (10% → 50% → 100%)
 $ kubectl scale deployment sentinel-canary --replicas=1

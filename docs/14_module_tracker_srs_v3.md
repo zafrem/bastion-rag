@@ -1,10 +1,10 @@
 # Bastion-Tracker Module SRS
 
-**Project:** Bastion - RAG Security Governance Framework
+**Project:** Bastion-RAG - RAG Security Governance Framework
 **Document Type:** Module SRS (Tier 2)
 **Document ID:** 14-tracker-srs
 **Module:** D - Tracker (Observability & Visualization)
-**Version:** 3.0 (Foundation-aligned)
+**Version:** 3.1
 **Date:** 2026-05-26
 **Status:** Active
 **Supersedes:** v2.0 (2026-05-17) — archived at docs/archive/v2/
@@ -20,7 +20,7 @@
 
 ### 1.1 Purpose
 
-This document specifies the **Tracker** module, the observability and visualization layer of Bastion. Unlike data-path modules (Sentinel/Vault/Navigator/Anchor), Tracker is a **cross-cutting observer** — it watches the entire pipeline without touching data flow.
+This document specifies the **Tracker** module, the observability and visualization layer of Bastion-RAG. Unlike data-path modules (Sentinel/Vault/Navigator/Anchor), Tracker is a **cross-cutting observer** — it watches the entire pipeline without touching data flow.
 
 ### 1.2 What Changed in v3
 
@@ -133,7 +133,7 @@ Answer: YES
 ├─────────────────────────────────────────────┤
 │  ┌──────────────────────────────┐            │
 │  │  Event Collector (NATS sub)  │            │
-│  │  Subscribes: bastion.events.>│            │
+│  │  Subscribes: bastion-rag.events.>│            │
 │  └────────────┬─────────────────┘            │
 │               ▼                              │
 │  ┌──────────────────────────────┐            │
@@ -164,7 +164,7 @@ User → Sentinel(Go) → Vault(Go) → Navigator(Py) → Anchor(Py) → LLM →
          ▼                ▼              ▼               ▼
         ┌─────────────────────────────────────────────────┐
         │               NATS Event Bus                     │
-        │   bastion.events.{module}.{event_type}           │
+        │   bastion-rag.events.{module}.{event_type}           │
         │   JSON payload — same format regardless of lang  │
         └──────────────────────┬──────────────────────────┘
                                ▼
@@ -230,7 +230,7 @@ Note: Tracker's failure must NOT affect data path
 
 **FR-CORE-EC-001: NATS Subscription**
 ```
-Subscribe: bastion.events.>
+Subscribe: bastion-rag.events.>
 Handle: 10,000+ events/s
 Per Foundation event schema (02)
 Dependency: NATS only
@@ -367,7 +367,7 @@ Detail: see Honey-Token SRS (Tier 3).
 
 **Brief Contract:**
 ```
-Subscribes: bastion.events.*.honey_token_*
+Subscribes: bastion-rag.events.*.honey_token_*
 
 On correlated detection (same trace_id across layers):
 → High confidence breach
@@ -435,7 +435,7 @@ Other modules emit; Tracker correlates.
 ### 6.1 Input: Event Subscription (NATS)
 
 ```
-Subscribe: bastion.events.>
+Subscribe: bastion-rag.events.>
 Per Foundation event schema (02)
 All modules publish (Go and Python); Tracker consumes.
 ```
@@ -444,7 +444,7 @@ All modules publish (Go and Python); Tracker consumes.
 
 ```
 Wire format: JSON-over-gRPC (Go encoding.RegisterCodec JSONCodec)
-Service: bastion.tracker.v1.TrackerService
+Service: bastion-rag.tracker.v1.TrackerService
 
 Methods:
   SubmitEvent(BastionEvent) → Ack
@@ -458,37 +458,74 @@ Methods:
 ### 6.3 REST Interface
 
 ```
+# Auth
+POST /v1/auth/login          — issue JWT (admin/operator/viewer)
+POST /v1/auth/refresh         — extend session without re-login (v3.1)
+GET  /v1/auth/login-audit     — login attempt trail, admin only (v3.1)
+
 # Events (Core)
-GET  /v1/events
-GET  /v1/events/{id}
+GET  /v1/events               — recent events with field filters
+GET  /v1/events/{id}          — single event with signature status
+GET  /v1/events/search        — full-text keyword search
+GET  /v1/events/page          — cursor-based pagination (v3.1)
+GET  /v1/events/export        — JSONL streaming download, admin only (v3.1)
+
+# Traces (Core)
 GET  /v1/traces/{trace_id}
+GET  /v1/traces/{trace_id}/timeline
 
 # System (Core)
 GET  /v1/topology
+GET  /v1/topology/health
 GET  /v1/health
 GET  /v1/metrics
 
 # Pipeline (Enhanced)
 GET  /v1/pipelines/stats
 
+# Dashboard (v3.1)
+GET  /v1/dashboard/summary        — 1h/24h counts, active incidents, top modules
+GET  /v1/dashboard/pipeline-health — per-module latency, error rate, events/min
+GET  /v1/dashboard/recent-activity — last 20 events ≥ warning severity
+GET  /v1/dashboard/tenant/{id}    — per-tenant event/incident/blocked breakdown
+
+# Anomaly detection (v3.1)
+GET  /v1/anomaly/baselines    — statistical baselines per module×event_type
+GET  /v1/anomaly/events       — detected anomalies from the last 24h
+
 # Orchestrated
 GET  /v1/lineage/{trace_id}
+GET  /v1/lineage/{trace_id}/sources
+GET  /v1/lineage/user/{user_id}
+GET  /v1/lineage/data/{data_ref}
+GET  /v1/lineage/audit
 GET  /v1/security/incidents
 GET  /v1/honey-tokens/triggers
+
+# Audit verification
+GET  /v1/audit/verify        — HMAC-SHA256 signature scan over all stored events
 ```
 
 ### 6.4 Web UI
 
 ```
 Pages:
-/                  Dashboard (Core)
-/flow              Live Flow (Enhanced) ⭐ — shows Go+Python modules
-/topology          System Topology (module language badges)
-/traces/{id}       Trace Detail (Core)
-/security          Security Events (Orchestrated)
-/honey-tokens      Honey-token Monitor (Orchestrated)
-/lineage           Data Lineage (Orchestrated)
-/demo              PoC Demo Mode
+/                       Dashboard summary — event counts, module health,
+                          active incidents, honey-token triggers (v3.1)
+/flow                   Live Flow (Enhanced) ⭐ — shows Go+Python modules
+/topology               System Topology (module language badges)
+/traces/{id}            Trace Detail (Core)
+/security               Security Events (Orchestrated)
+/honey-tokens           Honey-token Monitor (Orchestrated)
+/lineage                Data Lineage (Orchestrated)
+/logs                   Log Browser — time-range filter, cursor pagination,
+                          severity/module/tenant filter, JSONL export (v3.1)
+/anomaly                Anomaly Events — detected patterns, baselines (v3.1)
+/admin/login-audit      Login Audit Trail — success/fail per user (v3.1)
+/demo                   PoC Demo Mode
+
+WebSocket: /ws/events         — live event stream (filterable per-client)
+WebSocket: /ws/dashboard      — 30s periodic dashboard summary push (v3.1)
 ```
 
 ### 6.5 CLI Interface
@@ -560,7 +597,7 @@ NFR-IND-003: Core works standalone (NATS+PostgreSQL)
          ↑ events (JSON, language-agnostic)
   ┌──────────────────────┐
   │    NATS Event Bus     │
-  │  bastion.events.>     │
+  │  bastion-rag.events.>     │
   └────┬──────────────────┘
        │
   ┌────┴───────────────────────────────┐
@@ -580,7 +617,7 @@ Ports: REST :8084 | gRPC :9094 | WebSocket :8084/ws
 
 ```
 [tracker] starting v3.0 (REST :8084, gRPC :9094)
-[tracker] NATS connected — subscribing bastion.events.>
+[tracker] NATS connected — subscribing bastion-rag.events.>
 [tracker] PostgreSQL connected
 [tracker] no module events yet (waiting)
 [tracker] core: FULLY OPERATIONAL
@@ -636,7 +673,7 @@ server:
 core:
   nats:
     url: nats://nats:4222
-    subjects: ["bastion.events.>"]
+    subjects: ["bastion-rag.events.>"]
   storage:
     postgresql: postgresql://postgres:5432/tracker
     retention_days: 30
@@ -693,6 +730,60 @@ Special nature:
 
 ---
 
+## 11b. Management Layer (v3.1)
+
+The management layer adds an operator-facing control plane on top of the existing observer backend.
+
+### Admin Authentication
+
+| Feature | Detail |
+|---|---|
+| JWT login | `POST /v1/auth/login` — issues HS256 JWT; role hierarchy: admin > operator > viewer |
+| Session refresh | `POST /v1/auth/refresh` — extends session from valid token; preserves user ID and role |
+| Login audit trail | Every attempt (success + failure) written to ring buffer; queryable at `GET /v1/auth/login-audit` |
+| Bcrypt enforcement | `auth.require_bcrypt: true` in config rejects plaintext passwords at startup |
+| Configurable TTL | `jwt_expiry` (default 8h) and `refresh_expiry` (default 168h) are independently configurable |
+
+### Dashboard
+
+`GET /v1/dashboard/summary` returns a `DashboardSummary` computed live from the ring buffer:
+- `event_count_1h` / `event_count_24h` — event volume over rolling windows
+- `active_incidents` — incidents with status ≠ resolved
+- `firing_alerts` — alerts in FIRING state
+- `honey_token_triggers` — honey-token events in the last 24h
+- `blocked_requests_1h` — events with `status=blocked` in the last hour
+- `top_modules` — top 5 modules by event volume, sorted descending
+
+`GET /v1/dashboard/pipeline-health` returns per-module: avg latency, error rate, events/min, last seen.
+
+`GET /v1/dashboard/tenant/{tenant_id}` returns per-tenant breakdown (operator+ only).
+
+WebSocket `/ws/dashboard` pushes `DashboardSummary` to all clients every 30 seconds.
+
+### Anomaly Detection
+
+The `anomaly.Detector` runs as a processor hook — every inbound event is inspected. Six pattern rules:
+
+| Pattern | Trigger | Severity |
+|---|---|---|
+| `statistical_spike` | Event rate for module×type exceeds 3σ above 1h rolling mean | warning |
+| `high_freq_user` | Same `user_id` exceeds N requests/minute (default 30) | warning |
+| `repeated_block` | Same `user_id` blocked ≥ 3 times within 5 minutes | critical |
+| `cross_tenant_signal` | Any `cross_tenant_attempt` event | critical |
+| `honey_multi_layer` | Same `trace_id` triggers honey-tokens in ≥ 2 different modules | critical |
+| `off_hours_access` | Request outside `active_hours_start`–`active_hours_end` (when configured) | warning |
+
+On detection: `AnomalyEvent` is stored in-memory, broadcast as `WSMessage{Type:"anomaly"}` to WebSocket clients, and synthesised into a `BastionEvent{EventType:"anomaly_detected"}` that passes through the processor (triggering incident auto-creation).
+
+### Enhanced Log Browser
+
+| Feature | Endpoint |
+|---|---|
+| Cursor pagination | `GET /v1/events/page?cursor={event_id}&limit=50` |
+| JSONL export | `GET /v1/events/export?limit=10000` (streams NDJSON, admin only) |
+| Time-range filter | `?from=RFC3339&to=RFC3339` on existing `GET /v1/events` |
+| Full-text search | `GET /v1/events/search?q={keyword}` |
+
 ## 12. Change History
 
 | Version | Date | Changes |
@@ -700,6 +791,7 @@ Special nature:
 | 1.0 | 2026-05-17 | Initial |
 | 2.0 | 2026-05-17 | Foundation-aligned, observer nature clarified |
 | 3.0 | 2026-05-26 | Go 1.22+; polyglot context (Navigator/Anchor → Python); pipeline visualization updated for language labels; foundation ref v3 |
+| 3.1 | 2026-05-31 | Management layer: admin JWT auth + refresh, login audit trail, `DashboardSummary`, pipeline health, tenant activity, `anomaly.Detector` (6 pattern rules + σ baseline), cursor pagination, JSONL export, WebSocket 30s push |
 
 ---
 

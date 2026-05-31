@@ -1,6 +1,6 @@
 # Bastion-Anchor Output Phase SRS v1.0
 
-**Project:** Bastion - RAG Security Governance Framework  
+**Project:** Bastion-RAG - RAG Security Governance Framework  
 **Module:** Module E - Anchor (Output Phase)  
 **Document Version:** 1.0  
 **Date:** 2026-05-17  
@@ -29,7 +29,7 @@ This SRS focuses specifically on:
 
 ### 1.2 Background: Completing the Bidirectional Pattern
 
-#### Bastion's Bidirectional Architecture
+#### Bastion-RAG's Bidirectional Architecture
 
 ```
 Input Path:                Output Path:
@@ -41,7 +41,7 @@ E (Anchor-IN)              E (Anchor-OUT) ⭐ This doc
   LLM ────────────────────────┘
 ```
 
-This SRS completes the bidirectional pattern across all Bastion modules.
+This SRS completes the bidirectional pattern across all Bastion-RAG modules.
 
 #### Why Output-Side Bias Matters
 
@@ -309,7 +309,7 @@ Anchor-OUT extends Anchor's existing interfaces.
 ```protobuf
 // anchor.proto (extended)
 syntax = "proto3";
-package bastion.anchor.v1;
+package bastion-rag.anchor.v1;
 
 service AnchorService {
   // Existing Phase 1 methods
@@ -484,7 +484,7 @@ GET  /v1/anchor/bias/baseline             # Current Phase 1 baseline
 
 ```http
 POST /v1/anchor/verify HTTP/1.1
-Host: anchor.bastion.local
+Host: anchor.bastion-rag.local
 Content-Type: application/json
 
 {
@@ -1468,7 +1468,7 @@ performance:
 tracker:
   enabled: true
   nats_url: nats://nats:4222
-  event_subject: bastion.events.anchor
+  event_subject: bastion-rag.events.anchor
 
   alerts:
     bias_high: true
@@ -1492,7 +1492,7 @@ Anchor remains single service handling both phases:
 
 ```yaml
 anchor:
-  image: bastion/anchor:1.1.0
+  image: bastion-rag/anchor:1.1.0
   ports:
     - "8080:8080"
     - "9090:9090"
@@ -1686,7 +1686,7 @@ Anchor = Bidirectional bias awareness
 
 ### Value Delivered
 
-- ✅ Complete bidirectional pattern across all Bastion modules
+- ✅ Complete bidirectional pattern across all Bastion-RAG modules
 - ✅ Bias awareness at both ends
 - ✅ LLM behavior monitoring
 - ✅ Quality verification
