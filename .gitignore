@@ -41,6 +41,11 @@ go.work.sum
 .Trashes
 ehthumbs.db
 Thumbs.db
+CLAUDE.md
 
 # Log files
 *.log
+
+# Runtime artifacts from start-all / stop-all
+logs/
+run/

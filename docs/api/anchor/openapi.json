@@ -1,0 +1,1428 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bastion Anchor",
+    "version": "2.0.0"
+  },
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/metrics": {
+      "get": {
+        "summary": "Prometheus Metrics",
+        "operationId": "prometheus_metrics_v1_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/secure": {
+      "post": {
+        "summary": "Secure Embedding",
+        "operationId": "secure_embedding_v1_anchor_secure_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SecureRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecureResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/secure/batch": {
+      "post": {
+        "summary": "Secure Batch",
+        "operationId": "secure_batch_v1_anchor_secure_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchSecureRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchSecureResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/bias": {
+      "post": {
+        "summary": "Measure Bias",
+        "operationId": "measure_bias_v1_anchor_bias_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BiasRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiasResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/quality": {
+      "post": {
+        "summary": "Measure Quality",
+        "operationId": "measure_quality_v1_anchor_quality_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QualityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/config": {
+      "get": {
+        "summary": "Get Config",
+        "operationId": "get_config_v1_anchor_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnchorConfig"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Config",
+        "operationId": "update_config_v1_anchor_config_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnchorConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnchorConfig"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/verify": {
+      "post": {
+        "summary": "Verify Response",
+        "operationId": "verify_response_v1_anchor_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/analyze": {
+      "post": {
+        "summary": "Analyze Response",
+        "operationId": "analyze_response_v1_anchor_analyze_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/analyze/embedding": {
+      "post": {
+        "summary": "Analyze Embedding",
+        "operationId": "analyze_embedding_v1_anchor_analyze_embedding_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmbeddingAnalysisRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingAnalysisResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/anchor/drift": {
+      "post": {
+        "summary": "Check Drift",
+        "operationId": "check_drift_v1_anchor_drift_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DriftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriftResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnchorConfig": {
+        "properties": {
+          "default_noise_sigma": {
+            "type": "number",
+            "title": "Default Noise Sigma"
+          },
+          "preserve_norm": {
+            "type": "boolean",
+            "title": "Preserve Norm"
+          },
+          "strategy": {
+            "type": "string",
+            "title": "Strategy"
+          },
+          "tenant_overrides": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Tenant Overrides"
+          },
+          "bias_enabled": {
+            "type": "boolean",
+            "title": "Bias Enabled"
+          },
+          "quality_enabled": {
+            "type": "boolean",
+            "title": "Quality Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "default_noise_sigma",
+          "preserve_norm",
+          "strategy",
+          "tenant_overrides",
+          "bias_enabled",
+          "quality_enabled"
+        ],
+        "title": "AnchorConfig"
+      },
+      "AttributePair": {
+        "properties": {
+          "attribute_a": {
+            "type": "string",
+            "title": "Attribute A"
+          },
+          "attribute_b": {
+            "type": "string",
+            "title": "Attribute B"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "attribute_a",
+          "attribute_b"
+        ],
+        "title": "AttributePair"
+      },
+      "BatchSecureRequest": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SecureRequest"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "BatchSecureRequest"
+      },
+      "BatchSecureResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SecureResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "BatchSecureResponse"
+      },
+      "BiasBaseline": {
+        "properties": {
+          "overall_score": {
+            "type": "number",
+            "title": "Overall Score"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryBaseline"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "overall_score"
+        ],
+        "title": "BiasBaseline"
+      },
+      "BiasMeasurement": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "title": "Word"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "bias_score": {
+            "type": "number",
+            "title": "Bias Score"
+          },
+          "sim_a": {
+            "type": "number",
+            "title": "Sim A"
+          },
+          "sim_b": {
+            "type": "number",
+            "title": "Sim B"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "category",
+          "bias_score",
+          "sim_a",
+          "sim_b",
+          "severity"
+        ],
+        "title": "BiasMeasurement"
+      },
+      "BiasRequest": {
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": ""
+          },
+          "test_words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Test Words"
+          },
+          "attribute_pairs": {
+            "items": {
+              "$ref": "#/components/schemas/AttributePair"
+            },
+            "type": "array",
+            "title": "Attribute Pairs"
+          },
+          "word_embeddings": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Word Embeddings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "test_words",
+          "attribute_pairs"
+        ],
+        "title": "BiasRequest"
+      },
+      "BiasResponse": {
+        "properties": {
+          "measurements": {
+            "items": {
+              "$ref": "#/components/schemas/BiasMeasurement"
+            },
+            "type": "array",
+            "title": "Measurements"
+          },
+          "overall_bias_score": {
+            "type": "number",
+            "title": "Overall Bias Score"
+          },
+          "interpretation": {
+            "type": "string",
+            "title": "Interpretation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "measurements",
+          "overall_bias_score",
+          "interpretation"
+        ],
+        "title": "BiasResponse"
+      },
+      "CategoryBaseline": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "measured_at": {
+            "type": "integer",
+            "title": "Measured At",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "score"
+        ],
+        "title": "CategoryBaseline"
+      },
+      "CategoryDrift": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "phase1_score": {
+            "type": "number",
+            "title": "Phase1 Score"
+          },
+          "phase2_score": {
+            "type": "number",
+            "title": "Phase2 Score"
+          },
+          "change": {
+            "type": "number",
+            "title": "Change"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "phase1_score",
+          "phase2_score",
+          "change",
+          "direction"
+        ],
+        "title": "CategoryDrift"
+      },
+      "DriftAnalysis": {
+        "properties": {
+          "drift_detected": {
+            "type": "boolean",
+            "title": "Drift Detected"
+          },
+          "phase1_bias_score": {
+            "type": "number",
+            "title": "Phase1 Bias Score"
+          },
+          "phase2_bias_score": {
+            "type": "number",
+            "title": "Phase2 Bias Score"
+          },
+          "drift_amount": {
+            "type": "number",
+            "title": "Drift Amount"
+          },
+          "drift_direction": {
+            "type": "string",
+            "title": "Drift Direction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drift_detected",
+          "phase1_bias_score",
+          "phase2_bias_score",
+          "drift_amount",
+          "drift_direction"
+        ],
+        "title": "DriftAnalysis"
+      },
+      "DriftRequest": {
+        "properties": {
+          "phase1": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BiasBaseline"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phase2": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResponseBiasAnalysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "DriftRequest"
+      },
+      "DriftResponse": {
+        "properties": {
+          "drift_detected": {
+            "type": "boolean",
+            "title": "Drift Detected"
+          },
+          "drifts": {
+            "items": {
+              "$ref": "#/components/schemas/CategoryDrift"
+            },
+            "type": "array",
+            "title": "Drifts"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "drift_detected",
+          "severity"
+        ],
+        "title": "DriftResponse"
+      },
+      "EmbedMetrics": {
+        "properties": {
+          "noise_added": {
+            "type": "number",
+            "title": "Noise Added",
+            "default": 0.0
+          },
+          "similarity_to_original": {
+            "type": "number",
+            "title": "Similarity To Original",
+            "default": 0.0
+          },
+          "bias_score": {
+            "type": "number",
+            "title": "Bias Score",
+            "default": 0.0
+          },
+          "strategy_used": {
+            "type": "string",
+            "title": "Strategy Used",
+            "default": ""
+          },
+          "original_norm": {
+            "type": "number",
+            "title": "Original Norm",
+            "default": 0.0
+          },
+          "secured_norm": {
+            "type": "number",
+            "title": "Secured Norm",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "EmbedMetrics"
+      },
+      "EmbeddingAnalysis": {
+        "properties": {
+          "similarity_to_query": {
+            "type": "number",
+            "title": "Similarity To Query"
+          },
+          "similarity_to_context": {
+            "type": "number",
+            "title": "Similarity To Context"
+          },
+          "diversity_score": {
+            "type": "number",
+            "title": "Diversity Score"
+          },
+          "semantic_drift_detected": {
+            "type": "boolean",
+            "title": "Semantic Drift Detected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "similarity_to_query",
+          "similarity_to_context",
+          "diversity_score",
+          "semantic_drift_detected"
+        ],
+        "title": "EmbeddingAnalysis"
+      },
+      "EmbeddingAnalysisRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "comparison_texts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Comparison Texts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "EmbeddingAnalysisRequest"
+      },
+      "EmbeddingAnalysisResponse": {
+        "properties": {
+          "embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Embedding"
+          },
+          "similarities": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Similarities"
+          },
+          "diversity": {
+            "type": "number",
+            "title": "Diversity",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "EmbeddingAnalysisResponse"
+      },
+      "EmbeddingPair": {
+        "properties": {
+          "query_embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Query Embedding"
+          },
+          "match_embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Match Embedding"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query_embedding",
+          "match_embedding"
+        ],
+        "title": "EmbeddingPair"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "QualityRequest": {
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": ""
+          },
+          "noise_sigma": {
+            "type": "number",
+            "title": "Noise Sigma",
+            "default": 0.0
+          },
+          "embedding_pairs": {
+            "items": {
+              "$ref": "#/components/schemas/EmbeddingPair"
+            },
+            "type": "array",
+            "title": "Embedding Pairs"
+          },
+          "top_k": {
+            "type": "integer",
+            "title": "Top K",
+            "default": 10
+          }
+        },
+        "type": "object",
+        "title": "QualityRequest"
+      },
+      "QualityResponse": {
+        "properties": {
+          "noise_sigma": {
+            "type": "number",
+            "title": "Noise Sigma"
+          },
+          "recall_without": {
+            "type": "number",
+            "title": "Recall Without"
+          },
+          "recall_with": {
+            "type": "number",
+            "title": "Recall With"
+          },
+          "recall_drop_percent": {
+            "type": "number",
+            "title": "Recall Drop Percent"
+          },
+          "avg_similarity_to_original": {
+            "type": "number",
+            "title": "Avg Similarity To Original"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "noise_sigma",
+          "recall_without",
+          "recall_with",
+          "recall_drop_percent",
+          "avg_similarity_to_original",
+          "status"
+        ],
+        "title": "QualityResponse"
+      },
+      "ResponseBiasAnalysis": {
+        "properties": {
+          "overall_score": {
+            "type": "number",
+            "title": "Overall Score"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseCategoryBias"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "exceeds_threshold": {
+            "type": "boolean",
+            "title": "Exceeds Threshold"
+          }
+        },
+        "type": "object",
+        "required": [
+          "overall_score",
+          "severity",
+          "exceeds_threshold"
+        ],
+        "title": "ResponseBiasAnalysis"
+      },
+      "ResponseCategoryBias": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "score"
+        ],
+        "title": "ResponseCategoryBias"
+      },
+      "ResponseQuality": {
+        "properties": {
+          "grounding_score": {
+            "type": "number",
+            "title": "Grounding Score"
+          },
+          "coherence_score": {
+            "type": "number",
+            "title": "Coherence Score"
+          },
+          "relevance_score": {
+            "type": "number",
+            "title": "Relevance Score"
+          },
+          "overall_quality": {
+            "type": "number",
+            "title": "Overall Quality"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grounding_score",
+          "coherence_score",
+          "relevance_score",
+          "overall_quality"
+        ],
+        "title": "ResponseQuality"
+      },
+      "SecureRequest": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": ""
+          },
+          "embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Embedding"
+          },
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "default": "index"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": ""
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SecurityOptions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "embedding"
+        ],
+        "title": "SecureRequest"
+      },
+      "SecureResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "secured_embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Secured Embedding"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/EmbedMetrics"
+          },
+          "processing_time_ms": {
+            "type": "number",
+            "title": "Processing Time Ms",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "secured_embedding",
+          "metrics"
+        ],
+        "title": "SecureResponse"
+      },
+      "SecurityOptions": {
+        "properties": {
+          "noise_sigma": {
+            "type": "number",
+            "title": "Noise Sigma",
+            "default": 0.0
+          },
+          "measure_bias": {
+            "type": "boolean",
+            "title": "Measure Bias",
+            "default": false
+          },
+          "preserve_norm": {
+            "type": "boolean",
+            "title": "Preserve Norm",
+            "default": false
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "title": "Timeout Ms",
+            "default": 0
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "SecurityOptions"
+      },
+      "UserContext": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "default": ""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": ""
+          },
+          "department": {
+            "type": "string",
+            "title": "Department",
+            "default": ""
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "UserContext"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerifyOptions": {
+        "properties": {
+          "check_bias": {
+            "type": "boolean",
+            "title": "Check Bias",
+            "default": false
+          },
+          "analyze_embedding": {
+            "type": "boolean",
+            "title": "Analyze Embedding",
+            "default": false
+          },
+          "check_drift": {
+            "type": "boolean",
+            "title": "Check Drift",
+            "default": false
+          },
+          "measure_quality": {
+            "type": "boolean",
+            "title": "Measure Quality",
+            "default": false
+          },
+          "bias_threshold": {
+            "type": "number",
+            "title": "Bias Threshold",
+            "default": 0.0
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "title": "Timeout Ms",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "VerifyOptions"
+      },
+      "VerifyRequest": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "trace_id": {
+            "type": "string",
+            "title": "Trace Id",
+            "default": ""
+          },
+          "tenant_id": {
+            "type": "string",
+            "title": "Tenant Id",
+            "default": ""
+          },
+          "llm_response": {
+            "type": "string",
+            "title": "Llm Response"
+          },
+          "original_query": {
+            "type": "string",
+            "title": "Original Query",
+            "default": ""
+          },
+          "source_documents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Source Documents"
+          },
+          "user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phase1_baseline": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BiasBaseline"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerifyOptions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "llm_response"
+        ],
+        "title": "VerifyRequest"
+      },
+      "VerifyResponse": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "UNKNOWN"
+          },
+          "bias_analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResponseBiasAnalysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "embedding_analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmbeddingAnalysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "drift_analysis": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DriftAnalysis"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quality": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResponseQuality"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recommendations"
+          },
+          "processing_time_ms": {
+            "type": "number",
+            "title": "Processing Time Ms",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "VerifyResponse"
+      }
+    }
+  }
+}

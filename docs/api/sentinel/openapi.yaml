@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: Bastion-Sentinel API
+  version: "1.0.0"
+  description: >
+    Input/output guardrail service for the Bastion-RAG framework: prompt-injection
+    detection, metadata validation, output validation (hallucination / PII-leak /
+    permission checks), and industry-specific filters. This document covers the
+    curated public `/v1` REST surface. Each canonical `/v1/sentinel/...` path also
+    has a shorter `/v1/...` alias.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local Sentinel server
+tags:
+  - name: Health
+  - name: Input validation
+  - name: Output validation
+  - name: Config
+
+paths:
+  /v1/health:
+    get: { tags: [Health], summary: Health + dependency check, responses: { "200": { description: healthy } } }
+  /health/live:
+    get: { tags: [Health], summary: Liveness probe, responses: { "200": { description: alive } } }
+  /health/ready:
+    get: { tags: [Health], summary: Readiness probe, responses: { "200": { description: ready } } }
+
+  /v1/sentinel/validate/input:
+    post:
+      tags: [Input validation]
+      summary: Validate a user query (prompt-injection + metadata)
+      description: Canonical path; alias `/v1/validate`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ValidateRequest" }
+      responses:
+        "200":
+          description: Validation verdict
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidateResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /v1/sentinel/validate/input/batch:
+    post:
+      tags: [Input validation]
+      summary: Validate a batch of queries (alias `/v1/validate/batch`)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requests: { type: array, items: { $ref: "#/components/schemas/ValidateRequest" } }
+      responses:
+        "200":
+          description: Per-request verdicts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { $ref: "#/components/schemas/ValidateResponse" } }
+  /v1/sentinel/validate/input/contextual:
+    post:
+      tags: [Input validation]
+      summary: Validate a query with surrounding conversation context (alias `/v1/validate/input/contextual`)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/ValidateRequest"
+                - type: object
+                  properties:
+                    context: { type: array, items: { type: string }, description: Prior turns }
+      responses:
+        "200":
+          description: Validation verdict
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidateResponse" }
+
+  /v1/sentinel/validate/output:
+    post:
+      tags: [Output validation]
+      summary: Validate an LLM response (hallucination / PII-leak / permission)
+      description: Canonical path; alias `/v1/validate/output`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OutputValidateRequest" }
+      responses:
+        "200":
+          description: Output validation verdict
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OutputValidateResponse" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /v1/sentinel/validate/output/batch:
+    post:
+      tags: [Output validation]
+      summary: Validate a batch of responses (alias `/v1/validate/output/batch`)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: Per-response verdicts, content: { application/json: { schema: { type: object } } } }
+  /v1/sentinel/validate/output/mapped:
+    post:
+      tags: [Output validation]
+      summary: Validate a response against mapped source documents for grounding (alias `/v1/validate/output/mapped`)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: Grounding-aware verdict, content: { application/json: { schema: { $ref: "#/components/schemas/OutputValidateResponse" } } } }
+
+  /v1/config:
+    get: { tags: [Config], summary: Current effective config summary, responses: { "200": { description: Config } } }
+  /v1/config/reload:
+    post: { tags: [Config], summary: Hot-reload configuration, responses: { "200": { description: Reloaded } } }
+
+components:
+  responses:
+    BadRequest:
+      description: Invalid request
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    ValidateOptions:
+      type: object
+      properties:
+        strict_mode: { type: boolean }
+        timeout_ms: { type: integer }
+        include_details: { type: boolean }
+        output_format: { type: string }
+    ValidateRequest:
+      type: object
+      required: [query]
+      properties:
+        request_id: { type: string }
+        query: { type: string }
+        metadata: { type: object, additionalProperties: { type: string } }
+        options: { $ref: "#/components/schemas/ValidateOptions" }
+    PromptCheckResult:
+      type: object
+      properties:
+        status: { type: string, enum: [passed, blocked] }
+        risk_score: { type: number, format: float }
+        method: { type: string }
+        matched_patterns: { type: array, items: { type: string } }
+    ValidateResponse:
+      type: object
+      properties:
+        request_id: { type: string }
+        status: { type: string, enum: [passed, blocked, error] }
+        prompt_check: { $ref: "#/components/schemas/PromptCheckResult" }
+        metadata_check:
+          type: object
+          properties:
+            status: { type: string }
+            issues: { type: array, items: { type: string } }
+        extracted_data: { type: object, additionalProperties: true }
+        processing_time_ms: { type: number, format: float }
+        error_message: { type: string }
+    OutputValidateRequest:
+      type: object
+      required: [response]
+      properties:
+        request_id: { type: string }
+        response: { type: string, description: The LLM response to validate }
+        query: { type: string, description: Original query (for grounding) }
+        sources: { type: array, items: { type: string }, description: Source docs for grounding/hallucination checks }
+        permissions: { type: array, items: { type: string } }
+        options: { $ref: "#/components/schemas/ValidateOptions" }
+    OutputValidateResponse:
+      type: object
+      properties:
+        request_id: { type: string }
+        status: { type: string, enum: [passed, blocked, error] }
+        hallucination:
+          type: object
+          properties:
+            grounding_score: { type: number, format: float }
+            flagged_claims: { type: array, items: { type: string } }
+        pii_incidents: { type: array, items: { type: object } }
+        permission_violations: { type: array, items: { type: string } }
+        processing_time_ms: { type: number, format: float }

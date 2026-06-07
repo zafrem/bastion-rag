@@ -1,0 +1,514 @@
+openapi: 3.0.3
+info:
+  title: Bastion-Tracker API
+  version: "1.0.0"
+  description: >
+    Observability, audit, and governance API for the Bastion-RAG framework.
+    Tracker ingests events from every module, correlates them into traces,
+    manages honey-tokens / incidents / alerts, and serves the operator
+    dashboard. This document covers the curated public `/v1` REST surface.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8080
+    description: Local server (REST + embedded UI)
+tags:
+  - name: Health
+  - name: Auth
+  - name: Users
+  - name: Events
+  - name: Traces
+  - name: Lineage
+  - name: Security
+  - name: Honey-tokens
+  - name: Monitor
+  - name: Anomaly
+  - name: Dashboard
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/health:
+    get:
+      tags: [Health]
+      summary: Liveness + dependency check
+      security: []
+      responses:
+        "200":
+          description: Service healthy
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+  /v1/health/live:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      security: []
+      responses: { "200": { description: alive } }
+  /v1/health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness probe
+      security: []
+      responses: { "200": { description: ready } }
+
+  /v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Exchange credentials for a JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Token issued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: Auth not enabled }
+  /v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Issue a fresh JWT from a valid token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token: { type: string }
+      responses:
+        "200":
+          description: New token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /v1/users:
+    get:
+      tags: [Users]
+      summary: List all users (admin)
+      description: Returns password-free user records. Requires the admin role when auth is enabled.
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+    post:
+      tags: [Users]
+      summary: Create a user (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "409": { description: User already exists, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  /v1/users/{name}:
+    parameters:
+      - name: name
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Users]
+      summary: Get a single user (admin)
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    patch:
+      tags: [Users]
+      summary: Update a user's role and/or password (admin)
+      description: >
+        Either or both fields may be set. Demoting or deleting the last admin is
+        refused with 409 to prevent lockout.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateUserRequest" }
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { description: Would remove the last admin, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+    delete:
+      tags: [Users]
+      summary: Delete a user (admin)
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { description: Would remove the last admin, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+
+  /v1/events:
+    get:
+      tags: [Events]
+      summary: List recent events
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 100 } }
+        - { name: module, in: query, schema: { type: string } }
+        - { name: severity, in: query, schema: { type: string } }
+        - { name: tenant_id, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventsResponse" }
+    post:
+      tags: [Events]
+      summary: Submit a single event (operator)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BastionEvent" }
+      responses:
+        "202": { description: Accepted }
+  /v1/events/search:
+    get:
+      tags: [Events]
+      summary: Full-text search over events
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer, default: 100 } }
+      responses:
+        "200":
+          description: Matching events
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventsResponse" }
+  /v1/events/{event_id}:
+    get:
+      tags: [Events]
+      summary: Fetch one event by ID
+      parameters:
+        - { name: event_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Event
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BastionEvent" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/traces:
+    get:
+      tags: [Traces]
+      summary: List recent end-to-end request traces
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 50 } }
+      responses:
+        "200":
+          description: Traces
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TracesResponse" }
+  /v1/traces/{trace_id}:
+    get:
+      tags: [Traces]
+      summary: Get a single trace with its spans
+      parameters:
+        - { name: trace_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Trace
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Trace" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/lineage/user/{user_id}:
+    get:
+      tags: [Lineage]
+      summary: All traces for a user (data-lineage query)
+      parameters:
+        - { name: user_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Traces touched by the user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TracesResponse" }
+  /v1/lineage/audit:
+    get:
+      tags: [Lineage]
+      summary: Compliance audit query over a time range
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - { name: tenant_id, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Events in range
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EventsResponse" }
+
+  /v1/security/incidents:
+    get:
+      tags: [Security]
+      summary: List open security incidents
+      responses:
+        "200":
+          description: Incidents
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Incident" }
+  /v1/alerts:
+    get:
+      tags: [Security]
+      summary: List firing alerts
+      responses:
+        "200":
+          description: Alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Alert" }
+
+  /v1/honey-tokens:
+    get:
+      tags: [Honey-tokens]
+      summary: List honey-tokens
+      responses:
+        "200":
+          description: Honey-tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/HoneyToken" }
+    post:
+      tags: [Honey-tokens]
+      summary: Create a honey-token (operator)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/HoneyToken" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HoneyToken" }
+  /v1/honey-tokens/{token_id}:
+    delete:
+      tags: [Honey-tokens]
+      summary: Delete a honey-token (operator)
+      parameters:
+        - { name: token_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/monitor/mode:
+    get:
+      tags: [Monitor]
+      summary: Current pipeline monitoring mode (off / monitor / gate)
+      responses:
+        "200":
+          description: Mode
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mode: { type: string, enum: [off, monitor, gate] }
+  /v1/anomaly/events:
+    get:
+      tags: [Anomaly]
+      summary: Recently detected anomalies
+      responses:
+        "200":
+          description: Anomaly events
+          content:
+            application/json:
+              schema: { type: array, items: { type: object } }
+
+  /v1/dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Aggregated dashboard summary
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema: { type: object }
+  /v1/dashboard/pipeline-health:
+    get:
+      tags: [Dashboard]
+      summary: Per-module pipeline health
+      responses:
+        "200":
+          description: Pipeline health
+          content:
+            application/json:
+              schema: { type: object }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        JWT obtained from POST /v1/auth/login. Only enforced when auth is enabled
+        in config (auth.enabled). Roles: viewer < operator < admin.
+  responses:
+    Unauthorized:
+      description: Missing or invalid token
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    Forbidden:
+      description: Authenticated but role too low
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    NotFound:
+      description: Resource not found
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+    BadRequest:
+      description: Invalid request
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    HealthStatus:
+      type: object
+      properties:
+        status: { type: string, example: ok }
+        version: { type: string, example: "1.0.0" }
+        checks:
+          type: object
+          additionalProperties: { type: string }
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string }
+        expires_in: { type: string, example: "8h0m0s" }
+        role: { type: string, enum: [viewer, operator, admin] }
+    User:
+      type: object
+      properties:
+        name: { type: string }
+        role: { type: string, enum: [viewer, operator, admin] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    CreateUserRequest:
+      type: object
+      required: [name, password, role]
+      properties:
+        name: { type: string }
+        password: { type: string, format: password }
+        role: { type: string, enum: [viewer, operator, admin] }
+    UpdateUserRequest:
+      type: object
+      properties:
+        role: { type: string, enum: [viewer, operator, admin] }
+        password: { type: string, format: password }
+    BastionEvent:
+      type: object
+      properties:
+        event_id: { type: string }
+        trace_id: { type: string }
+        span_id: { type: string }
+        module: { type: string, example: sentinel }
+        event_type: { type: string }
+        severity: { type: string, enum: [info, warning, error, critical] }
+        tenant_id: { type: string }
+        user_id: { type: string }
+        timestamp: { type: integer, format: int64, description: UnixNano }
+        pipeline_type: { type: string, enum: [full, lite, minimal, custom] }
+        status: { type: string, enum: [passed, blocked, error] }
+    EventsResponse:
+      type: object
+      properties:
+        events: { type: array, items: { $ref: "#/components/schemas/BastionEvent" } }
+        total: { type: integer }
+    Span:
+      type: object
+      properties:
+        span_id: { type: string }
+        module: { type: string }
+        event_type: { type: string }
+        duration_ms: { type: integer, format: int64 }
+        status: { type: string }
+    Trace:
+      type: object
+      properties:
+        trace_id: { type: string }
+        tenant_id: { type: string }
+        user_id: { type: string }
+        pipeline_type: { type: string }
+        total_ms: { type: integer, format: int64 }
+        status: { type: string, enum: [in_progress, passed, blocked, error] }
+        spans: { type: array, items: { $ref: "#/components/schemas/Span" } }
+    TracesResponse:
+      type: object
+      properties:
+        traces: { type: array, items: { $ref: "#/components/schemas/Trace" } }
+        total: { type: integer }
+    Incident:
+      type: object
+      properties:
+        incident_id: { type: string }
+        title: { type: string }
+        severity: { type: string }
+        status: { type: string, enum: [open, investigating, resolved] }
+        tenant_id: { type: string }
+        event_ids: { type: array, items: { type: string } }
+    Alert:
+      type: object
+      properties:
+        alert_id: { type: string }
+        name: { type: string }
+        severity: { type: string }
+        status: { type: string, enum: [firing, acknowledged, resolved] }
+    HoneyToken:
+      type: object
+      properties:
+        token_id: { type: string }
+        name: { type: string }
+        type: { type: string, enum: [email, credential, identity, document] }
+        location: { type: string }
+        description: { type: string }
+        enabled: { type: boolean }
+        trigger_count: { type: integer }

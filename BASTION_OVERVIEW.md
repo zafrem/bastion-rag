@@ -259,14 +259,14 @@ All modules communicate over gRPC (for speed) and REST (for compatibility). Even
 ## Getting Started
 
 ```bash
-# Start the full Bastion-RAG stack
-docker-compose up
+# Start the full Bastion-RAG stack (each module as its own process)
+make start-all
 
-# Open the live operations dashboard
-open http://localhost:3000
+# Open the live operations dashboard (served by Tracker)
+open http://localhost:8080
 
-# Run the demonstration scenarios
-make demo
+# Run the end-to-end integration suite
+make integration
 ```
 
 For technical documentation, implementation guides, and the full specification library, see the [`docs/`](./docs/) directory.
