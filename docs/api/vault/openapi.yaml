@@ -1,0 +1,255 @@
+openapi: 3.0.3
+info:
+  title: Bastion-Vault API
+  version: "1.0.0"
+  description: >
+    PII anonymization, data classification, k-anonymity validation, access
+    control (break-glass), honey-tokens, right-to-erasure, and the Cloud-LLM
+    connector for the Bastion-RAG framework. This document covers the curated
+    public `/v1` REST surface; sensitive token internals are deliberately not
+    exposed as endpoints.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://localhost:8081
+    description: Local Vault server
+tags:
+  - name: Health
+  - name: Permissions
+  - name: Anonymization
+  - name: Classification
+  - name: K-anonymity
+  - name: Break-glass
+  - name: Access
+  - name: Honey-tokens
+  - name: Erasure
+  - name: Cloud-LLM
+  - name: Config
+  - name: Audit
+
+paths:
+  /v1/health/live:
+    get: { tags: [Health], summary: Liveness probe, responses: { "200": { description: alive } } }
+  /v1/health/ready:
+    get: { tags: [Health], summary: Readiness probe, responses: { "200": { description: ready } } }
+
+  /v1/vault/permissions/{userID}:
+    get:
+      tags: [Permissions]
+      summary: Get a user's allowed data categories
+      parameters:
+        - { name: userID, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Permission set
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PermissionResponse" }
+
+  /v1/vault/anonymize:
+    post:
+      tags: [Anonymization]
+      summary: Anonymize / tokenize PII in records
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AnonymizeRequest" }
+      responses:
+        "200":
+          description: Anonymized records
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnonymizeResponse" }
+        "403": { description: Cross-tenant access denied, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  /v1/vault/anonymize/batch:
+    post:
+      tags: [Anonymization]
+      summary: Batch anonymize multiple record sets
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: Batch result, content: { application/json: { schema: { type: object } } } }
+  /v1/vault/deanonymize:
+    post:
+      tags: [Anonymization]
+      summary: Resolve tokens back to original values (access-controlled)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DeanonymizeRequest" }
+      responses:
+        "200": { description: De-anonymized records, content: { application/json: { schema: { $ref: "#/components/schemas/AnonymizeResponse" } } } }
+        "403": { description: Caller not permitted to resolve these tokens, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+
+  /v1/vault/classify:
+    post:
+      tags: [Classification]
+      summary: Classify a record's data category / sensitivity
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        "200": { description: Classification result, content: { application/json: { schema: { type: object } } } }
+  /v1/vault/detect-pii:
+    post:
+      tags: [Classification]
+      summary: Detect PII spans in text
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { text: { type: string } } } } } }
+      responses:
+        "200": { description: Detected PII entities, content: { application/json: { schema: { type: object } } } }
+
+  /v1/vault/k-anonymity/validate:
+    post:
+      tags: [K-anonymity]
+      summary: Validate a record set against a k-anonymity threshold
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses:
+        "200": { description: Validation result (k value, violations), content: { application/json: { schema: { type: object } } } }
+
+  /v1/vault/break-glass/request:
+    post:
+      tags: [Break-glass]
+      summary: Request emergency elevated access
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Pending break-glass request } }
+  /v1/vault/break-glass/approve:
+    post:
+      tags: [Break-glass]
+      summary: Approve a break-glass request (approver)
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Approved } }
+  /v1/vault/break-glass/revoke:
+    post:
+      tags: [Break-glass]
+      summary: Revoke an active break-glass grant
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Revoked } }
+  /v1/vault/break-glass/{id}:
+    get:
+      tags: [Break-glass]
+      summary: Get break-glass request status
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200": { description: Status }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /v1/vault/apply-permissions:
+    post:
+      tags: [Access]
+      summary: Apply permission-based field transforms (alias /v1/vault/transform)
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Transformed records } }
+  /v1/vault/resolve-tokens:
+    post:
+      tags: [Access]
+      summary: Resolve a set of tokens the caller is permitted to see
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Resolved values } }
+  /v1/vault/verify-access:
+    post:
+      tags: [Access]
+      summary: Check whether a caller may access a category (alias /v1/vault/access/check)
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Access decision } }
+  /v1/vault/process:
+    post:
+      tags: [Access]
+      summary: Full output-processing pipeline (resolve + permission-filter + inference check)
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Processed output set } }
+
+  /v1/vault/honey-tokens:
+    get:
+      tags: [Honey-tokens]
+      summary: List vault honey-tokens
+      responses: { "200": { description: Honey-tokens, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+    post:
+      tags: [Honey-tokens]
+      summary: Create a honey-token
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "201": { description: Created } }
+  /v1/vault/honey-tokens/{id}:
+    delete:
+      tags: [Honey-tokens]
+      summary: Delete a honey-token
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { "200": { description: Deleted }, "404": { $ref: "#/components/responses/NotFound" } }
+
+  /v1/vault/tokens:
+    delete:
+      tags: [Erasure]
+      summary: Right-to-erasure — delete a subject's tokens
+      requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+      responses: { "200": { description: Erased } }
+
+  /v1/vault/llm/complete:
+    post:
+      tags: [Cloud-LLM]
+      summary: Anonymized completion via the Cloud-LLM connector
+      description: Anonymizes the prompt, calls the configured cloud LLM, then de-anonymizes the response.
+      requestBody: { required: true, content: { application/json: { schema: { type: object, properties: { prompt: { type: string }, tenant_id: { type: string } } } } } }
+      responses: { "200": { description: Completion } }
+
+  /v1/vault/audit:
+    get:
+      tags: [Audit]
+      summary: Query the signed audit log
+      parameters:
+        - { name: tenant, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+        - { name: since, in: query, schema: { type: string, format: date-time } }
+      responses: { "200": { description: Audit entries, content: { application/json: { schema: { type: array, items: { type: object } } } } } }
+
+  /v1/config:
+    get: { tags: [Config], summary: Current effective config summary, responses: { "200": { description: Config } } }
+  /v1/config/reload:
+    post: { tags: [Config], summary: Hot-reload configuration, responses: { "200": { description: Reloaded } } }
+
+components:
+  responses:
+    NotFound:
+      description: Resource not found
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+    PermissionResponse:
+      type: object
+      properties:
+        user_id: { type: string }
+        tenant_id: { type: string }
+        allowed_categories: { type: array, items: { type: string } }
+    AnonymizeRequest:
+      type: object
+      required: [tenant_id, category, records]
+      properties:
+        tenant_id: { type: string }
+        category: { type: string, description: Data category (e.g. customer, hr, manufacturing) }
+        records: { type: array, items: { type: object, additionalProperties: true } }
+        purpose: { type: string }
+        requester_id: { type: string }
+        access_level: { type: string }
+        break_glass_token: { type: string }
+    AnonymizeResponse:
+      type: object
+      properties:
+        tenant_id: { type: string }
+        category: { type: string }
+        records: { type: array, items: { type: object, additionalProperties: true } }
+        audit_id: { type: string }
+        metadata:
+          type: object
+          properties:
+            strategies_applied: { type: array, items: { type: string } }
+    DeanonymizeRequest:
+      type: object
+      required: [tenant_id, records]
+      properties:
+        tenant_id: { type: string }
+        records: { type: array, items: { type: object, additionalProperties: true } }
+        requester_id: { type: string }
+        access_level: { type: string }

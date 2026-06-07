@@ -958,7 +958,7 @@ Priority 4 — ✅ COMPLETE
 |---|---|---|---|
 | FR-MR-01-001 | Intent classification | ✅ | `navigator/navigator/router.py` · `Router._classify()` |
 | FR-MR-01-002 | Strategy selection | ✅ | `navigator/navigator/router.py` · `_INTENT_STRATEGY` |
-| FR-MR-01-003 | Domain-aware collection selection | ✅ | `router.py` · `Router._select_collections()` (keyword proxy) |
+| FR-MR-01-003 | Domain-aware collection selection | ✅ | `router.py` · `_select_collections()` (keyword proxy, default) + `_select_by_embedding()`/`_cosine()` (topic-centroid cosine, opt-in via `router.use_embedding_affinity`); centroids maintained in `searcher.py` · `update_topic_vector()`/`get_topic_vectors()` |
 | FR-MR-01-004 | Routing audit event | ✅ | `events.py` · `event_query_routed()` |
 | FR-MR-02-001 | Faker token rewriting | ✅ | `navigator/navigator/token_rewriter.py` · `TokenRewriter` |
 | FR-MR-02-002 | HyDE | ✅ | `navigator/navigator/hyde.py` · `HyDETransformer`; wired in `orchestrator.py` |
@@ -982,7 +982,7 @@ Priority 4 — ✅ COMPLETE
 | FR-MR-06-003 | Document content hash storage | ✅ | `content_hash` field in Qdrant payload via `index_document()`; `IndexResponse.content_hash`; `DeltaIndexResponse.content_hash` |
 | FR-MR-06-004 | Schema-aware chunking profiles | ✅ | `navigator/navigator/chunker.py` · `PROFILE_*` constants; `profile_for_mime()`, `config_for_profile()`, `chunk_by_profile()`; `chunk_csv()`, `chunk_json()`, `chunk_html()` |
 
-**Note on FR-MR-01-003:** The SRS specifies collection-level topic embeddings pre-computed at index time. The current implementation uses keyword-based domain affinity scoring as a practical proxy. The embedding-based version (requiring Qdrant collection metadata for topic vectors) is deferred to the next iteration.
+**Note on FR-MR-01-003:** Both selection modes are now implemented. The default remains keyword-based domain affinity (a fast, dependency-free proxy). The embedding-based version specified by the SRS is available opt-in via `modular_rag.router.use_embedding_affinity: true`: a per-collection topic centroid (running mean of indexed chunk embeddings) is maintained at index time in a sidecar Qdrant collection (`__bastion_topics__`), and the router scores each collection by cosine similarity between the query embedding and that centroid, excluding collections below `routing_threshold` (configurable per tenant via `tenant_thresholds`). Collections without a centroid yet fail open (SC-03). Implementation: `searcher.py` (`update_topic_vector`/`get_topic_vectors`), `router.py` (`_select_by_embedding`, `_cosine`), `orchestrator.py` (`_do_route`).
 
 ---
 
@@ -994,6 +994,7 @@ Priority 4 — ✅ COMPLETE
 | 1.1 | 2026-05-29 | Priority 1 + Priority 2 implemented; §12 updated with completion status; §13 Implementation Status table added; status changed to Active |
 | 1.2 | 2026-05-29 | Priority 3 implemented: FR-MR-04-001/002/003 (purpose tagging + filter + Vault conjunction), FR-MR-02-002 (HyDE), FR-MR-05-003 (Tracker lineage sources endpoint), FR-MR-05-004 (staleness tracking) |
 | 1.3 | 2026-05-31 | Priority 4 implemented: FR-MR-06-001 (SourceConnector ABC + JsonlConnector + DirectoryConnector + RestPullConnector), FR-MR-06-002 (delta indexing with SHA-256 hash comparison + Qdrant FilterSelector delete), FR-MR-06-003 (content_hash in Qdrant payload), FR-MR-06-004 (markdown/plain_text/csv/json/html profiles), FR-MR-02-003 (QueryDecomposer + parallel ThreadPoolExecutor + RRF merge), FR-MR-04-004 (data_steward role in Vault RBAC + CanActAsSteward + PATCH /purposes endpoint). Tracker enhancements: anomaly detector (5 pattern rules + σ baseline), management dashboard, cursor-based log pagination, JSONL export, login audit trail, JWT refresh. |
+| 1.4 | 2026-06-05 | FR-MR-01-003 embedding-based domain affinity implemented (opt-in `router.use_embedding_affinity`): per-collection topic centroids maintained at index time in sidecar collection `__bastion_topics__`; router scores collections by query↔centroid cosine vs `routing_threshold` (per-tenant via `tenant_thresholds`); keyword proxy retained as default; fail-open when no centroid. 17 new unit tests (`tests/test_router_affinity.py`). |
 
 ---
 

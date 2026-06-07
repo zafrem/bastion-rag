@@ -228,25 +228,37 @@ Test suites include: unit tests, HTTP integration tests, end-to-end pipeline sce
 ```bash
 git clone --recurse-submodules https://github.com/zafrem/bastion-rag.git
 cd bastion-rag
-docker-compose up
+make submodule-update   # ensure all five module submodules are checked out
+make start-all          # start every module as its own process
 ```
 
 > **Note:** Navigator downloads `BAAI/bge-m3` (~1.4 GB) and `BAAI/bge-reranker-v2-m3` (~900 MB) on first run. Cached after that. Requires ~4 GB RAM.
 
 | Service | Endpoint |
 |---|---|
-| Tracker dashboard | http://localhost:3000 |
-| Tracker REST API | http://localhost:8080 |
+| Tracker dashboard + REST API | http://localhost:8080 |
 | Sentinel | REST :8080 · gRPC :9090 |
 | Vault | REST :8081 · gRPC :9091 |
 | Navigator | REST :8082 · gRPC :9092 |
 | Anchor | REST :8083 · gRPC :9093 |
 
-### Run demos and tests
+### Start modules separately
+
+Each module runs as its own process. Start them individually or all at once:
 
 ```bash
-make demo          # replay all 8 built-in security scenarios
-make run-tests     # full test suite (Go + Python)
+make start-sentinel    # or start-vault / start-navigator / start-anchor / start-tracker
+make start-all         # start all five modules in the background
+make stop-all          # stop everything started by start-all
+```
+
+The operator dashboard is served by **Tracker** at http://localhost:8080.
+
+### Run tests
+
+```bash
+make run-tests     # mock-LLM integration suite (Go)
+make integration   # end-to-end integration against the running stack
 ```
 
 ### Deployment configurations
@@ -269,11 +281,11 @@ bastion-rag/
 ├── vault/               Go — PII anonymization, access control, Cloud LLM connector
 ├── navigator/           Python — hybrid vector search, federation
 ├── anchor/              Python — embedding noise, bias detection
-├── tracker/             Go — observability, audit, monitoring mode, React UI
+├── tracker/             Go — observability, audit, monitoring mode, embedded web UI
 ├── tests/               End-to-end, scenario, and latency tests
+├── scripts/             Per-module start/stop and integration runners
 ├── docs/                SRS specification library (16 documents, v3.0)
-├── BASTION_OVERVIEW.md  Plain-English architecture guide
-└── docker-compose.yml
+└── BASTION_OVERVIEW.md  Plain-English architecture guide
 ```
 
 Example source documents (customer, manufacturing, HR records with PII) used by the demo scenarios: [`navigator/tests/fixtures/source_documents.jsonl`](https://github.com/zafrem/bastion-navigator/blob/main/tests/fixtures/source_documents.jsonl)
@@ -286,6 +298,7 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 |---|---|
 | Non-technical stakeholders | [BASTION_OVERVIEW.md](./BASTION_OVERVIEW.md) |
 | Architecture overview | [docs/30_integration_master_overview.md](./docs/30_integration_master_overview.md) |
+| REST API reference (all modules) | [docs/api/index.html](./docs/api/index.html) |
 | Architecture principles | [docs/01_foundation_architecture_principles.md](./docs/01_foundation_architecture_principles.md) |
 
 | Event schema standard | [docs/02_foundation_event_schema_standard.md](./docs/02_foundation_event_schema_standard.md) |
