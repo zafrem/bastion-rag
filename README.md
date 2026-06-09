@@ -300,7 +300,6 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 | Architecture overview | [docs/30_integration_master_overview.md](./docs/30_integration_master_overview.md) |
 | REST API reference (all modules) | [docs/api/index.html](./docs/api/index.html) |
 | Architecture principles | [docs/01_foundation_architecture_principles.md](./docs/01_foundation_architecture_principles.md) |
-
 | Event schema standard | [docs/02_foundation_event_schema_standard.md](./docs/02_foundation_event_schema_standard.md) |
 | Module interaction map | [docs/03_foundation_module_interaction_map.md](./docs/03_foundation_module_interaction_map.md) |
 | Sentinel SRS v3.0 | [docs/10_module_sentinel_srs_v3.md](./docs/10_module_sentinel_srs_v3.md) |
