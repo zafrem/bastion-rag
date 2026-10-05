@@ -53,11 +53,11 @@
     <section id="pipeline">
       <h2><span>02</span> SYMMETRIC PIPELINE</h2>
       <p class="sub">Every module that touches input also touches output. Bypass one layer and the next still catches you.</p>
-      <pre class="diagram" aria-label="Pipeline diagram: input path through Sentinel, Vault, Navigator, Anchor to the LLM, and back through Anchor, Vault, Sentinel; Tracker observes all."><span class="c">IN </span> query ─▶ <b>Sentinel</b> ─▶ <b>Vault</b> ─▶ <b>Navigator</b> ─▶ <b>Anchor</b> ─▶ <span class="m">[ LLM ]</span>
-                                                            │
-<span class="c">OUT</span> safe  ◀─ <b>Sentinel</b> ◀─ <b>Vault</b> ◀──────────── <b>Anchor</b> ◀──┘
+      <pre class="diagram" aria-label="Pipeline diagram: input path through Sentinel, Vault, Navigator, Anchor to the LLM, and back through Anchor, Vault, Sentinel; Tracker observes all."><span class="c">IN </span>  query ──&gt; <b>Sentinel</b> ──&gt; <b>Vault</b> ──&gt; <b>Navigator</b> ──&gt; <b>Anchor</b> ──&gt; <span class="m">[ LLM ]</span>
+                                                                  │
+<span class="c">OUT</span>  safe &lt;── <b>Sentinel</b> &lt;── <b>Vault</b> &lt;───────────────── <b>Anchor</b> &lt;──────┘
 
-        ╰──────────── <b class="m">Tracker</b> observes every step ────────────╯</pre>
+╰────────────────── <b class="m">Tracker</b> observes every step ──────────────────╯</pre>
     </section>
 
     <section id="modules">
