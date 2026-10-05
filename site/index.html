@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bastion-RAG — RAG Security Governance Framework</title>
+  <meta name="description" content="Bastion-RAG wraps your RAG pipeline with bidirectional security: injection defense, PII tokenization, tenant-isolated search, embedding protection and audit.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="#top">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="#problem">threats</a>
+      <a href="#pipeline">pipeline</a>
+      <a href="#modules">modules</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">// RAG SECURITY GOVERNANCE FRAMEWORK &middot; v0.1.0</p>
+      <h1 class="glitch" data-text="BASTION-RAG">BASTION-RAG</h1>
+      <p class="tagline">&ldquo;We don&rsquo;t block data. We govern its safe flow.&rdquo;</p>
+      <p class="lede">A security layer that wraps your RAG pipeline and screens traffic in <em>both</em> directions &mdash; like an airport that checks passengers on the way in and luggage on the way out.</p>
+      <pre class="term" aria-label="Example terminal output"><span class="dim">$</span> <span id="typed" data-lines='["sentinel.check(query)  → PASS   0.3ms","vault.tokenize(pii)      → 2 tokens","navigator.search(tenant) → 8 hits","sentinel.check(response) → PASS   0.9ms"]'>sentinel.check(query)  → PASS   0.3ms</span><span class="cursor">&#9608;</span></pre>
+      <div class="cta">
+        <a class="btn" href="https://github.com/zafrem/bastion-rag">&gt; view on github</a>
+        <a class="btn ghost" href="#modules">&gt; explore modules</a>
+      </div>
+    </section>
+
+    <section id="problem">
+      <h2><span>01</span> THREAT MODEL</h2>
+      <p class="sub">Feeding private documents to an AI creates real attack surface.</p>
+      <ul class="chips">
+        <li><b>Prompt injection</b> hidden instructions override the model</li>
+        <li><b>PII leakage</b> names, emails, IDs slip into responses</li>
+        <li><b>Cross-tenant exposure</b> customer A&rsquo;s data surfaces for B</li>
+        <li><b>Hallucination</b> facts that exist in no source document</li>
+        <li><b>Intrusion</b> queries that prove prior knowledge of secrets</li>
+      </ul>
+    </section>
+
+    <section id="pipeline">
+      <h2><span>02</span> SYMMETRIC PIPELINE</h2>
+      <p class="sub">Every module that touches input also touches output. Bypass one layer and the next still catches you.</p>
+      <pre class="diagram" aria-label="Pipeline diagram: input path through Sentinel, Vault, Navigator, Anchor to the LLM, and back through Anchor, Vault, Sentinel; Tracker observes all."><span class="c">IN </span> query ─▶ <b>Sentinel</b> ─▶ <b>Vault</b> ─▶ <b>Navigator</b> ─▶ <b>Anchor</b> ─▶ <span class="m">[ LLM ]</span>
+                                                            │
+<span class="c">OUT</span> safe  ◀─ <b>Sentinel</b> ◀─ <b>Vault</b> ◀──────────── <b>Anchor</b> ◀──┘
+
+        ╰──────────── <b class="m">Tracker</b> observes every step ────────────╯</pre>
+    </section>
+
+    <section id="modules">
+      <h2><span>03</span> MODULES</h2>
+      <div class="cards">
+        <article class="card">
+          <span class="tag">GO</span>
+          <h3>SENTINEL</h3>
+          <p class="role">Bidirectional validation gateway</p>
+          <p>First and last line of defence. Detects prompt injection on the way in; catches PII re-emergence, hallucinations and permission violations on the way out. One engine, two configurations.</p>
+          <p class="meta">~0.3 ms in &middot; ~0.9 ms out</p>
+        </article>
+        <article class="card">
+          <span class="tag">GO</span>
+          <h3>VAULT</h3>
+          <p class="role">Two-phase privacy shield</p>
+          <p>Replaces 30+ PII entity types with tenant-scoped tokens before the LLM sees them, then restores values only for users their policy allows. Includes a cloud LLM connector.</p>
+          <p class="meta">tokenize &rarr; process &rarr; detokenize</p>
+        </article>
+        <article class="card">
+          <span class="tag">PYTHON</span>
+          <h3>NAVIGATOR</h3>
+          <p class="role">Tenant-isolated hybrid search</p>
+          <p>Filters by tenant <em>before</em> searching, never after. Fuses BGE-M3 vector and BM25 results with RRF, reranks, and can federate queries across deployments.</p>
+          <p class="meta">pre-filter isolation &middot; RRF fusion</p>
+        </article>
+        <article class="card">
+          <span class="tag">PYTHON</span>
+          <h3>ANCHOR</h3>
+          <p class="role">Embedding security</p>
+          <p>Adds calibrated noise to embeddings at index and query time so stolen vectors can&rsquo;t rebuild documents, and monitors responses for demographic bias with WEAT statistics.</p>
+          <p class="meta">differential noise &middot; WEAT</p>
+        </article>
+        <article class="card">
+          <span class="tag">GO + REACT</span>
+          <h3>TRACKER</h3>
+          <p class="role">Observability &amp; human-in-the-loop</p>
+          <p>Traces every event end to end into an HMAC-signed, tamper-evident audit log. Switch at runtime between off, observe and gate modes, where operators approve each stage.</p>
+          <p class="meta">audit &middot; lineage &middot; live dashboard</p>
+        </article>
+        <article class="card card-extra">
+          <span class="tag">CROSS-CUTTING</span>
+          <h3>+ DEFENCE IN DEPTH</h3>
+          <p class="role">Honey tokens &middot; multi-tenancy &middot; federation</p>
+          <p>Decoy records expose intruders across three layers. Tenant isolation is enforced independently in every module, so one failure never exposes data.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div><b>~1.2<small>ms</small></b><span>added latency</span></div>
+      <div><b>5</b><span>security modules</span></div>
+      <div><b>~787</b><span>test cases</span></div>
+      <div><b>&lt;1<small>%</small></b><span>of LLM round-trip</span></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+
+  <script src="main.js" defer></script>
+</body>
+</html>
