@@ -266,6 +266,7 @@ The modules are secure by default: they refuse to start, or lock the relevant en
 | Vault | `auth.jwt_secret` — at least 32 bytes, not the old `change-me-in-production` placeholder | `VAULT_AUTH_JWT_SECRET` | **Refuses to start** (unless `auth.skip_auth: true`, dev only) |
 | Tracker | `storage.audit_secret` — at least 32 bytes; signs the audit log | `TRACKER_AUDIT_SECRET` | **Refuses to start** (unless `dev_mode: true`) |
 | Tracker (auth on) | `auth.jwt_secret` — at least 32 bytes, and bcrypt-hashed `auth.users` passwords | `TRACKER_JWT_SECRET` | **Refuses to start** |
+| Navigator (callers) | `server.auth_token` — shared bearer token for REST and gRPC; `server.trust_caller_permissions` (default off) is refused unless it is set | `NAVIGATOR_AUTH_TOKEN` | The API accepts unauthenticated callers (a warning is logged); caller-supplied `allowed_categories` can only narrow what Vault allows, and a request with no user is denied when Vault is on |
 | Navigator (Vault enabled) | `vault.auth_token_file` / `vault.auth_token` — a service JWT that Vault accepts | `NAVIGATOR_VAULT_AUTH_TOKEN` | Vault answers `401`, and Navigator **denies access** (searches nothing) rather than searching every collection |
 
 ```bash
