@@ -279,7 +279,7 @@ Other behaviour to know about:
 - **Vault revocation fails closed.** If the Redis revocation list can't be queried, requests get `503` instead of being let through. Set `auth.revocation_fail_open: true` to opt out (not recommended).
 - **Tracker CORS is an allowlist.** No CORS headers are sent unless `server.cors_allowed_origins` lists the caller's origin. `X-Forwarded-For` is only trusted with `server.trust_proxy: true`.
 - **Local demos:** `dev_mode: true` (Tracker) and `auth.skip_auth: true` (Vault) bypass these checks. Never use them in production.
-- **Sentinel's gRPC port has no auth yet**; keep it on a private network.
+- **gRPC is authenticated too.** Sentinel's gRPC API (unary and streaming) uses the same shared token as REST, sent as `authorization: Bearer <token>` metadata; its `Health` RPC stays public. Vault's gRPC API requires the same JWT as REST, with the same fail-closed revocation, and takes the tenant and caller identity from the token, not the request body: a request naming another tenant is rejected, and the same access policy applies as for REST.
 
 ### Run tests
 

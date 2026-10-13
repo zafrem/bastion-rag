@@ -67,7 +67,7 @@ make start-all</code></pre>
 <tr><td>Tracker</td><td><code>storage.audit_secret</code> / <code>TRACKER_AUDIT_SECRET</code> (&ge; 32 bytes)</td><td>refuses to start (unless <code>dev_mode</code>)</td></tr>
 <tr><td>Tracker, auth on</td><td><code>auth.jwt_secret</code> / <code>TRACKER_JWT_SECRET</code> and bcrypt-hashed user passwords</td><td>refuses to start</td></tr>
 </tbody></table>
-    <p class="note"><b>Also.</b> Vault token revocation fails closed (503 if Redis is unreachable). Tracker sends no CORS headers unless <code>server.cors_allowed_origins</code> lists the caller, and trusts <code>X-Forwarded-For</code> only with <code>server.trust_proxy</code>. Sentinel's gRPC port has no authentication yet; keep it on a private network.</p>
+    <p class="note"><b>Also.</b> Vault token revocation fails closed (503 if Redis is unreachable). Tracker sends no CORS headers unless <code>server.cors_allowed_origins</code> lists the caller, and trusts <code>X-Forwarded-For</code> only with <code>server.trust_proxy</code>. gRPC is authenticated too: the Sentinel gRPC API uses the same token, and the Vault gRPC API the same JWT, with the tenant taken from the token.</p>
     <h2><span>04</span> YOUR FIRST REQUEST</h2>
     <p>With Sentinel running, validate a query. Add the <code>Authorization</code> header only if you set <code>SENTINEL_AUTH_TOKEN</code>:</p>
     <pre class="code"><code>curl -s -X POST http://localhost:8080/v1/validate \

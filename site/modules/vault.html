@@ -80,7 +80,7 @@ Content-Type: application/json
   jwt_algorithm: HS256
   skip_auth: false              # dev only
   revocation_fail_open: false   # Redis outage -&gt; 503, not accepted</code></pre>
-    <p class="note"><b>Defaults.</b> Vault refuses to start with an empty, short or placeholder JWT secret (unless <code>skip_auth</code> is on, for development only). Token revocation fails closed: if the Redis revocation list can't be queried, requests get 503.</p>
+    <p class="note"><b>Defaults.</b> Vault refuses to start with an empty, short or placeholder JWT secret (unless <code>skip_auth</code> is on, for development only). Token revocation fails closed: if the Redis revocation list can't be queried, requests get 503. The gRPC API needs the same JWT, and takes the tenant and caller from the token, not from the request body.</p>
     <h2><span>07</span> ENDPOINTS</h2>
 <table class="spec">
 <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
