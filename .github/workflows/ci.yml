@@ -80,6 +80,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install --extra-index-url https://download.pytorch.org/whl/cpu \
             -e . pytest pytest-asyncio pytest-timeout
+      - name: nltk data
+        if: matrix.module == 'navigator'
+        run: python -c "import nltk; [nltk.download(p) for p in ('punkt', 'punkt_tab')]"
       - name: test
         working-directory: ${{ matrix.module }}
         run: pytest tests -q --timeout=60

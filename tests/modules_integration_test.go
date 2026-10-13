@@ -610,7 +610,10 @@ func TestCase3_FederationHeaders_BelowMaxHopDepthReturnsResults(t *testing.T) {
 	req.Header.Set("x-hop-depth", "1")
 	req.Header.Set("x-origin-id", "navigator-a")
 
-	resp, _ := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 	var result map[string]any
 	json.NewDecoder(resp.Body).Decode(&result)
@@ -633,7 +636,10 @@ func TestCase3_FederationHeaders_OriginIDInRequest(t *testing.T) {
 	req.Header.Set("x-origin-id", "navigator-origin-xyz")
 	req.Header.Set("x-hop-depth", "0")
 
-	resp, _ := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected 200, got %d", resp.StatusCode)
