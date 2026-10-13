@@ -226,3 +226,9 @@ table.spec th { color: var(--magenta); background: var(--panel); font-weight: 60
 }
 
 .dim { color: var(--dim); }
+
+/* Whole card is clickable: the "details" link stretches over its card (single anchor, no nested links). */
+.card .more::before { content: ""; position: absolute; inset: 0; z-index: 1; }
+.card:has(.more) { cursor: pointer; }
+.card:has(.more:focus-visible) { outline: 2px solid var(--cyan); outline-offset: 3px; }
+.card:has(.more:hover) .more { text-shadow: 0 0 8px var(--cyan); }
