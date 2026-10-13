@@ -73,14 +73,14 @@ Content-Type: application/json
   &quot;requester_id&quot;: &quot;user-abc&quot;,
   &quot;access_level&quot;: &quot;anonymized&quot;
 }</code></pre>
-    <p class="note">Every endpoint except health and metrics requires a Bearer JWT; send <code>X-Tenant-ID</code> to select a tenant.</p>
+    <p class="note">Every endpoint except health and metrics requires a Bearer JWT. The tenant is the one the token was issued for; an optional <code>X-Tenant-ID</code> header can only restate it, and naming another tenant returns 403.</p>
     <h2><span>06</span> SECURITY SETTINGS</h2>
     <pre class="code"><code>auth:
   jwt_secret: &quot;&quot;                # required, &gt;= 32 bytes (env VAULT_AUTH_JWT_SECRET)
   jwt_algorithm: HS256
   skip_auth: false              # dev only
   revocation_fail_open: false   # Redis outage -&gt; 503, not accepted</code></pre>
-    <p class="note"><b>Defaults.</b> Vault refuses to start with an empty, short or placeholder JWT secret (unless <code>skip_auth</code> is on, for development only). Token revocation fails closed: if the Redis revocation list can't be queried, requests get 503. The gRPC API needs the same JWT, and takes the tenant and caller from the token, not from the request body.</p>
+    <p class="note"><b>Defaults.</b> Vault refuses to start with an empty, short or placeholder JWT secret (unless <code>skip_auth</code> is on, for development only). Token revocation fails closed: if the Redis revocation list can't be queried, requests get 503. REST and gRPC both take the tenant and caller from the token, never from a header or the request body.</p>
     <h2><span>07</span> ENDPOINTS</h2>
 <table class="spec">
 <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
