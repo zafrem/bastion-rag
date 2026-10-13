@@ -51,3 +51,6 @@ CLAUDE.md
 # Runtime artifacts from start-all / stop-all
 logs/
 run/
+
+# Audit logs written by Vault during tests
+tests/audit/
