@@ -728,8 +728,6 @@ func TestDemoScenario8_OperationsDashboard(t *testing.T) {
 		{"Sentinel /health/live",     sentinelSrv.URL + "/health/live",  http.MethodGet},
 		{"Sentinel /health/ready",    sentinelSrv.URL + "/health/ready", http.MethodGet},
 		{"Sentinel /v1/health",       sentinelSrv.URL + "/v1/health",    http.MethodGet},
-		// Sentinel config introspection
-		{"Sentinel /v1/config",       sentinelSrv.URL + "/v1/config",    http.MethodGet},
 		// Sentinel metrics (Prometheus)
 		{"Sentinel /v1/metrics",      sentinelSrv.URL + "/v1/metrics",   http.MethodGet},
 		// Navigator health
@@ -766,7 +764,28 @@ func TestDemoScenario8_OperationsDashboard(t *testing.T) {
 
 	// Verify Sentinel configuration is accessible and non-empty ───────────────
 	t.Run("ConfigEndpoint_ReturnsConfiguration", func(t *testing.T) {
-		resp, err := http.Get(sentinelSrv.URL + "/v1/config")
+		// Admin routes require a configured token: without one they are disabled,
+		// with one they demand "Authorization: Bearer <token>".
+		if r, err := http.Get(sentinelSrv.URL + "/v1/config"); err != nil {
+			t.Fatalf("config endpoint (no token configured): %v", err)
+		} else {
+			r.Body.Close()
+			if r.StatusCode != http.StatusForbidden {
+				t.Fatalf("config without configured token: expected 403, got %d", r.StatusCode)
+			}
+		}
+		authedSrv := buildSentinelWithToken(t, "demo-admin-token")
+		unauth, err := http.Get(authedSrv.URL + "/v1/config")
+		if err != nil {
+			t.Fatalf("config endpoint (unauthenticated): %v", err)
+		}
+		unauth.Body.Close()
+		if unauth.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("config without token: expected 401, got %d", unauth.StatusCode)
+		}
+		req, _ := http.NewRequest(http.MethodGet, authedSrv.URL+"/v1/config", nil)
+		req.Header.Set("Authorization", "Bearer demo-admin-token")
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			t.Fatalf("config endpoint: %v", err)
 		}

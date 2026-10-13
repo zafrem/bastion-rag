@@ -50,7 +50,16 @@ import (
 
 func buildSentinel(t *testing.T) *httptest.Server {
 	t.Helper()
+	return buildSentinelWithToken(t, "")
+}
+
+// buildSentinelWithToken builds a Sentinel REST server with the given shared
+// auth token. With an empty token the admin routes are disabled and the
+// validation routes stay open.
+func buildSentinelWithToken(t *testing.T, token string) *httptest.Server {
+	t.Helper()
 	cfg := config.Default()
+	cfg.Server.AuthToken = token
 	// Resolve the external PII patterns path relative to the sentinel directory.
 	// When tests run from the repo root the default relative path "external/..." won't resolve.
 	repoRoot := repoRootDir(t)

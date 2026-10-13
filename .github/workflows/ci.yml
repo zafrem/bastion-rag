@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['site/**', '**/*.md']
+  pull_request:
+    paths-ignore: ['site/**', '**/*.md']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: go (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [sentinel, vault, tracker, navigator]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+      - name: vet
+        working-directory: ${{ matrix.module }}
+        run: go vet ./...
+      - name: test
+        working-directory: ${{ matrix.module }}
+        run: go test ./...
+
+  integration:
+    name: go (cross-module tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: |
+            go.sum
+            sentinel/go.sum
+            vault/go.sum
+      - run: go vet ./tests/...
+      - run: go test ./tests/...
+
+  python:
+    name: python (${{ matrix.module }})
+    runs-on: ubuntu-latest
+    # Navigator pulls in sentence-transformers (torch) and some of its tests may
+    # expect external services; it is non-blocking until it has run green on CI.
+    continue-on-error: ${{ matrix.module == 'navigator' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [anchor, navigator]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ${{ matrix.module }}/pyproject.toml
+      - name: install
+        working-directory: ${{ matrix.module }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu \
+            -e . pytest pytest-asyncio pytest-timeout
+      - name: test
+        working-directory: ${{ matrix.module }}
+        run: pytest tests -q --timeout=60
+
+  scripts:
+    name: shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: syntax check
+        run: for f in scripts/*.sh; do bash -n "$f"; done
+      - name: shellcheck
+        run: shellcheck --severity=error scripts/*.sh
