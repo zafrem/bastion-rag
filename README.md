@@ -266,6 +266,7 @@ The modules are secure by default: they refuse to start, or lock the relevant en
 | Vault | `auth.jwt_secret` — at least 32 bytes, not the old `change-me-in-production` placeholder | `VAULT_AUTH_JWT_SECRET` | **Refuses to start** (unless `auth.skip_auth: true`, dev only) |
 | Tracker | `storage.audit_secret` — at least 32 bytes; signs the audit log | `TRACKER_AUDIT_SECRET` | **Refuses to start** (unless `dev_mode: true`) |
 | Tracker (auth on) | `auth.jwt_secret` — at least 32 bytes, and bcrypt-hashed `auth.users` passwords | `TRACKER_JWT_SECRET` | **Refuses to start** |
+| Navigator (Vault enabled) | `vault.auth_token_file` / `vault.auth_token` — a service JWT that Vault accepts | `NAVIGATOR_VAULT_AUTH_TOKEN` | Vault answers `401`, and Navigator **denies access** (searches nothing) rather than searching every collection |
 
 ```bash
 export SENTINEL_AUTH_TOKEN=$(openssl rand -hex 32)
