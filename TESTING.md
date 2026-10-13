@@ -109,6 +109,24 @@ make stop-all           # stop everything start-all launched
 Logs from `start-all` land in `logs/<module>.log`; PID files live in `run/`
 (both git-ignored).
 
+### Secrets when running the modules
+
+Vault and Tracker refuse to start with the old built-in keys. `make start-vault`
+and `make start-tracker` generate a random secret for each run, so they work out
+of the box. If you launch a binary yourself, export one first:
+
+```bash
+export VAULT_AUTH_JWT_SECRET=$(openssl rand -hex 32)     # Vault  (>= 32 bytes)
+export TRACKER_AUDIT_SECRET=$(openssl rand -hex 32)      # Tracker (>= 32 bytes)
+export SENTINEL_AUTH_TOKEN=$(openssl rand -hex 32)       # Sentinel (optional; see below)
+```
+
+Sentinel's `GET /v1/config` and `POST /v1/config/reload` return `403` unless a token
+is configured, and then require `Authorization: Bearer $SENTINEL_AUTH_TOKEN`. In Go
+tests, set `cfg.Server.AuthToken` (see `buildSentinelWithToken` in
+`tests/modules_integration_test.go`). Tracker's `make demo` (`demo-server`) is
+unaffected; it uses built-in demo settings and is for local use only.
+
 ### Default ports
 
 | Module    | REST | gRPC | Other |

@@ -741,7 +741,9 @@ The management layer adds an operator-facing control plane on top of the existin
 | JWT login | `POST /v1/auth/login` — issues HS256 JWT; role hierarchy: admin > operator > viewer |
 | Session refresh | `POST /v1/auth/refresh` — extends session from valid token; preserves user ID and role |
 | Login audit trail | Every attempt (success + failure) written to ring buffer; queryable at `GET /v1/auth/login-audit` |
-| Bcrypt enforcement | `auth.require_bcrypt: true` in config rejects plaintext passwords at startup |
+| Bcrypt enforcement | When `auth.enabled` is true, startup is refused if any `auth.users` password is not a bcrypt hash (`$2a$…`/`$2b$…`/`$2y$…`), unless `dev_mode: true`. The older `auth.require_bcrypt` flag is no longer needed |
+| Secret requirements | `auth.jwt_secret` (when auth is enabled) and `storage.audit_secret` must be at least 32 bytes; the former `change-me-in-production` JWT default and the built-in audit key are rejected. Both can be set via `TRACKER_JWT_SECRET` / `TRACKER_AUDIT_SECRET`. `dev_mode: true` skips these checks (local demos only) |
+| CORS and proxy headers | CORS is an allowlist (`server.cors_allowed_origins`; empty = no CORS headers). `X-Forwarded-For` / `X-Real-IP` are honoured only when `server.trust_proxy: true` |
 | Configurable TTL | `jwt_expiry` (default 8h) and `refresh_expiry` (default 168h) are independently configurable |
 
 ### Dashboard

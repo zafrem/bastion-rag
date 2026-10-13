@@ -232,6 +232,8 @@ make submodule-update   # ensure all five module submodules are checked out
 make start-all          # start every module as its own process
 ```
 
+> **Secrets:** `make start-vault` / `make start-tracker` (and so `start-all`) generate a random JWT / audit-signing secret for that run, so a local start needs no setup. For anything beyond a local run, set your own — see [Security defaults](#security-defaults).
+
 > **Note:** Navigator downloads `BAAI/bge-m3` (~1.4 GB) and `BAAI/bge-reranker-v2-m3` (~900 MB) on first run. Cached after that. Requires ~4 GB RAM.
 
 | Service | Endpoint |
@@ -253,6 +255,31 @@ make stop-all          # stop everything started by start-all
 ```
 
 The operator dashboard is served by **Tracker** at http://localhost:8080.
+
+### Security defaults
+
+The modules are secure by default: they refuse to start, or lock the relevant endpoints, rather than fall back to a known key.
+
+| Module | Requirement | Set via | If missing |
+|---|---|---|---|
+| Sentinel | `server.auth_token` — bearer token for the REST API | `SENTINEL_AUTH_TOKEN` | `/v1/config` and `/v1/config/reload` return **403**; validation routes stay open (set a token to protect them too). Health and metrics probes are always public |
+| Vault | `auth.jwt_secret` — at least 32 bytes, not the old `change-me-in-production` placeholder | `VAULT_AUTH_JWT_SECRET` | **Refuses to start** (unless `auth.skip_auth: true`, dev only) |
+| Tracker | `storage.audit_secret` — at least 32 bytes; signs the audit log | `TRACKER_AUDIT_SECRET` | **Refuses to start** (unless `dev_mode: true`) |
+| Tracker (auth on) | `auth.jwt_secret` — at least 32 bytes, and bcrypt-hashed `auth.users` passwords | `TRACKER_JWT_SECRET` | **Refuses to start** |
+
+```bash
+export SENTINEL_AUTH_TOKEN=$(openssl rand -hex 32)
+export VAULT_AUTH_JWT_SECRET=$(openssl rand -hex 32)
+export TRACKER_AUDIT_SECRET=$(openssl rand -hex 32)
+make start-all
+```
+
+Other behaviour to know about:
+
+- **Vault revocation fails closed.** If the Redis revocation list can't be queried, requests get `503` instead of being let through. Set `auth.revocation_fail_open: true` to opt out (not recommended).
+- **Tracker CORS is an allowlist.** No CORS headers are sent unless `server.cors_allowed_origins` lists the caller's origin. `X-Forwarded-For` is only trusted with `server.trust_proxy: true`.
+- **Local demos:** `dev_mode: true` (Tracker) and `auth.skip_auth: true` (Vault) bypass these checks. Never use them in production.
+- **Sentinel's gRPC port has no auth yet**; keep it on a private network.
 
 ### Run tests
 

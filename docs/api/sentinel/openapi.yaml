@@ -124,12 +124,38 @@ paths:
         "200": { description: Grounding-aware verdict, content: { application/json: { schema: { $ref: "#/components/schemas/OutputValidateResponse" } } } }
 
   /v1/config:
-    get: { tags: [Config], summary: Current effective config summary, responses: { "200": { description: Config } } }
+    get:
+      tags: [Config]
+      summary: Current effective config summary
+      description: Requires `server.auth_token` (or `SENTINEL_AUTH_TOKEN`) to be configured; returns 403 otherwise. The token itself is never included in the response.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Config }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Admin endpoints are disabled because no auth token is configured }
   /v1/config/reload:
-    post: { tags: [Config], summary: Hot-reload configuration, responses: { "200": { description: Reloaded } } }
+    post:
+      tags: [Config]
+      summary: Hot-reload configuration
+      description: Requires `server.auth_token` (or `SENTINEL_AUTH_TOKEN`) to be configured; returns 403 otherwise.
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Reloaded }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Admin endpoints are disabled because no auth token is configured }
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Shared token from `server.auth_token` / `SENTINEL_AUTH_TOKEN`. When a token is
+        configured every route except the health and metrics probes requires it.
   responses:
+    Unauthorized:
+      description: Missing or invalid bearer token
+      content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
     BadRequest:
       description: Invalid request
       content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
