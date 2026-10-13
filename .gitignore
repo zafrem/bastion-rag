@@ -5,7 +5,9 @@
 *.so
 *.dylib
 bin/
-mock-llm
+# built mock LLM binaries only (tests/mock-llm/ holds source that must be tracked)
+/mock-llm
+/tests/mock-llm/mock-llm
 
 # Test binary, built with `go test -c`
 *.test
