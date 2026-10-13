@@ -21,9 +21,10 @@
   <header class="top">
     <a class="brand" href="#top">&#9632; BASTION<span>/RAG</span></a>
     <nav>
-      <a href="#problem">threats</a>
       <a href="#pipeline">pipeline</a>
+      <a href="#demo">demo</a>
       <a href="#modules">modules</a>
+      <a href="/quickstart.html">quickstart</a>
       <a href="https://github.com/zafrem/bastion-rag">github</a>
     </nav>
   </header>
@@ -37,7 +38,7 @@
       <pre class="term" aria-label="Example terminal output"><span class="dim">$</span> <span id="typed" data-lines='["sentinel.check(query)  → PASS   0.3ms","vault.tokenize(pii)      → 2 tokens","navigator.search(tenant) → 8 hits","sentinel.check(response) → PASS   0.9ms"]'>sentinel.check(query)  → PASS   0.3ms</span><span class="cursor">&#9608;</span></pre>
       <div class="cta">
         <a class="btn" href="https://github.com/zafrem/bastion-rag">&gt; view on github</a>
-        <a class="btn ghost" href="#modules">&gt; explore modules</a>
+        <a class="btn ghost" href="/quickstart.html">&gt; quick start</a>
       </div>
     </section>
 
@@ -63,8 +64,39 @@
 ╰────────────────── <b class="m">Tracker</b> observes every step ──────────────────╯</pre>
     </section>
 
+    <section id="demo">
+      <h2><span>03</span> WATCH A REQUEST</h2>
+      <p class="sub">Pick a scenario and follow it through the pipeline. This is a scripted walk-through, not a live system.</p>
+      <div class="demo" id="demo-root">
+        <div class="demo-picker" role="group" aria-label="Scenario"><span class="dim">Enable JavaScript to switch scenarios.</span></div>
+        <p class="demo-query"><span>query&nbsp;&gt;</span> <b>What are our customer satisfaction trends for Q4?</b></p>
+        <ul class="demo-nodes" aria-hidden="true">
+          <li data-node="sentinel">SENTINEL</li>
+          <li data-node="vault">VAULT</li>
+          <li data-node="navigator">NAVIGATOR</li>
+          <li data-node="anchor">ANCHOR</li>
+          <li data-node="llm">LLM</li>
+        </ul>
+        <ol class="demo-log" aria-live="polite">
+          <li><span class="who">sentinel &middot; in</span><span class="what">Injection check PASSED (~0.3 ms). Metadata valid.</span></li>
+          <li><span class="who">vault &middot; in</span><span class="what">No PII found. Query passes through unchanged.</span></li>
+          <li><span class="who">navigator &middot; in</span><span class="what">Tenant filter applied before search. Hybrid search, RRF fusion, rerank.</span></li>
+          <li><span class="who">anchor &middot; in</span><span class="what">Noise injected into the query embedding; unit length preserved.</span></li>
+          <li><span class="who">llm &middot; in</span><span class="what">Model answers from the retrieved documents.</span></li>
+          <li><span class="who">anchor &middot; out</span><span class="what">Bias and grounding checks passed.</span></li>
+          <li><span class="who">vault &middot; out</span><span class="what">Nothing to detokenize.</span></li>
+          <li><span class="who">sentinel &middot; out</span><span class="what">No PII re-emergence; answer grounded in sources (~0.9 ms).</span></li>
+          <li><span class="who">tracker</span><span class="what">Every step recorded under one trace_id.</span></li>
+        </ol>
+        <div class="demo-foot">
+          <span>Simulated, with illustrative values. Latencies are the README&rsquo;s typical Sentinel figures.</span>
+          <button type="button" class="demo-replay">&#8635; replay</button>
+        </div>
+      </div>
+    </section>
+
     <section id="modules">
-      <h2><span>03</span> MODULES</h2>
+      <h2><span>04</span> MODULES</h2>
       <div class="cards">
         <article class="card">
           <span class="tag">GO</span>
@@ -72,6 +104,7 @@
           <p class="role">Bidirectional validation gateway</p>
           <p>First and last line of defence. Detects prompt injection on the way in; catches PII re-emergence, hallucinations and permission violations on the way out. One engine, two configurations.</p>
           <p class="meta">~0.3 ms in &middot; ~0.9 ms out</p>
+          <a class="more" href="/modules/sentinel.html">details</a>
         </article>
         <article class="card">
           <span class="tag">GO</span>
@@ -79,6 +112,7 @@
           <p class="role">Two-phase privacy shield</p>
           <p>Replaces 30+ PII entity types with tenant-scoped tokens before the LLM sees them, then restores values only for users their policy allows. Includes a cloud LLM connector.</p>
           <p class="meta">tokenize &rarr; process &rarr; detokenize</p>
+          <a class="more" href="/modules/vault.html">details</a>
         </article>
         <article class="card">
           <span class="tag">PYTHON</span>
@@ -86,6 +120,7 @@
           <p class="role">Tenant-isolated hybrid search</p>
           <p>Filters by tenant <em>before</em> searching, never after. Fuses BGE-M3 vector and BM25 results with RRF, reranks, and can federate queries across deployments.</p>
           <p class="meta">pre-filter isolation &middot; RRF fusion</p>
+          <a class="more" href="/modules/navigator.html">details</a>
         </article>
         <article class="card">
           <span class="tag">PYTHON</span>
@@ -93,6 +128,7 @@
           <p class="role">Embedding security</p>
           <p>Adds calibrated noise to embeddings at index and query time so stolen vectors can&rsquo;t rebuild documents, and monitors responses for demographic bias with WEAT statistics.</p>
           <p class="meta">differential noise &middot; WEAT</p>
+          <a class="more" href="/modules/anchor.html">details</a>
         </article>
         <article class="card">
           <span class="tag">GO + REACT</span>
@@ -100,6 +136,7 @@
           <p class="role">Observability &amp; human-in-the-loop</p>
           <p>Traces every event end to end into an HMAC-signed, tamper-evident audit log. Switch at runtime between off, observe and gate modes, where operators approve each stage.</p>
           <p class="meta">audit &middot; lineage &middot; live dashboard</p>
+          <a class="more" href="/modules/tracker.html">details</a>
         </article>
         <article class="card card-extra">
           <span class="tag">CROSS-CUTTING</span>
@@ -119,9 +156,10 @@
   </main>
 
   <footer>
-    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
   </footer>
 
   <script src="main.js" defer></script>
+  <script src="demo.js" defer></script>
 </body>
 </html>

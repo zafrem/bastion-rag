@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracker — Bastion-RAG</title>
+  <meta name="description" content="An observer: it touches no data in the pipeline, but records everything that happens to it.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="/#pipeline">pipeline</a>
+      <a href="/#demo">demo</a>
+      <a href="/#modules" aria-current="page">modules</a>
+      <a href="/quickstart.html">quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <p class="crumbs"><a href="/">home</a> / <a href="/#modules">modules</a> / tracker</p>
+    <p class="eyebrow">// MODULE</p>
+    <h1>TRACKER</h1>
+    <p class="tagline">Observability and human-in-the-loop</p>
+    <ul class="chips-row"><li><b>Go + React</b></li><li>REST/UI :8080 · gRPC :9090 · WebSocket :8081</li></ul>
+    <p class="lede">An observer: it touches no data in the pipeline, but records everything that happens to it.</p>
+    <h2><span>01</span> OVERVIEW</h2>
+    <p>Tracker is the control center. Every module emits standard events tagged with a trace_id, and Tracker turns them into a lineage you can query, an HMAC-signed audit log, and a live operator dashboard.</p>
+    <h2><span>02</span> WHAT IT DOES</h2>
+    <ul class="plain">
+      <li><b>Real-time flow visualization</b> over WebSocket, with an embedded operations dashboard.</li>
+      <li><b>Tamper-evident audit log:</b> events are HMAC-signed as they are stored.</li>
+      <li><b>Data lineage</b> queryable by trace_id, user_id or audit scope.</li>
+      <li><b>Honey-token detection</b> and rule-based alerts with incident management.</li>
+      <li><b>Pipeline monitoring modes</b> switchable at runtime: <code>off</code>, <code>observe</code> and <code>gate</code> (human approval at each stage, rejecting on timeout by default).</li>
+      <li><b>Anomaly detection</b> and bypass monitoring.</li>
+    </ul>
+    <h2><span>03</span> WHERE IT SITS</h2>
+<table class="spec">
+<thead><tr><th>Path</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><b>Input</b></td><td>Collects events from every module on the way in, correlating them under a single trace_id.</td></tr>
+<tr><td><b>Output</b></td><td>Does the same on the way out, so one request&#x27;s full journey can be reconstructed afterwards.</td></tr>
+</tbody></table>
+    <h2><span>04</span> RUN IT</h2>
+    <pre class="code"><code>export TRACKER_AUDIT_SECRET=$(openssl rand -hex 32)   # &gt;= 32 bytes, required
+cd tracker &amp;&amp; make run   # or: make start-tracker from the repo root
+# dashboard: http://localhost:8080</code></pre>
+    <h2><span>05</span> EXAMPLE: SWITCH TO GATE MODE AND APPROVE A CHECKPOINT</h2>
+    <pre class="code"><code># Every pipeline stage now waits for human approval
+curl -X POST http://localhost:8080/v1/monitor/mode \
+     -d &#x27;{&quot;mode&quot;: &quot;gate&quot;, &quot;reason&quot;: &quot;incident investigation&quot;}&#x27;
+
+# An operator approves a pending checkpoint
+curl -X POST http://localhost:8080/v1/monitor/checkpoints/{id}/decide \
+     -d &#x27;{&quot;decision&quot;: &quot;approve&quot;, &quot;notes&quot;: &quot;verified — legitimate request&quot;}&#x27;</code></pre>
+    <p class="note">Real-time updates are pushed over WebSocket, so dashboards update without polling.</p>
+    <h2><span>06</span> SECURITY SETTINGS</h2>
+    <pre class="code"><code>storage:
+  audit_secret: &quot;&quot;     # required, &gt;= 32 bytes (env TRACKER_AUDIT_SECRET)
+auth:
+  enabled: false
+  jwt_secret: &quot;&quot;       # required when auth is enabled (env TRACKER_JWT_SECRET)
+server:
+  cors_allowed_origins: []   # empty = no CORS headers
+  trust_proxy: false
+dev_mode: false        # skips the startup checks; local demos only</code></pre>
+    <p class="note"><b>Defaults.</b> Tracker refuses to start without an audit secret, because signatures made with a public key are forgeable. With auth enabled it also needs a real JWT secret and bcrypt-hashed passwords.</p>
+    <h2><span>07</span> ENDPOINTS</h2>
+<table class="spec">
+<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>POST</code></td><td><code>/v1/events</code></td><td>Submit an event</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/events</code></td><td>List events</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/monitor/mode</code></td><td>Current monitoring mode (switch with POST)</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/auth/login</code></td><td>Issue a JWT when auth is enabled</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/health/live</code></td><td>Liveness probe</td></tr>
+</tbody></table>
+    <h2><span>08</span> LEARN MORE</h2>
+<ul class="plain">
+      <li><a href="https://github.com/zafrem/bastion-tracker">Tracker README</a></li>
+      <li><a href="https://github.com/zafrem/bastion-tracker/blob/main/docs/management-features.md">Management features</a></li>
+    </ul>
+    <nav class="pager" aria-label="Module navigation">
+      <a href="/modules/anchor.html">&larr; Anchor</a>
+      <a href="/quickstart.html">Quick start &rarr;</a>
+    </nav>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+</body>
+</html>

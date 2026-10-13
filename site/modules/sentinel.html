@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sentinel — Bastion-RAG</title>
+  <meta name="description" content="First and last line of defence. The same engine screens queries on the way in and responses on the way out.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="/#pipeline">pipeline</a>
+      <a href="/#demo">demo</a>
+      <a href="/#modules" aria-current="page">modules</a>
+      <a href="/quickstart.html">quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <p class="crumbs"><a href="/">home</a> / <a href="/#modules">modules</a> / sentinel</p>
+    <p class="eyebrow">// MODULE</p>
+    <h1>SENTINEL</h1>
+    <p class="tagline">Bidirectional validation gateway</p>
+    <ul class="chips-row"><li><b>Go</b></li><li>REST :8080 · gRPC :9090</li></ul>
+    <p class="lede">First and last line of defence. The same engine screens queries on the way in and responses on the way out.</p>
+    <h2><span>01</span> OVERVIEW</h2>
+    <p>Sentinel validates traffic in both directions with one engine and two configurations, which avoids input and output rules drifting apart over time. It adds roughly 0.3 ms on the input path and 0.9 ms on the output path including HTTP overhead.</p>
+    <h2><span>02</span> WHAT IT DOES</h2>
+    <ul class="plain">
+      <li><b>Prompt-injection detection</b> with regex and keyword rules and a configurable scoring method.</li>
+      <li><b>Metadata validation</b> for tenant ID, user ID, context ID and timestamp before any data is touched.</li>
+      <li><b>Industry rulesets</b> (HIPAA, GDPR, ITAR, PCI) through a pluggable filter registry, with per-tenant overrides.</li>
+      <li><b>Output checks:</b> PII re-emergence, hallucination against the retrieved source documents, and output permission filters.</li>
+      <li><b>Honey-token detection</b> in queries and responses, using references supplied by the orchestrator.</li>
+      <li><b>Hot reload</b> of rules via SIGHUP or <code>POST /v1/config/reload</code>.</li>
+    </ul>
+    <h2><span>03</span> WHERE IT SITS</h2>
+<table class="spec">
+<thead><tr><th>Path</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><b>Input</b></td><td>Checks the query for injection and validates request metadata. A blocked request stops here.</td></tr>
+<tr><td><b>Output</b></td><td>Scans the response for PII that leaked despite anonymization, checks it against source documents, and applies output permissions.</td></tr>
+</tbody></table>
+    <h2><span>04</span> RUN IT</h2>
+    <pre class="code"><code>cd sentinel
+go run ./cmd/sentinel server   # built-in defaults; add --config &lt;file&gt; to load your own
+# or: make start-sentinel from the repo root</code></pre>
+    <h2><span>05</span> EXAMPLE: VALIDATE A QUERY</h2>
+    <pre class="code"><code>curl -X POST http://localhost:8080/v1/validate \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer $SENTINEL_AUTH_TOKEN&quot; \
+  -d &#x27;{
+    &quot;request_id&quot;: &quot;req-001&quot;,
+    &quot;query&quot;: &quot;What is the capital of France?&quot;,
+    &quot;metadata&quot;: {
+      &quot;tenant_id&quot;: &quot;acme&quot;,
+      &quot;user_id&quot;: &quot;john&quot;,
+      &quot;context_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+      &quot;timestamp&quot;: &quot;2026-05-17T10:00:00Z&quot;
+    }
+  }&#x27;
+# A PASSED verdict returns HTTP 200; a BLOCKED verdict returns HTTP 403.</code></pre>
+    <p class="note">The Authorization header is only needed when <code>server.auth_token</code> (or <code>SENTINEL_AUTH_TOKEN</code>) is set. The timestamp must be within an hour of server time.</p>
+    <h2><span>06</span> SECURITY SETTINGS</h2>
+    <pre class="code"><code>server:
+  rest_port: 8080
+  grpc_port: 9090
+  auth_token: &quot;&quot;   # or env SENTINEL_AUTH_TOKEN</code></pre>
+    <p class="note"><b>Defaults.</b> With no token, <code>/v1/config</code> and <code>/v1/config/reload</code> return 403 and the validation routes stay open. With a token, every route except the health and metrics probes requires <code>Authorization: Bearer &lt;token&gt;</code>. The gRPC port has no authentication yet, so keep it on a private network.</p>
+    <h2><span>07</span> ENDPOINTS</h2>
+<table class="spec">
+<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>POST</code></td><td><code>/v1/validate</code></td><td>Validate one query (alias <code>/v1/sentinel/validate/input</code>)</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/validate/batch</code></td><td>Validate several queries</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/validate/output</code></td><td>Validate an LLM response</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/validate/output/mapped</code></td><td>Output validation with Vault token mappings</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/config</code></td><td>Active configuration (token required)</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/config/reload</code></td><td>Hot-reload the config file (token required)</td></tr>
+<tr><td><code>GET</code></td><td><code>/health/live, /health/ready, /v1/health, /v1/metrics</code></td><td>Probes and Prometheus metrics (always public)</td></tr>
+</tbody></table>
+    <h2><span>08</span> LEARN MORE</h2>
+<ul class="plain">
+      <li><a href="https://github.com/zafrem/bastion-sentinel">Sentinel README</a></li>
+      <li><a href="https://github.com/zafrem/bastion-sentinel/blob/main/docs/api-reference.md">API reference</a></li>
+      <li><a href="https://github.com/zafrem/bastion-sentinel/blob/main/docs/configuration.md">Configuration</a></li>
+    </ul>
+    <nav class="pager" aria-label="Module navigation">
+      <a href="/#modules">&larr; All modules</a>
+      <a href="/modules/vault.html">Vault &rarr;</a>
+    </nav>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+</body>
+</html>

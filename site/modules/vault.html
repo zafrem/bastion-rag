@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vault — Bastion-RAG</title>
+  <meta name="description" content="The model never sees real personal data. Vault tokenizes on the way in and restores values, for authorised users only, on the way out.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="/#pipeline">pipeline</a>
+      <a href="/#demo">demo</a>
+      <a href="/#modules" aria-current="page">modules</a>
+      <a href="/quickstart.html">quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <p class="crumbs"><a href="/">home</a> / <a href="/#modules">modules</a> / vault</p>
+    <p class="eyebrow">// MODULE</p>
+    <h1>VAULT</h1>
+    <p class="tagline">Two-phase privacy shield</p>
+    <ul class="chips-row"><li><b>Go</b></li><li>REST :8081 · gRPC :9091</li></ul>
+    <p class="lede">The model never sees real personal data. Vault tokenizes on the way in and restores values, for authorised users only, on the way out.</p>
+    <h2><span>01</span> OVERVIEW</h2>
+    <p>Vault replaces sensitive values with structured tokens before the query reaches the LLM, and decodes them after the response returns according to each user&#x27;s access level. Tokens are scoped per tenant, so the same token in two tenants maps to different values.</p>
+    <h2><span>02</span> WHAT IT DOES</h2>
+    <ul class="plain">
+      <li><b>PII detection</b> across 30+ entity types: names, emails, phone numbers, national IDs and financial data.</li>
+      <li><b>Structured tokens</b> in the <code>[TYPE_hex6]</code> shape, scoped per tenant.</li>
+      <li><b>Access control</b> with built-in RBAC and optional OPA (Rego) policy delegation.</li>
+      <li><b>K-anonymity</b> enforcement and selective detokenization per user.</li>
+      <li><b>Key management</b> through a KMS abstraction (local, AWS, HashiCorp Vault).</li>
+      <li><b>Break-glass</b> access requests with approval, plus a <b>cloud LLM connector</b> that anonymizes payloads before they leave your network.</li>
+    </ul>
+    <h2><span>03</span> WHERE IT SITS</h2>
+<table class="spec">
+<thead><tr><th>Path</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><b>Input</b></td><td>Phase 1 anonymizes the query: PII becomes tenant-scoped tokens, and decoy (honey-token) values are flagged.</td></tr>
+<tr><td><b>Output</b></td><td>Phase 2 applies access policy to the response and detokenizes only the fields the user is allowed to see.</td></tr>
+</tbody></table>
+    <h2><span>04</span> RUN IT</h2>
+    <pre class="code"><code>export VAULT_AUTH_JWT_SECRET=$(openssl rand -hex 32)   # &gt;= 32 bytes, required
+export VAULT_KMS_LOCAL_MASTER_KEY=$(openssl rand -hex 32)
+cd vault &amp;&amp; go run ./cmd/vault server -c configs/vault.yaml   # or: make start-vault from the repo root</code></pre>
+    <h2><span>05</span> EXAMPLE: ANONYMIZE RECORDS</h2>
+    <pre class="code"><code>POST /v1/vault/anonymize
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
+
+{
+  &quot;category&quot;: &quot;DC-01&quot;,
+  &quot;records&quot;: [
+    {&quot;name&quot;: &quot;김철수&quot;, &quot;rrn&quot;: &quot;850101-1234567&quot;, &quot;mobile&quot;: &quot;010-1234-5678&quot;}
+  ],
+  &quot;purpose&quot;: &quot;analytics&quot;,
+  &quot;requester_id&quot;: &quot;user-abc&quot;,
+  &quot;access_level&quot;: &quot;anonymized&quot;
+}</code></pre>
+    <p class="note">Every endpoint except health and metrics requires a Bearer JWT; send <code>X-Tenant-ID</code> to select a tenant.</p>
+    <h2><span>06</span> SECURITY SETTINGS</h2>
+    <pre class="code"><code>auth:
+  jwt_secret: &quot;&quot;                # required, &gt;= 32 bytes (env VAULT_AUTH_JWT_SECRET)
+  jwt_algorithm: HS256
+  skip_auth: false              # dev only
+  revocation_fail_open: false   # Redis outage -&gt; 503, not accepted</code></pre>
+    <p class="note"><b>Defaults.</b> Vault refuses to start with an empty, short or placeholder JWT secret (unless <code>skip_auth</code> is on, for development only). Token revocation fails closed: if the Redis revocation list can't be queried, requests get 503.</p>
+    <h2><span>07</span> ENDPOINTS</h2>
+<table class="spec">
+<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>POST</code></td><td><code>/v1/vault/anonymize</code></td><td>Anonymize records by data category</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/vault/deanonymize</code></td><td>Resolve tokens back to values (access-controlled)</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/vault/classify</code></td><td>Classify data category</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/vault/detect-pii</code></td><td>Detect PII in text</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/vault/k-anonymity/validate</code></td><td>Validate k-anonymity</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/vault/break-glass/request</code></td><td>Request break-glass access (also <code>/approve</code> and <code>/revoke</code>)</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/vault/permissions/{userID}</code></td><td>A user's effective permissions</td></tr>
+</tbody></table>
+    <h2><span>08</span> LEARN MORE</h2>
+<ul class="plain">
+      <li><a href="https://github.com/zafrem/bastion-vault">Vault README</a></li>
+      <li><a href="https://github.com/zafrem/bastion-vault/blob/main/docs/multi-tenancy.md">Multi-tenancy design</a></li>
+    </ul>
+    <nav class="pager" aria-label="Module navigation">
+      <a href="/modules/sentinel.html">&larr; Sentinel</a>
+      <a href="/modules/navigator.html">Navigator &rarr;</a>
+    </nav>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+</body>
+</html>

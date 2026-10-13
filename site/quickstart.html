@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quick start — Bastion-RAG</title>
+  <meta name="description" content="Clone, set three secrets, and start every Bastion-RAG module locally.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="/#pipeline">pipeline</a>
+      <a href="/#demo">demo</a>
+      <a href="/#modules">modules</a>
+      <a href="/quickstart.html" aria-current="page">quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <p class="crumbs"><a href="/">home</a> / quick start</p>
+    <p class="eyebrow">// GETTING STARTED</p>
+    <h1>QUICK START</h1>
+    <p class="lede">Run the whole stack locally. Each module is its own process, started by a script in <code>scripts/</code>.</p>
+    <h2><span>01</span> CLONE AND START</h2>
+    <pre class="code"><code>git clone --recurse-submodules https://github.com/zafrem/bastion-rag.git
+cd bastion-rag
+make submodule-update   # make sure all five module submodules are checked out
+make start-all          # start every module in the background
+make stop-all           # stop everything start-all launched</code></pre>
+    <p class="note"><b>Prerequisites.</b> Go 1.25+ and Python 3.11+. Navigator downloads about 2.3 GB of models on first run and needs roughly 4 GB of RAM. Logs land in <code>logs/&lt;module&gt;.log</code>.</p>
+    <h2><span>02</span> DEFAULT PORTS</h2>
+<table class="spec">
+<thead><tr><th>Service</th><th>Endpoint</th></tr></thead>
+<tbody>
+<tr><td>Sentinel</td><td>REST :8080 · gRPC :9090</td></tr>
+<tr><td>Vault</td><td>REST :8081 · gRPC :9091</td></tr>
+<tr><td>Navigator</td><td>REST :8082 · gRPC :9092</td></tr>
+<tr><td>Anchor</td><td>REST :8083 · gRPC :9093</td></tr>
+<tr><td>Tracker</td><td>dashboard and REST :8080 · gRPC :9090 · WebSocket :8081</td></tr>
+</tbody></table>
+    <p class="note"><b>Port clash.</b> In the default configs Tracker's REST port (8080) collides with Sentinel, and its WebSocket port (8081) collides with Vault. To run everything at once natively, override Tracker's <code>server.rest_port</code> and <code>server.websocket_port</code>, or run Tracker on another host.</p>
+    <h2><span>03</span> SECURITY DEFAULTS</h2>
+    <p>The modules refuse to start, or lock the relevant endpoints, instead of falling back to a known key. <code>make start-vault</code> and <code>make start-tracker</code> generate a random secret for each run, so a local start needs no setup. For anything beyond a local run, set your own:</p>
+    <pre class="code"><code>export SENTINEL_AUTH_TOKEN=$(openssl rand -hex 32)
+export VAULT_AUTH_JWT_SECRET=$(openssl rand -hex 32)
+export TRACKER_AUDIT_SECRET=$(openssl rand -hex 32)
+make start-all</code></pre>
+<table class="spec">
+<thead><tr><th>Module</th><th>Requirement</th><th>If missing</th></tr></thead>
+<tbody>
+<tr><td>Sentinel</td><td><code>server.auth_token</code> / <code>SENTINEL_AUTH_TOKEN</code></td><td><code>/v1/config</code> and <code>/v1/config/reload</code> return 403; validation routes stay open</td></tr>
+<tr><td>Vault</td><td><code>auth.jwt_secret</code> / <code>VAULT_AUTH_JWT_SECRET</code> (&ge; 32 bytes)</td><td>refuses to start (unless <code>skip_auth</code>, dev only)</td></tr>
+<tr><td>Tracker</td><td><code>storage.audit_secret</code> / <code>TRACKER_AUDIT_SECRET</code> (&ge; 32 bytes)</td><td>refuses to start (unless <code>dev_mode</code>)</td></tr>
+<tr><td>Tracker, auth on</td><td><code>auth.jwt_secret</code> / <code>TRACKER_JWT_SECRET</code> and bcrypt-hashed user passwords</td><td>refuses to start</td></tr>
+</tbody></table>
+    <p class="note"><b>Also.</b> Vault token revocation fails closed (503 if Redis is unreachable). Tracker sends no CORS headers unless <code>server.cors_allowed_origins</code> lists the caller, and trusts <code>X-Forwarded-For</code> only with <code>server.trust_proxy</code>. Sentinel's gRPC port has no authentication yet; keep it on a private network.</p>
+    <h2><span>04</span> YOUR FIRST REQUEST</h2>
+    <p>With Sentinel running, validate a query. Add the <code>Authorization</code> header only if you set <code>SENTINEL_AUTH_TOKEN</code>:</p>
+    <pre class="code"><code>curl -s -X POST http://localhost:8080/v1/validate \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer $SENTINEL_AUTH_TOKEN&quot; \
+  -d &#x27;{
+    &quot;query&quot;: &quot;What is the capital of France?&quot;,
+    &quot;metadata&quot;: {
+      &quot;tenant_id&quot;: &quot;acme&quot;,
+      &quot;user_id&quot;: &quot;john&quot;,
+      &quot;context_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+      &quot;timestamp&quot;: &quot;&#x27;&quot;$(date -u +%Y-%m-%dT%H:%M:%SZ)&quot;&#x27;&quot;
+    }
+  }&#x27;</code></pre>
+    <p class="note">A <b>PASSED</b> verdict returns HTTP 200; a <b>BLOCKED</b> verdict returns HTTP 403. Try <code>"Ignore all previous instructions"</code> as the query to see a block.</p>
+    <h2><span>05</span> RUN THE TESTS</h2>
+    <pre class="code"><code>make run-tests     # mock-LLM integration suite (Go)
+make integration   # end-to-end integration against the running stack</code></pre>
+    <h2><span>06</span> WHAT NEXT</h2>
+<ul class="plain">
+      <li>Read how each part works: <a href="/modules/sentinel.html">Sentinel</a>, <a href="/modules/vault.html">Vault</a>, <a href="/modules/navigator.html">Navigator</a>, <a href="/modules/anchor.html">Anchor</a>, <a href="/modules/tracker.html">Tracker</a>.</li>
+      <li>Open the Tracker dashboard at <code>http://localhost:8080</code> to watch events arrive.</li>
+      <li><a href="https://github.com/zafrem/bastion-rag">Browse the repository</a> for the full SRS documents and OpenAPI specs under <code>docs/</code>.</li>
+    </ul>
+    <nav class="pager" aria-label="Page navigation">
+      <a href="/">&larr; Home</a>
+      <a href="/modules/sentinel.html">Sentinel &rarr;</a>
+    </nav>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+</body>
+</html>

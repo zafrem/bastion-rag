@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anchor — Bastion-RAG</title>
+  <meta name="description" content="Protects the vectors behind search, and checks that responses stay grounded and fair.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="/#pipeline">pipeline</a>
+      <a href="/#demo">demo</a>
+      <a href="/#modules" aria-current="page">modules</a>
+      <a href="/quickstart.html">quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <p class="crumbs"><a href="/">home</a> / <a href="/#modules">modules</a> / anchor</p>
+    <p class="eyebrow">// MODULE</p>
+    <h1>ANCHOR</h1>
+    <p class="tagline">Embedding security</p>
+    <ul class="chips-row"><li><b>Python</b></li><li>REST :8083 · gRPC :9093</li></ul>
+    <p class="lede">Protects the vectors behind search, and checks that responses stay grounded and fair.</p>
+    <h2><span>01</span> OVERVIEW</h2>
+    <p>Anchor protects the embedding layer and the integrity of the output. Embeddings are made resistant to privacy attacks, and responses are measured for bias, drift and grounding.</p>
+    <h2><span>02</span> WHAT IT DOES</h2>
+    <ul class="plain">
+      <li><b>Noise injection:</b> Gaussian or Laplacian noise on embeddings, with per-tenant overrides.</li>
+      <li><b>Reconstruction resistance:</b> raw vectors extracted from the database can't rebuild the original text.</li>
+      <li><b>Norm preservation:</b> unit length is kept so cosine similarity still works.</li>
+      <li><b>Bias analysis</b> in both directions using WEAT (Word Embedding Association Test).</li>
+      <li><b>Response verification:</b> bias and stereotypes, semantic drift from the query or source, and grounding in retrieved documents.</li>
+      <li><b>Quality monitoring:</b> tracks recall@K preservation and end-to-end response quality.</li>
+    </ul>
+    <h2><span>03</span> WHERE IT SITS</h2>
+<table class="spec">
+<thead><tr><th>Path</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><b>Input</b></td><td>Anchor-IN adds calibrated noise to embeddings at index and query time, and measures bias.</td></tr>
+<tr><td><b>Output</b></td><td>Anchor-OUT verifies the response: bias, drift and grounding against the retrieved documents.</td></tr>
+</tbody></table>
+    <h2><span>04</span> RUN IT</h2>
+    <pre class="code"><code>cd anchor
+make install &amp;&amp; make run   # or: make start-anchor from the repo root</code></pre>
+    <p class="note"><b>Note.</b> NATS is optional. Without it, Anchor still runs; event streaming is disabled and a warning is logged.</p>
+    <h2><span>05</span> ENDPOINTS</h2>
+<table class="spec">
+<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>POST</code></td><td><code>/v1/anchor/secure</code></td><td>Apply noise to embeddings (also <code>/secure/batch</code>)</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/anchor/bias</code></td><td>Bias analysis</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/anchor/verify</code></td><td>Verify a response</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/anchor/quality</code></td><td>Quality metrics</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/anchor/config</code></td><td>Active configuration</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/health, /v1/metrics</code></td><td>Health and Prometheus metrics</td></tr>
+</tbody></table>
+    <h2><span>06</span> LEARN MORE</h2>
+<ul class="plain">
+      <li><a href="https://github.com/zafrem/bastion-anchor">Anchor README</a></li>
+      <li><a href="https://github.com/zafrem/bastion-anchor/blob/main/docs/embedding-noise-injection.md">Embedding noise injection</a></li>
+    </ul>
+    <nav class="pager" aria-label="Module navigation">
+      <a href="/modules/navigator.html">&larr; Navigator</a>
+      <a href="/modules/tracker.html">Tracker &rarr;</a>
+    </nav>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+</body>
+</html>

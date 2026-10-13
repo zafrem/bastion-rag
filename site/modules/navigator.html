@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Navigator — Bastion-RAG</title>
+  <meta name="description" content="Retrieval that never touches another tenant&#x27;s data, not even transiently.">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand" href="/">&#9632; BASTION<span>/RAG</span></a>
+    <nav>
+      <a href="/#pipeline">pipeline</a>
+      <a href="/#demo">demo</a>
+      <a href="/#modules" aria-current="page">modules</a>
+      <a href="/quickstart.html">quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">github</a>
+    </nav>
+  </header>
+
+  <main class="page">
+
+    <p class="crumbs"><a href="/">home</a> / <a href="/#modules">modules</a> / navigator</p>
+    <p class="eyebrow">// MODULE</p>
+    <h1>NAVIGATOR</h1>
+    <p class="tagline">Tenant-isolated hybrid search</p>
+    <ul class="chips-row"><li><b>Python</b></li><li>REST :8082 · gRPC :9092</li></ul>
+    <p class="lede">Retrieval that never touches another tenant&#x27;s data, not even transiently.</p>
+    <h2><span>01</span> OVERVIEW</h2>
+    <p>Navigator is the search and ranking layer. It applies the tenant filter before the search runs rather than filtering results afterwards, then fuses vector and keyword results and reranks them. It integrates with Qdrant for vector storage and uses BGE-M3 embeddings for Korean and English.</p>
+    <h2><span>02</span> WHAT IT DOES</h2>
+    <ul class="plain">
+      <li><b>Pre-filter isolation:</b> tenant metadata filters are applied before the search, not after.</li>
+      <li><b>Hybrid search:</b> HNSW vector search combined with BM25 using Reciprocal Rank Fusion (RRF).</li>
+      <li><b>Reranking</b> with a BGE cross-encoder.</li>
+      <li><b>Access-aware filtering</b> through Vault, based on user permissions and data categories.</li>
+      <li><b>Multilingual</b> retrieval tuned for mixed Korean and English document sets.</li>
+      <li><b>Federated search</b> across deployments, with a hop-depth counter to prevent circular queries.</li>
+    </ul>
+    <h2><span>03</span> WHERE IT SITS</h2>
+<table class="spec">
+<thead><tr><th>Path</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><b>Input</b></td><td>Embeds the query, runs tenant-scoped hybrid search, fuses and reranks the results, and filters by permission.</td></tr>
+<tr><td><b>Output</b></td><td>Navigator sits on the retrieval side of the pipeline; the output checks are done by Anchor, Vault and Sentinel.</td></tr>
+</tbody></table>
+    <h2><span>04</span> RUN IT</h2>
+    <pre class="code"><code>cd navigator
+make install &amp;&amp; make run   # or: make start-navigator from the repo root</code></pre>
+    <p class="note"><b>Note.</b> On first run Navigator downloads the <code>BAAI/bge-m3</code> (~1.4 GB) and <code>BAAI/bge-reranker-v2-m3</code> (~900 MB) models, which are cached afterwards. It needs about 4 GB of RAM.</p>
+    <h2><span>05</span> ENDPOINTS</h2>
+<table class="spec">
+<thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/search</code></td><td>Vector search</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/search/hybrid</code></td><td>Hybrid (vector + BM25) search</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/search/with-permissions</code></td><td>Search filtered by user permissions</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/search/batch</code></td><td>Batch search</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/rerank</code></td><td>Rerank a result set</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/embed</code></td><td>Embed text (also <code>/embed/batch</code>)</td></tr>
+<tr><td><code>POST</code></td><td><code>/v1/navigator/index</code></td><td>Index documents (also <code>/index/delta</code>)</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/navigator/collections</code></td><td>List collections</td></tr>
+<tr><td><code>GET</code></td><td><code>/v1/health, /v1/metrics</code></td><td>Health and Prometheus metrics</td></tr>
+</tbody></table>
+    <h2><span>06</span> LEARN MORE</h2>
+<ul class="plain">
+      <li><a href="https://github.com/zafrem/bastion-navigator">Navigator README</a></li>
+      <li><a href="https://github.com/zafrem/bastion-navigator/blob/main/docs/logical-partitioning.md">Logical partitioning</a></li>
+    </ul>
+    <nav class="pager" aria-label="Module navigation">
+      <a href="/modules/vault.html">&larr; Vault</a>
+      <a href="/modules/anchor.html">Anchor &rarr;</a>
+    </nav>
+  </main>
+
+  <footer>
+    <p>BASTION-RAG &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+  </footer>
+</body>
+</html>
