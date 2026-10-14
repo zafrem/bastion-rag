@@ -232,7 +232,7 @@ make submodule-update   # ensure all five module submodules are checked out
 make start-all          # start every module as its own process
 ```
 
-> **Secrets:** `make start-vault` / `make start-tracker` (and so `start-all`) generate a random JWT / audit-signing secret for that run, so a local start needs no setup. For anything beyond a local run, set your own — see [Security defaults](#security-defaults).
+> **Secrets:** `make start-vault` / `make start-tracker` / `make start-navigator` (and so `start-all`) generate a random JWT / audit-signing secret / caller token for that run, so a local start needs no setup. For anything beyond a local run, set your own — see [Security defaults](#security-defaults).
 
 > **Note:** Navigator downloads `BAAI/bge-m3` (~1.4 GB) and `BAAI/bge-reranker-v2-m3` (~900 MB) on first run. Cached after that. Requires ~4 GB RAM.
 
@@ -266,13 +266,14 @@ The modules are secure by default: they refuse to start, or lock the relevant en
 | Vault | `auth.jwt_secret` — at least 32 bytes, not the old `change-me-in-production` placeholder | `VAULT_AUTH_JWT_SECRET` | **Refuses to start** (unless `auth.skip_auth: true`, dev only) |
 | Tracker | `storage.audit_secret` — at least 32 bytes; signs the audit log | `TRACKER_AUDIT_SECRET` | **Refuses to start** (unless `dev_mode: true`) |
 | Tracker (auth on) | `auth.jwt_secret` — at least 32 bytes, and bcrypt-hashed `auth.users` passwords | `TRACKER_JWT_SECRET` | **Refuses to start** |
-| Navigator (callers) | `server.auth_token` — shared bearer token for REST and gRPC; `server.trust_caller_permissions` (default off) is refused unless it is set | `NAVIGATOR_AUTH_TOKEN` | The API accepts unauthenticated callers (a warning is logged); caller-supplied `allowed_categories` can only narrow what Vault allows, and a request with no user is denied when Vault is on |
+| Navigator (callers) | `server.auth_token` — shared bearer token for REST and gRPC; `server.trust_caller_permissions` (default off) is refused unless it is set | `NAVIGATOR_AUTH_TOKEN` | **Refuses to start** (unless `server.allow_unauthenticated`, dev only). Caller-supplied `allowed_categories` can only narrow what Vault allows, and a request with no user is denied when Vault is on |
 | Navigator (Vault enabled) | `vault.auth_token_file` / `vault.auth_token` — a service JWT that Vault accepts | `NAVIGATOR_VAULT_AUTH_TOKEN` | Vault answers `401`, and Navigator **denies access** (searches nothing) rather than searching every collection |
 
 ```bash
 export SENTINEL_AUTH_TOKEN=$(openssl rand -hex 32)
 export VAULT_AUTH_JWT_SECRET=$(openssl rand -hex 32)
 export TRACKER_AUDIT_SECRET=$(openssl rand -hex 32)
+export NAVIGATOR_AUTH_TOKEN=$(openssl rand -hex 32)
 make start-all
 ```
 

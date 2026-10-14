@@ -232,3 +232,10 @@ table.spec th { color: var(--magenta); background: var(--panel); font-weight: 60
 .card:has(.more) { cursor: pointer; }
 .card:has(.more:focus-visible) { outline: 2px solid var(--cyan); outline-offset: 3px; }
 .card:has(.more:hover) .more { text-shadow: 0 0 8px var(--cyan); }
+
+/* Top bar: nav links plus the Buy Me A Coffee badge, kept together on the right and wrapping on small screens. */
+.top-right { display: flex; align-items: center; justify-content: flex-end; gap: 20px; flex-wrap: wrap; }
+.top .coffee { display: inline-flex; line-height: 0; }
+.top .coffee img { display: block; height: 28px; width: auto; }
+.top .coffee:hover { text-shadow: none; opacity: .9; }
+@media (max-width: 520px) { .top-right { justify-content: flex-start; } }
