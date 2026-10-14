@@ -233,9 +233,16 @@ table.spec th { color: var(--magenta); background: var(--panel); font-weight: 60
 .card:has(.more:focus-visible) { outline: 2px solid var(--cyan); outline-offset: 3px; }
 .card:has(.more:hover) .more { text-shadow: 0 0 8px var(--cyan); }
 
-/* Top bar: nav links plus the Buy Me A Coffee badge, kept together on the right and wrapping on small screens. */
-.top-right { display: flex; align-items: center; justify-content: flex-end; gap: 20px; flex-wrap: wrap; }
-.top .coffee { display: inline-flex; line-height: 0; }
-.top .coffee img { display: block; height: 28px; width: auto; }
+/* Top bar: brand on the left; the nav links and the Buy Me A Coffee badge share one row, with the badge
+   at the far right. On small screens the brand and badge stay on one row and the links wrap below. */
+.top { flex-wrap: nowrap; gap: 20px; }
+.top .brand { margin-right: auto; white-space: nowrap; flex-shrink: 0; }
+.top nav { gap: 16px; white-space: nowrap; }
+.top .coffee { display: inline-flex; flex-shrink: 0; line-height: 0; }
+.top .coffee img { display: block; height: 24px; width: auto; }
 .top .coffee:hover { text-shadow: none; opacity: .9; }
-@media (max-width: 520px) { .top-right { justify-content: flex-start; } }
+@media (max-width: 820px) {
+  .top { flex-wrap: wrap; }
+  .top .coffee { order: 1; }
+  .top nav { order: 2; flex-basis: 100%; flex-wrap: wrap; }
+}
