@@ -267,6 +267,7 @@ The modules are secure by default: they refuse to start, or lock the relevant en
 | Tracker | `storage.audit_secret` — at least 32 bytes; signs the audit log | `TRACKER_AUDIT_SECRET` | **Refuses to start** (unless `dev_mode: true`) |
 | Tracker (auth on) | `auth.jwt_secret` — at least 32 bytes, and bcrypt-hashed `auth.users` passwords | `TRACKER_JWT_SECRET` | **Refuses to start** |
 | Navigator (callers) | `server.auth_token` — shared bearer token for REST and gRPC; `server.trust_caller_permissions` (default off) is refused unless it is set | `NAVIGATOR_AUTH_TOKEN` | **Refuses to start** (unless `server.allow_unauthenticated`, dev only). Caller-supplied `allowed_categories` can only narrow what Vault allows, and a request with no user is denied when Vault is on |
+| All gRPC servers | `server.grpc_tls_cert` + `server.grpc_tls_key` (PEM files); `server.grpc_tls_client_ca` for mutual TLS | the same keys in each module's config (Vault also `VAULT_SERVER_GRPC_TLS_*`) | gRPC stays **plaintext** (Sentinel, Vault and Navigator warn when a token or JWT is required); a half-set or unreadable setting **refuses to start** |
 | Navigator (Vault enabled) | `vault.auth_token_file` / `vault.auth_token` — a service JWT that Vault accepts | `NAVIGATOR_VAULT_AUTH_TOKEN` | Vault answers `401`, and Navigator **denies access** (searches nothing) rather than searching every collection |
 
 ```bash
@@ -284,6 +285,31 @@ Other behaviour to know about:
 - **Local demos:** `dev_mode: true` (Tracker) and `auth.skip_auth: true` (Vault) bypass these checks. Never use them in production.
 - **Vault's tenant comes from the token.** On REST as well as gRPC, a request can only act for the tenant its JWT was issued for; an `X-Tenant-ID` header or body `tenant_id` naming another tenant gets `403` (REST) or `PermissionDenied` (gRPC) and raises a `cross_tenant_attempt` event.
 - **gRPC is authenticated too.** Sentinel's gRPC API (unary and streaming) uses the same shared token as REST, sent as `authorization: Bearer <token>` metadata; its `Health` RPC stays public. Vault's gRPC API requires the same JWT as REST, with the same fail-closed revocation, and takes the tenant and caller identity from the token, not the request body: a request naming another tenant is rejected, and the same access policy applies as for REST.
+
+### gRPC TLS
+
+Every gRPC server (Sentinel, Vault, Tracker, Navigator and Anchor) can serve over TLS, and Navigator's federation client can call TLS peers. It is off until you configure certificates. Without it the bearer tokens and JWTs travel in plaintext, so enable it, or terminate TLS in front of the gRPC ports, whenever they leave a private network.
+
+Each module takes the same three keys under `server:` (Vault also reads `VAULT_SERVER_GRPC_TLS_CERT` and friends):
+
+```yaml
+server:
+  grpc_tls_cert: /etc/bastion/tls/server.pem
+  grpc_tls_key:  /etc/bastion/tls/server.key
+  grpc_tls_client_ca: /etc/bastion/tls/ca.pem   # optional: require client certificates (mutual TLS)
+```
+
+- Cert and key must be set together; `grpc_tls_client_ca` needs both. A missing, unreadable or mismatched file makes the module **refuse to start**.
+- The files are re-read when they change, so rotating certificates needs no restart. If a replacement can't be loaded, the previous working certificate keeps being served.
+- Federation peers: set `tls: true` (and `tls_ca_file`, plus `tls_client_cert` / `tls_client_key` for mutual TLS) on each peer in Navigator's config.
+- These settings cover the gRPC ports only. The REST ports are plaintext; put them behind a TLS-terminating proxy.
+
+To try it locally, generate throwaway certificates (development only; the output folder is git-ignored):
+
+```bash
+scripts/gen-dev-certs.sh        # writes certs/ca.pem, server.pem/.key, client.pem/.key
+openssl s_client -connect localhost:9090 -alpn h2 -CAfile certs/ca.pem </dev/null | grep 'Verify return code'
+```
 
 ### Run tests
 

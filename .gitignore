@@ -54,3 +54,6 @@ run/
 
 # Audit logs written by Vault during tests
 tests/audit/
+
+# Local dev certificates and keys (scripts/gen-dev-certs.sh)
+/certs/

@@ -80,7 +80,7 @@ go run ./cmd/sentinel server   # built-in defaults; add --config &lt;file&gt; to
   rest_port: 8080
   grpc_port: 9090
   auth_token: &quot;&quot;   # or env SENTINEL_AUTH_TOKEN</code></pre>
-    <p class="note"><b>Defaults.</b> With no token, <code>/v1/config</code> and <code>/v1/config/reload</code> return 403 and the validation routes stay open. With a token, every route except the health and metrics probes requires <code>Authorization: Bearer &lt;token&gt;</code>. The gRPC API uses the same token (<code>authorization: Bearer &lt;token&gt;</code> metadata); only its <code>Health</code> RPC is public. Keep the gRPC port on a private network, since it has no TLS.</p>
+    <p class="note"><b>Defaults.</b> With no token, <code>/v1/config</code> and <code>/v1/config/reload</code> return 403 and the validation routes stay open. With a token, every route except the health and metrics probes requires <code>Authorization: Bearer &lt;token&gt;</code>. The gRPC API uses the same token (<code>authorization: Bearer &lt;token&gt;</code> metadata); only its <code>Health</code> RPC is public. Set <code>server.grpc_tls_cert</code> and <code>server.grpc_tls_key</code> to serve gRPC over TLS (add <code>server.grpc_tls_client_ca</code> for mutual TLS); without it the token travels in plaintext on the gRPC port.</p>
     <h2><span>07</span> ENDPOINTS</h2>
 <table class="spec">
 <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>

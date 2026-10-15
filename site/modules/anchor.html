@@ -58,7 +58,7 @@
     <h2><span>04</span> RUN IT</h2>
     <pre class="code"><code>cd anchor
 make install &amp;&amp; make run   # or: make start-anchor from the repo root</code></pre>
-    <p class="note"><b>Note.</b> NATS is optional. Without it, Anchor still runs; event streaming is disabled and a warning is logged.</p>
+    <p class="note"><b>Note.</b> NATS is optional. Without it, Anchor still runs; event streaming is disabled and a warning is logged. gRPC can serve TLS (<code>server.grpc_tls_cert</code> and <code>server.grpc_tls_key</code>; <code>server.grpc_tls_client_ca</code> adds mutual TLS).</p>
     <h2><span>05</span> ENDPOINTS</h2>
 <table class="spec">
 <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>

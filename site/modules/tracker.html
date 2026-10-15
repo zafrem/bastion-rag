@@ -78,7 +78,7 @@ server:
   cors_allowed_origins: []   # empty = no CORS headers
   trust_proxy: false
 dev_mode: false        # skips the startup checks; local demos only</code></pre>
-    <p class="note"><b>Defaults.</b> Tracker refuses to start without an audit secret, because signatures made with a public key are forgeable. With auth enabled it also needs a real JWT secret and bcrypt-hashed passwords.</p>
+    <p class="note"><b>Defaults.</b> Tracker refuses to start without an audit secret, because signatures made with a public key are forgeable. With auth enabled it also needs a real JWT secret and bcrypt-hashed passwords. gRPC can serve TLS (<code>server.grpc_tls_cert</code> and <code>server.grpc_tls_key</code>; <code>server.grpc_tls_client_ca</code> adds mutual TLS).</p>
     <h2><span>07</span> ENDPOINTS</h2>
 <table class="spec">
 <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
