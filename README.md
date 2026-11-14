@@ -267,7 +267,8 @@ The modules are secure by default: they refuse to start, or lock the relevant en
 | Tracker | `storage.audit_secret` — at least 32 bytes; signs the audit log | `TRACKER_AUDIT_SECRET` | **Refuses to start** (unless `dev_mode: true`) |
 | Tracker (auth on) | `auth.jwt_secret` — at least 32 bytes, and bcrypt-hashed `auth.users` passwords | `TRACKER_JWT_SECRET` | **Refuses to start** |
 | Navigator (callers) | `server.auth_token` — shared bearer token for REST and gRPC; `server.trust_caller_permissions` (default off) is refused unless it is set | `NAVIGATOR_AUTH_TOKEN` | **Refuses to start** (unless `server.allow_unauthenticated`, dev only). Caller-supplied `allowed_categories` can only narrow what Vault allows, and a request with no user is denied when Vault is on |
-| All gRPC servers | `server.grpc_tls_cert` + `server.grpc_tls_key` (PEM files); `server.grpc_tls_client_ca` for mutual TLS | the same keys in each module's config (Vault also `VAULT_SERVER_GRPC_TLS_*`) | gRPC stays **plaintext** (Sentinel, Vault and Navigator warn when a token or JWT is required); a half-set or unreadable setting **refuses to start** |
+| Anchor (callers) | `server.auth_token` — shared bearer token for REST and gRPC | `ANCHOR_AUTH_TOKEN` | **Refuses to start** (unless `server.allow_unauthenticated`, dev only) |
+| All gRPC servers | `server.grpc_tls_cert` + `server.grpc_tls_key` (PEM files); `server.grpc_tls_client_ca` for mutual TLS | the same keys in each module's config (Vault also `VAULT_SERVER_GRPC_TLS_*`) | gRPC stays **plaintext** (Sentinel, Vault, Navigator and Anchor warn when a token or JWT is required); a half-set or unreadable setting **refuses to start** |
 | Navigator (Vault enabled) | `vault.auth_token_file` / `vault.auth_token` — a service JWT that Vault accepts | `NAVIGATOR_VAULT_AUTH_TOKEN` | Vault answers `401`, and Navigator **denies access** (searches nothing) rather than searching every collection |
 
 ```bash
@@ -275,6 +276,7 @@ export SENTINEL_AUTH_TOKEN=$(openssl rand -hex 32)
 export VAULT_AUTH_JWT_SECRET=$(openssl rand -hex 32)
 export TRACKER_AUDIT_SECRET=$(openssl rand -hex 32)
 export NAVIGATOR_AUTH_TOKEN=$(openssl rand -hex 32)
+export ANCHOR_AUTH_TOKEN=$(openssl rand -hex 32)
 make start-all
 ```
 
