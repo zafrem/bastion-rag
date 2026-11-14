@@ -58,9 +58,6 @@ jobs:
   python:
     name: python (${{ matrix.module }})
     runs-on: ubuntu-latest
-    # Navigator pulls in sentence-transformers (torch) and some of its tests may
-    # expect external services; it is non-blocking until it has run green on CI.
-    continue-on-error: ${{ matrix.module == 'navigator' }}
     strategy:
       fail-fast: false
       matrix:

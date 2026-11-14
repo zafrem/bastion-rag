@@ -8,9 +8,9 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/_common.sh"
 echo "================================================================================"
 echo "BASTION RAG: starting all modules"
 echo "================================================================================"
-echo "WARNING: default configs put Tracker REST on :8080 (clashes with Sentinel) and"
-echo "         Tracker WebSocket on :8081 (clashes with Vault). Override those ports"
-echo "         if you need Sentinel/Vault and Tracker up at the same time (see TESTING.md)."
+export TRACKER_REST_PORT="${TRACKER_REST_PORT:-8084}"
+export TRACKER_GRPC_PORT="${TRACKER_GRPC_PORT:-9094}"
+echo "  Tracker REST/UI port: :$TRACKER_REST_PORT (gRPC :$TRACKER_GRPC_PORT) to avoid colliding with Sentinel (:8080/:9090)"
 echo
 
 for m in "${ALL_MODULES[@]}"; do

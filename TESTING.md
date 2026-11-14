@@ -84,8 +84,8 @@ Each submodule contains its own internal test suite. You can run them individual
 
 - **Sentinel:** `cd sentinel && go test ./...`
 - **Vault:** `cd vault && go test ./...`
-- **Navigator:** `cd navigator && go test ./...`
-- **Anchor:** `cd anchor && go test ./...`
+- **Navigator:** `cd navigator && pytest` (and `cd navigator && go test ./...` for the Go CLI)
+- **Anchor:** `cd anchor && pytest`
 - **Tracker:** `cd tracker && go test ./...`
 
 ## 6. Running the Modules Separately
@@ -137,12 +137,11 @@ unaffected; it uses built-in demo settings and is for local use only.
 | Anchor    | 8083 | 9093 | |
 | Tracker   | 8080 | 9090 | WebSocket 8081 · metrics 9091 · dashboard served at REST `:8080/` |
 
-> **Port conflict:** in the default configs Tracker's REST (`8080`) collides with
-> Sentinel (`8080`), and Tracker's WebSocket (`8081`) collides with Vault (`8081`).
-> To run the full stack natively at once, override Tracker's `server.rest_port` /
-> `server.websocket_port` (in `tracker/config/config.yaml`) — or run Tracker on a
-> separate host/container. `make start-all` starts Tracker last so the clash is
-> obvious in `logs/tracker.log`.
+> **Port conflict:** in the standalone configs Tracker's REST (`8080`) collides with
+> Sentinel (`8080`). `make start-all` automatically sets `TRACKER_REST_PORT=8084`
+> and `TRACKER_GRPC_PORT=9094` so all five modules run simultaneously without
+> port collisions. When starting Tracker manually alongside Sentinel, set
+> `TRACKER_REST_PORT` / `TRACKER_GRPC_PORT` or update `tracker/config/config.yaml`.
 
 The operator dashboard (audit, metrics, live flow) is served entirely by **Tracker**
 at http://localhost:8080 (the same port as its REST API) — there is no separate UI
