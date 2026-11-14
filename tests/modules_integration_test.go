@@ -138,14 +138,24 @@ func startNavigatorSubprocess(t *testing.T) string {
 	navDir := repoRoot + "/navigator"
 	port := "18082"
 
-	cmd := exec.Command("python", "-m", "uvicorn",
+	pythonBin := "python3"
+	if venvPy := navDir + "/.venv/bin/python"; fileExists(venvPy) {
+		pythonBin = venvPy
+	} else if _, err := exec.LookPath("python3"); err != nil {
+		pythonBin = "python"
+	}
+
+	cmd := exec.Command(pythonBin, "-m", "uvicorn",
 		"navigator.main:build_app",
 		"--host", "0.0.0.0",
 		"--port", port,
 		"--factory",
 	)
 	cmd.Dir = navDir
-	cmd.Env = append(os.Environ(), "CONFIG_PATH=/dev/null")
+	cmd.Env = append(os.Environ(),
+		"CONFIG_PATH=/dev/null",
+		"NAVIGATOR_AUTH_TOKEN=test-navigator-token",
+	)
 	cmd.Stdout = io.Discard
 	cmd.Stderr = io.Discard
 
@@ -163,6 +173,11 @@ func startNavigatorSubprocess(t *testing.T) string {
 		t.Skip("navigator subprocess did not become ready in time")
 	}
 	return baseURL
+}
+
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }
 
 // ─── in-process mock services ─────────────────────────────────────────────────
@@ -237,8 +252,21 @@ func buildMockLLM(t *testing.T) *httptest.Server {
 
 func postJSON(t *testing.T, url string, body any) *http.Response {
 	t.Helper()
+	return postJSONWithToken(t, url, body, "")
+}
+
+func postJSONWithToken(t *testing.T, url string, body any, bearerToken string) *http.Response {
+	t.Helper()
 	data, _ := json.Marshal(body)
-	resp, err := http.Post(url, "application/json", bytes.NewReader(data))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("NewRequest %s: %v", url, err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	if bearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+bearerToken)
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("POST %s: %v", url, err)
 	}
@@ -392,11 +420,11 @@ func TestFullPipeline_WithSubprocesses(t *testing.T) {
 
 	// ── STEP 3: Navigator search ───────────────────────────────────────────────
 	t.Log("[STEP 3] Navigator search")
-	navResp := postJSON(t, navigatorURL+"/v1/navigator/search", map[string]any{
+	navResp := postJSONWithToken(t, navigatorURL+"/v1/navigator/search", map[string]any{
 		"request_id": "subp-nav-001",
 		"tenant_id":  "acme",
 		"query":      "balance for " + tokenizedName,
-	})
+	}, "test-navigator-token")
 	navResult := readBody(t, navResp.Body)
 	navResults, _ := navResult["results"].([]any)
 	t.Logf("  → %d result(s)", len(navResults))

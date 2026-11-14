@@ -25,10 +25,10 @@ stop-all:
 
 # ── Tests ──────────────────────────────────────────────────────────────────
 test-integration:
-	go test -v tests/integration_test.go
+	go test -v ./tests/ -run "TestIntegration|TestFullPipeline|TestCase|TestHealth"
 
 test-flow:
-	go test -v tests/flow_test.go
+	go test -v ./tests/ -run "TestBidirectionalFlow|TestDemoScenarios|TestPipeline"
 
 test-communication:
 	go test -v ./navigator/internal/vault/...

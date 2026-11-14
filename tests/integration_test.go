@@ -13,26 +13,42 @@ import (
 	"time"
 )
 
-func TestIntegration(t *testing.T) {
-	// Start Mock LLM in its own process group so all descendants are killed on teardown.
-	// "go run" compiles and then forks a child process; killing only the "go run" PID
-	// leaves that child orphaned and still holding the stdout pipe, which causes the
-	// "I/O incomplete" failure. Killing the whole process group avoids this.
-	cmd := exec.Command("go", "run", "mock-llm/main.go")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	err := cmd.Start()
-	if err != nil {
-		t.Fatalf("Failed to start mock LLM: %v", err)
+func mockLLMReady(url string, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		resp, err := http.Get(url)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			resp.Body.Close()
+			return true
+		}
+		if resp != nil {
+			resp.Body.Close()
+		}
+		time.Sleep(250 * time.Millisecond)
 	}
-	defer func() {
-		syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-		cmd.Wait()
-	}()
+	return false
+}
 
-	// Wait for mock LLM to start
-	time.Sleep(2 * time.Second)
+func TestIntegration(t *testing.T) {
+	// If mock-llm is not already running (e.g. started by scripts/run-integration.sh),
+	// start it in its own process group so all descendants are killed on teardown.
+	if !mockLLMReady("http://localhost:11435/health", 500*time.Millisecond) {
+		cmd := exec.Command("go", "run", "mock-llm/main.go")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		if err := cmd.Start(); err != nil {
+			t.Fatalf("Failed to start mock LLM: %v", err)
+		}
+		defer func() {
+			syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
+			cmd.Wait()
+		}()
+
+		if !mockLLMReady("http://localhost:11435/health", 10*time.Second) {
+			t.Fatal("Mock LLM did not become ready within 10s")
+		}
+	}
 
 	// Test /api/generate
 	prompt := "Hello, mock LLM!"
