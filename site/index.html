@@ -3,182 +3,185 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bastion-RAG — RAG Security Governance Framework</title>
-  <meta name="description" content="Bastion-RAG wraps your RAG pipeline with bidirectional security: injection defense, PII tokenization, tenant-isolated search, embedding protection and audit.">
-  <meta name="theme-color" content="#05070d">
+  <title>Bastion RAG — Defense-in-Depth Security for RAG Pipelines</title>
+  <meta name="description" content="Bastion RAG wraps Retrieval-Augmented Generation pipelines with bidirectional security: prompt-injection defense, format-preserving PII tokenization, tenant-isolated search, embedding privacy, and tamper-evident audit.">
+  <meta name="theme-color" content="#0b0d11">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="grid-bg" aria-hidden="true"></div>
-  <div class="ambient-glow" aria-hidden="true"></div>
-  <div class="scanlines" aria-hidden="true"></div>
 
   <header class="top">
-    <a class="brand" href="#top">&#9632; BASTION<span>/RAG</span></a>
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Bastion <span>RAG</span></a>
     <nav>
-      <a href="#pipeline">pipeline</a>
-      <a href="#demo">demo</a>
-      <a href="#modules">modules</a>
-      <a href="#study">study-log</a>
-      <a href="/quickstart.html">quickstart</a>
-      <a href="https://github.com/zafrem/bastion-rag">github</a>
+      <a href="#pipeline">Architecture</a>
+      <a href="#demo">Simulator</a>
+      <a href="#modules">Modules</a>
+      <a href="#study">Study Notes</a>
+      <a href="/quickstart.html">Quickstart</a>
+      <a href="https://github.com/zafrem/bastion-rag">GitHub</a>
     </nav>
   </header>
 
   <main id="top">
     <section class="hero">
       <div class="hero-badges">
-        <span class="pill pill-magenta">SECURITY STUDY PROJECT</span>
-        <span class="pill pill-cyan">BIDIRECTIONAL RAG GUARDRAILS</span>
-        <span class="pill pill-green">mTLS + JWT ZERO-TRUST</span>
+        <span class="pill">Security Engineering Study</span>
+        <span class="pill">Bidirectional RAG Guardrails</span>
+        <span class="pill">mTLS &amp; JWT Zero-Trust</span>
       </div>
-      <p class="eyebrow">// RAG SECURITY GOVERNANCE FRAMEWORK &middot; v0.1.0</p>
-      <h1 class="glitch" data-text="BASTION-RAG">BASTION-RAG</h1>
-      <p class="tagline">&ldquo;We don&rsquo;t block data. We govern its safe flow.&rdquo;</p>
-      <p class="lede">A defense-in-depth security architecture that wraps your RAG pipeline and screens traffic in <em>both</em> directions &mdash; like an airport that checks passengers on the way in and inspects luggage on the way out.</p>
+      <h1>Defense-in-depth governance for RAG pipelines.</h1>
+      <p class="tagline">We don&rsquo;t block data. We govern its safe flow.</p>
+      <p class="lede">Bastion RAG is a modular security architecture that wraps Retrieval-Augmented Generation pipelines in both directions &mdash; screening queries, anonymizing PII, enforcing pre-search tenant isolation, protecting embeddings on the way in, and verifying grounding and permissions on the way out.</p>
 
       <aside class="study-callout" aria-label="Author note on security study">
         <div class="study-callout-head">
-          <span class="study-dot"></span>
-          <strong>ORIGIN NOTE // WHY I STARTED THIS REPOSITORY</strong>
+          <span class="study-badge">Author&rsquo;s Note</span>
+          <span class="study-sub">Why I started this repository</span>
         </div>
-        <p>I started <b>Bastion-RAG</b> as a hands-on project to study security engineering in the era of AI &amp; Retrieval-Augmented Generation. Rather than treating LLM security as a single prompt filter, I wanted to build and test every layer from first principles: prompt-injection heuristics, format-preserving PII tokenization, pre-filter tenant isolation, differential privacy on vectors, HMAC-chained audit logs, and mTLS/JWT zero-trust service boundaries. <a href="#study">Read the full study breakdown &rarr;</a></p>
+        <p>I started <strong>Bastion RAG</strong> to study AI and systems security from first principles. Rather than treating LLM security as a single prompt wrapper, I wanted to design, implement, and test concrete controls across the entire retrieval lifecycle: prompt-injection heuristics, format-preserving PII tokenization, pre-filter tenant isolation, differential privacy on embeddings, HMAC-chained audit logs, and mTLS/JWT zero-trust service boundaries. <a href="#study">Read the engineering study notes &rarr;</a></p>
       </aside>
 
-      <div class="term-window" aria-label="Example terminal output">
+      <div class="term-window" aria-label="Example pipeline trace output">
         <div class="term-bar" aria-hidden="true">
           <span class="term-dots"><i></i><i></i><i></i></span>
-          <span class="term-title">bastion-pipeline // trace_id=7f9a-4c12-b80e</span>
-          <span class="term-mode">MODE: ENFORCE</span>
+          <span class="term-title">bastion-pipeline &middot; trace_id=7f9a-4c12-b80e</span>
+          <span class="term-mode">mode: enforce</span>
         </div>
-        <pre class="term"><span class="dim">$</span> <span id="typed" data-lines='["sentinel.in(query)       → PASS   0.3ms  [risk=0.02, norm=NFC]","vault.anonymize(pii)     → 2 tokens      [PERSON_a3f2, EMAIL_9b4d]","navigator.search(tenant) → 8 hits        [pre-filter=acme, RRF+rerank]","anchor.noise(embedding)  → σ=0.01        [L2=1.000, cos_sim=0.994]","sentinel.out(response)   → SANITIZED     [vault_map_checked, 0.9ms]"]'>sentinel.in(query)       → PASS   0.3ms  [risk=0.02, norm=NFC]</span><span class="cursor">&#9608;</span></pre>
+        <pre class="term"><span class="dim">$</span> <span id="typed" data-lines='["sentinel.in(query)       → PASS       0.3ms  risk=0.02  norm=NFC","vault.anonymize(pii)     → 2 tokens   1.8ms  [PERSON_a3f2, EMAIL_9b4d]","navigator.search(tenant) → 8 hits     9.4ms  pre_filter=acme  fusion=RRF","anchor.noise(embedding)  → σ=0.01     0.6ms  l2_norm=1.000  cos_sim=0.994","sentinel.out(response)   → VERIFIED   0.9ms  vault_map=clean  grounded=true"]'>sentinel.in(query)       → PASS       0.3ms  risk=0.02  norm=NFC</span><span class="cursor">&#9612;</span></pre>
       </div>
 
       <div class="cta">
-        <a class="btn" href="https://github.com/zafrem/bastion-rag">&gt; explore on github</a>
-        <a class="btn ghost" href="#demo">&gt; interactive simulator</a>
-        <a class="btn ghost" href="/quickstart.html">&gt; quick start</a>
+        <a class="btn" href="https://github.com/zafrem/bastion-rag">View on GitHub</a>
+        <a class="btn ghost" href="#demo">Interactive Simulator</a>
+        <a class="btn ghost" href="/quickstart.html">Quickstart Guide</a>
       </div>
     </section>
 
     <section id="problem">
-      <h2><span>01</span> THREAT MODEL</h2>
-      <p class="sub">Feeding private documents to an LLM creates a multi-layer attack surface. Each threat requires a dedicated control.</p>
+      <div class="sec-head">
+        <span class="sec-num">01</span>
+        <h2>Threat Model</h2>
+      </div>
+      <p class="sub">Connecting private corpora to an LLM introduces failure modes across input parsing, retrieval, vector storage, and generation. Each layer in Bastion addresses a distinct threat class.</p>
       <ul class="chips">
         <li>
-          <span class="chip-sev sev-crit">INJECTION</span>
+          <span class="chip-sev sev-crit">Injection</span>
           <b>Prompt &amp; Indirect Injection</b>
-          Hidden instructions in user queries or retrieved documents hijack model behavior.
-          <small class="chip-def">Countered by: Sentinel-IN + Contextual Doc Scan</small>
+          Adversarial instructions in user queries or retrieved documents override system instructions.
+          <small class="chip-def">Mitigation: Sentinel-IN + Contextual Document Scan</small>
         </li>
         <li>
-          <span class="chip-sev sev-high">PRIVACY</span>
-          <b>PII &amp; Secret Leakage</b>
-          Names, SSNs, emails, or API keys slip into prompts or re-emerge in LLM completions.
-          <small class="chip-def">Countered by: Vault Two-Phase Tokenization + Sentinel-OUT</small>
+          <span class="chip-sev sev-high">Privacy</span>
+          <b>PII &amp; Secret Exposure</b>
+          Names, SSNs, emails, or credentials enter third-party LLM prompts or leak in model completions.
+          <small class="chip-def">Mitigation: Vault Two-Phase Tokenization + Sentinel-OUT</small>
         </li>
         <li>
-          <span class="chip-sev sev-crit">ISOLATION</span>
-          <b>Cross-Tenant Exposure</b>
-          Customer A&rsquo;s vectors or records surface for Customer B on shared infrastructure.
-          <small class="chip-def">Countered by: Navigator Pre-Filter + Vault JWT Tenant Binding</small>
+          <span class="chip-sev sev-crit">Isolation</span>
+          <b>Cross-Tenant Data Leakage</b>
+          Post-search filtering in shared vector indexes leaks document existence across tenant boundaries.
+          <small class="chip-def">Mitigation: Navigator Pre-Filter + Vault JWT Tenant Binding</small>
         </li>
         <li>
-          <span class="chip-sev sev-med">VECTOR</span>
+          <span class="chip-sev sev-med">Vectors</span>
           <b>Embedding Inversion &amp; Bias</b>
-          Stolen embeddings reconstruct source text, or skewed representations bias answers.
-          <small class="chip-def">Countered by: Anchor Differential Noise + WEAT Analyzer</small>
+          Compromised float vectors reconstruct source text, or skewed representations bias answers.
+          <small class="chip-def">Mitigation: Anchor Differential Noise + WEAT Audit</small>
         </li>
         <li>
-          <span class="chip-sev sev-med">INTEGRITY</span>
-          <b>Hallucination &amp; Drift</b>
-          The model states ungrounded numbers or facts absent from retrieved context.
-          <small class="chip-def">Countered by: Sentinel-OUT Grounding &amp; Citation Verifier</small>
+          <span class="chip-sev sev-med">Integrity</span>
+          <b>Hallucination &amp; Ungrounded Claims</b>
+          The model fabricates figures, citations, or claims unsupported by the retrieved context.
+          <small class="chip-def">Mitigation: Sentinel-OUT Grounding &amp; Citation Verifier</small>
         </li>
         <li>
-          <span class="chip-sev sev-high">INTRUSION</span>
+          <span class="chip-sev sev-high">Intrusion</span>
           <b>Reconnaissance &amp; Insider Probing</b>
-          Attackers query specific decoy records proving prior unauthorized access.
-          <small class="chip-def">Countered by: Cross-Layer Honey-Tokens + Tracker Alerts</small>
+          Attackers query planted decoy identifiers, signaling credential theft or corpus exfiltration.
+          <small class="chip-def">Mitigation: Cross-Layer Honey-Tokens + Tracker Alerts</small>
         </li>
       </ul>
     </section>
 
     <section id="pipeline">
-      <h2><span>02</span> SYMMETRIC PIPELINE</h2>
-      <p class="sub">Every module that inspects input also governs output. If an attacker slips past one layer, the mirror layer on the return path still catches them.</p>
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <h2>Symmetric Pipeline Architecture</h2>
+      </div>
+      <p class="sub">Every service that inspects inbound queries has a corresponding check on the outbound response path. If an issue bypasses an upstream stage, the return path still enforces policy before the caller receives an answer.</p>
 
-      <div class="pipeline-visual" aria-label="Interactive pipeline architecture">
+      <div class="pipeline-visual" aria-label="Symmetric pipeline architecture">
         <div class="pipe-lane pipe-in">
-          <div class="lane-label"><span class="c">INBOUND</span><span>USER QUERY &rarr; SECURED CONTEXT</span></div>
+          <div class="lane-label"><span class="lane-tag in">Inbound Path</span><span>User Query &rarr; Sanitized &amp; Scoped Context</span></div>
           <div class="pipe-track">
             <div class="pipe-node" data-stage="sentinel-in">
-              <span class="node-step">01</span>
+              <span class="node-step">Step 01</span>
               <strong>Sentinel-IN</strong>
-              <small>NFC + Regex + ML Risk</small>
+              <small>NFC + Regex + ML Scorer</small>
             </div>
-            <div class="pipe-arrow" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&rarr;</div>
             <div class="pipe-node" data-stage="vault-in">
-              <span class="node-step">02</span>
-              <strong>Vault P1</strong>
+              <span class="node-step">Step 02</span>
+              <strong>Vault Phase 1</strong>
               <small>PII Tokenize + K-Anon</small>
             </div>
-            <div class="pipe-arrow" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&rarr;</div>
             <div class="pipe-node" data-stage="navigator">
-              <span class="node-step">03</span>
+              <span class="node-step">Step 03</span>
               <strong>Navigator</strong>
               <small>Tenant Pre-Filter + RRF</small>
             </div>
-            <div class="pipe-arrow" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&rarr;</div>
             <div class="pipe-node" data-stage="anchor-in">
-              <span class="node-step">04</span>
+              <span class="node-step">Step 04</span>
               <strong>Anchor-IN</strong>
               <small>DP Noise (&sigma;=0.01)</small>
             </div>
-            <div class="pipe-arrow" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&rarr;</div>
             <div class="pipe-node pipe-llm" data-stage="llm">
-              <span class="node-step">LLM</span>
-              <strong>Model</strong>
+              <span class="node-step">Model</span>
+              <strong>LLM</strong>
               <small>Sees Tokens Only</small>
             </div>
           </div>
         </div>
 
         <div class="pipe-lane pipe-out">
-          <div class="lane-label"><span class="m">OUTBOUND</span><span>VERIFIED &amp; DETOKENIZED RESPONSE &larr; LLM</span></div>
+          <div class="lane-label"><span class="lane-tag out">Outbound Path</span><span>Verified &amp; Detokenized Response &larr; LLM</span></div>
           <div class="pipe-track">
             <div class="pipe-node" data-stage="sentinel-out">
-              <span class="node-step">08</span>
+              <span class="node-step">Step 08</span>
               <strong>Sentinel-OUT</strong>
               <small>PII Map + Grounding</small>
             </div>
-            <div class="pipe-arrow rev" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&larr;</div>
             <div class="pipe-node" data-stage="vault-out">
-              <span class="node-step">07</span>
-              <strong>Vault P2</strong>
+              <span class="node-step">Step 07</span>
+              <strong>Vault Phase 2</strong>
               <small>RBAC Detokenize</small>
             </div>
-            <div class="pipe-arrow rev" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&larr;</div>
             <div class="pipe-node pipe-pass" aria-hidden="true">
-              <span class="node-step">&mdash;</span>
-              <strong>Context Bound</strong>
-              <small>Sources Attached</small>
+              <span class="node-step">Context</span>
+              <strong>Source Bound</strong>
+              <small>Citations Attached</small>
             </div>
-            <div class="pipe-arrow rev" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&larr;</div>
             <div class="pipe-node" data-stage="anchor-out">
-              <span class="node-step">06</span>
+              <span class="node-step">Step 06</span>
               <strong>Anchor-OUT</strong>
               <small>WEAT Bias + Drift</small>
             </div>
-            <div class="pipe-arrow rev" aria-hidden="true"><span></span></div>
+            <div class="pipe-arrow" aria-hidden="true">&larr;</div>
             <div class="pipe-node pipe-llm" aria-hidden="true">
-              <span class="node-step">05</span>
+              <span class="node-step">Step 05</span>
               <strong>Raw Output</strong>
               <small>Tokenized Answer</small>
             </div>
@@ -186,16 +189,15 @@
         </div>
 
         <div class="pipe-bus">
-          <div class="bus-pulses" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
           <div class="bus-info">
-            <strong>TRACKER TELEMETRY &amp; GOVERNANCE BUS</strong>
-            <span>HMAC-SHA256 signed audit chain &middot; end-to-end <code>trace_id</code> lineage &middot; runtime <code>observe</code> / <code>gate</code> human-in-the-loop checkpoints</span>
+            <strong>Tracker Telemetry &amp; Governance Bus</strong>
+            <span>HMAC-SHA256 hash-chained audit log &middot; end-to-end <code>trace_id</code> lineage &middot; runtime <code>observe</code> and <code>gate</code> human-in-the-loop checkpoints</span>
           </div>
         </div>
       </div>
 
       <details class="ascii-toggle">
-        <summary>View raw ASCII architecture diagram</summary>
+        <summary>View compact ASCII diagram</summary>
         <pre class="diagram"><span class="c">IN </span>  query ──&gt; <b>Sentinel</b> ──&gt; <b>Vault</b> ──&gt; <b>Navigator</b> ──&gt; <b>Anchor</b> ──&gt; <span class="m">[ LLM ]</span>
                                                                   │
 <span class="c">OUT</span>  safe &lt;── <b>Sentinel</b> &lt;── <b>Vault</b> &lt;───────────────── <b>Anchor</b> &lt;──────┘
@@ -205,16 +207,19 @@
     </section>
 
     <section id="demo">
-      <h2><span>03</span> WATCH A REQUEST</h2>
-      <p class="sub">Pick an attack or governance scenario and watch how each module transforms or blocks the request. Click any log row to inspect its wire payload.</p>
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <h2>Request Trace Simulator</h2>
+      </div>
+      <p class="sub">Select a scenario below to step through how each service inspects, transforms, or blocks the request. Click any log entry to inspect its structured wire payload.</p>
       <div class="demo" id="demo-root">
         <div class="demo-picker" role="group" aria-label="Scenario"><span class="dim">Enable JavaScript to switch scenarios.</span></div>
-        <p class="demo-query"><span>query&nbsp;&gt;</span> <b>What are our customer satisfaction trends for Q4?</b></p>
+        <p class="demo-query"><span>Query</span> <b>What are our customer satisfaction trends for Q4?</b></p>
         <ul class="demo-nodes" aria-hidden="true">
-          <li data-node="sentinel">SENTINEL</li>
-          <li data-node="vault">VAULT</li>
-          <li data-node="navigator">NAVIGATOR</li>
-          <li data-node="anchor">ANCHOR</li>
+          <li data-node="sentinel">Sentinel</li>
+          <li data-node="vault">Vault</li>
+          <li data-node="navigator">Navigator</li>
+          <li data-node="anchor">Anchor</li>
           <li data-node="llm">LLM</li>
         </ul>
         <div class="demo-split">
@@ -231,7 +236,7 @@
           </ol>
           <aside class="demo-inspector" aria-label="Step payload inspector">
             <div class="inspector-head">
-              <span class="inspector-title">PAYLOAD INSPECTOR</span>
+              <span class="inspector-title">Stage Payload</span>
               <span class="inspector-stage" id="demo-stage-badge">sentinel &middot; in</span>
             </div>
             <pre class="inspector-code" id="demo-payload">{
@@ -243,95 +248,102 @@
           </aside>
         </div>
         <div class="demo-foot">
-          <span>Simulated walkthrough &middot; Click any step row above to inspect its JSON payload.</span>
-          <button type="button" class="demo-replay">&#8635; replay</button>
+          <span>Click any trace row above to inspect its JSON payload.</span>
+          <button type="button" class="demo-replay">Replay trace</button>
         </div>
       </div>
     </section>
 
     <section id="modules">
-      <h2><span>04</span> MODULES</h2>
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2>Core Modules</h2>
+      </div>
       <div class="cards">
         <article class="card">
-          <span class="tag">GO</span>
-          <h3>SENTINEL</h3>
+          <span class="tag">Go</span>
+          <h3>Sentinel</h3>
           <p class="role">Bidirectional validation gateway</p>
-          <p>First and last line of defence. Detects prompt injection (regex + keyword + logistic ML scorer) on the way in; catches PII re-emergence, Vault token-map leaks, hallucinations and permission violations on the way out.</p>
-          <p class="meta">~0.3 ms in &middot; ~0.9 ms out &middot; REST + gRPC TLS</p>
-          <a class="more" href="/modules/sentinel.html">details</a>
+          <p>First and last line of defense. Detects prompt injection (regex, keyword rules, and logistic ML scoring) on input; catches PII re-emergence, Vault token-map leaks, hallucinations, and permission violations on output.</p>
+          <p class="meta">~0.3 ms in &middot; ~0.9 ms out &middot; REST &amp; gRPC TLS</p>
+          <a class="more" href="/modules/sentinel.html">Documentation</a>
         </article>
         <article class="card">
-          <span class="tag">GO</span>
-          <h3>VAULT</h3>
-          <p class="role">Two-phase privacy shield</p>
-          <p>Replaces 30+ PII entity types with deterministic tenant-scoped tokens before the LLM sees them, enforces K-anonymity &amp; RBAC/OPA policies, and restores values only for authorized callers.</p>
-          <p class="meta">tokenize &rarr; process &rarr; detokenize</p>
-          <a class="more" href="/modules/vault.html">details</a>
+          <span class="tag">Go</span>
+          <h3>Vault</h3>
+          <p class="role">Two-phase privacy &amp; tokenization</p>
+          <p>Replaces 30+ PII entity types with deterministic tenant-scoped tokens before the LLM sees them, enforces K-anonymity and RBAC/OPA policies, and restores values only for authorized callers.</p>
+          <p class="meta">Tokenize &rarr; Process &rarr; Detokenize</p>
+          <a class="more" href="/modules/vault.html">Documentation</a>
         </article>
         <article class="card">
-          <span class="tag">PYTHON + GO</span>
-          <h3>NAVIGATOR</h3>
-          <p class="role">Tenant-isolated hybrid search</p>
-          <p>Filters by tenant <em>before</em> vector search, never after. Rewrites Vault tokens for searchability, fuses BGE-M3 dense + BM25 results with RRF, reranks, and federates with hop-depth loop prevention.</p>
-          <p class="meta">pre-filter isolation &middot; RRF fusion</p>
-          <a class="more" href="/modules/navigator.html">details</a>
+          <span class="tag">Python + Go</span>
+          <h3>Navigator</h3>
+          <p class="role">Tenant-isolated hybrid retrieval</p>
+          <p>Filters by tenant <em>before</em> vector search, never after. Rewrites Vault tokens for searchability, fuses BGE-M3 dense and BM25 sparse results with RRF, reranks, and federates with hop-depth loop prevention.</p>
+          <p class="meta">Pre-filter isolation &middot; RRF fusion</p>
+          <a class="more" href="/modules/navigator.html">Documentation</a>
         </article>
         <article class="card">
-          <span class="tag">PYTHON</span>
-          <h3>ANCHOR</h3>
+          <span class="tag">Python</span>
+          <h3>Anchor</h3>
           <p class="role">Embedding security &amp; fairness</p>
-          <p>Adds calibrated Gaussian/Laplace differential privacy noise to embeddings on the unit hypersphere so stolen vectors cannot invert documents, and audits demographic bias via WEAT statistics.</p>
-          <p class="meta">differential noise &middot; WEAT</p>
-          <a class="more" href="/modules/anchor.html">details</a>
+          <p>Adds calibrated Gaussian or Laplace differential privacy noise to embeddings on the unit hypersphere so compromised vectors cannot invert source text, and audits demographic bias via WEAT statistics.</p>
+          <p class="meta">Differential privacy noise &middot; WEAT</p>
+          <a class="more" href="/modules/anchor.html">Documentation</a>
         </article>
         <article class="card">
-          <span class="tag">GO + REACT</span>
-          <h3>TRACKER</h3>
-          <p class="role">Observability &amp; human-in-the-loop</p>
-          <p>Correlates every event into an HMAC-signed, tamper-evident audit chain. Switch at runtime between <code>off</code>, <code>observe</code>, and <code>gate</code> modes where operators approve sensitive pipeline checkpoints.</p>
-          <p class="meta">HMAC audit &middot; lineage &middot; live UI</p>
-          <a class="more" href="/modules/tracker.html">details</a>
+          <span class="tag">Go + React</span>
+          <h3>Tracker</h3>
+          <p class="role">Audit lineage &amp; human-in-the-loop</p>
+          <p>Correlates every stage into an HMAC-signed, tamper-evident audit chain. Switch at runtime between <code>off</code>, <code>observe</code>, and <code>gate</code> modes where operators review sensitive pipeline checkpoints.</p>
+          <p class="meta">HMAC-SHA256 audit &middot; Lineage UI</p>
+          <a class="more" href="/modules/tracker.html">Documentation</a>
         </article>
         <article class="card card-extra">
-          <span class="tag">CROSS-CUTTING</span>
-          <h3>+ DEFENCE IN DEPTH</h3>
-          <p class="role">Honey tokens &middot; mTLS &middot; zero-trust</p>
-          <p>Decoy records expose intruders across three layers. Every service authenticates callers via Bearer/JWT tokens and supports hot-reloaded TLS &amp; mutual TLS (mTLS) on gRPC.</p>
+          <span class="tag">Cross-Cutting</span>
+          <h3>Defense in Depth</h3>
+          <p class="role">Honey-tokens &middot; mTLS &middot; Zero-trust</p>
+          <p>Planted decoy records expose intruders across three independent layers. Every service authenticates callers via Bearer/JWT tokens and supports hot-reloaded TLS and mutual TLS (mTLS) on gRPC.</p>
+          <p class="meta">Fail-closed defaults &middot; Live cert reload</p>
         </article>
       </div>
     </section>
 
     <section id="study">
-      <h2><span>05</span> SECURITY STUDY LOG</h2>
-      <p class="sub">This repository was built to study AI and distributed-systems security by implementing real controls rather than relying on black-box wrappers. Here are the six core security domains explored across the codebase:</p>
+      <div class="sec-head">
+        <span class="sec-num">05</span>
+        <h2>Security Engineering Study Notes</h2>
+      </div>
+      <p class="sub">This repository was built to study AI and distributed-systems security by implementing concrete mechanisms rather than relying on black-box wrappers. Below are the six core areas explored across the codebase.</p>
       <div class="study-grid">
         <div class="study-item">
-          <span class="study-num">STUDY // 01</span>
+          <span class="study-num">Area 01</span>
           <h3>Adversarial Prompt &amp; Output Defense</h3>
           <p>Explored how Unicode homoglyphs, delimiter escapes (<code>&lt;|im_start|&gt;</code>), and indirect document injections bypass naive filters &mdash; combining NFC normalization, regex/keyword rules, logistic feature scoring, and outbound grounding verification.</p>
         </div>
         <div class="study-item">
-          <span class="study-num">STUDY // 02</span>
+          <span class="study-num">Area 02</span>
           <h3>Privacy-Preserving Data Flows</h3>
           <p>Studied the trade-off between utility and privacy when sending context to external LLMs: AES-GCM vault storage, format-preserving tokens, K-anonymity cohort checks (<i>k &ge; 5</i>), and cross-referencing Vault mappings on LLM output.</p>
         </div>
         <div class="study-item">
-          <span class="study-num">STUDY // 03</span>
+          <span class="study-num">Area 03</span>
           <h3>Multi-Tenant Isolation &amp; Federation</h3>
-          <p>Investigated how post-filtering in vector databases leaks existence of other tenants&rsquo; documents, implementing strict pre-filter tenant scoping, Vault permission intersections, and hop-limited peer federation.</p>
+          <p>Investigated how post-filtering in vector databases leaks the existence of other tenants&rsquo; documents, implementing strict pre-filter tenant scoping, Vault permission intersections, and hop-limited peer federation.</p>
         </div>
         <div class="study-item">
-          <span class="study-num">STUDY // 04</span>
+          <span class="study-num">Area 04</span>
           <h3>Vector Inversion &amp; Algorithmic Fairness</h3>
           <p>Studied embedding inversion attacks (reconstructing text from raw float vectors) and implemented L2-normalized Gaussian/Laplace noise injection alongside Word Embedding Association Test (WEAT) bias measurement.</p>
         </div>
         <div class="study-item">
-          <span class="study-num">STUDY // 05</span>
+          <span class="study-num">Area 05</span>
           <h3>Zero-Trust Service-to-Service Security</h3>
           <p>Practiced eliminating implicit internal trust: every REST and gRPC server enforces caller authentication (JWT/RBAC or constant-time bearer tokens), fail-closed startup validation, and live-reloaded TLS/mTLS certificates.</p>
         </div>
         <div class="study-item">
-          <span class="study-num">STUDY // 06</span>
+          <span class="study-num">Area 06</span>
           <h3>Tamper-Evident Auditing &amp; Deception</h3>
           <p>Implemented cryptographic hash-chained audit logs (HMAC-SHA256) to detect log tampering, cross-module honey-token tripwires for intrusion detection, and interactive human-in-the-loop approval gates.</p>
         </div>
@@ -339,16 +351,16 @@
     </section>
 
     <section class="stats">
-      <div><b>~1.2<small>ms</small></b><span>sentinel overhead</span></div>
-      <div><b>5</b><span>security modules</span></div>
-      <div><b>1,000<small>+</small></b><span>automated tests</span></div>
-      <div><b>mTLS</b><span>+ JWT zero-trust</span></div>
+      <div><b>~1.2<small>ms</small></b><span>Sentinel overhead</span></div>
+      <div><b>5</b><span>Core security services</span></div>
+      <div><b>1,000<small>+</small></b><span>Automated tests</span></div>
+      <div><b>mTLS</b><span>+ JWT service auth</span></div>
     </section>
   </main>
 
   <footer>
-    <p>BASTION-RAG &middot; Built as an open-source AI Security Study Project &middot; Apache 2.0 &middot; <a href="/quickstart.html">quick start</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
-    <p class="support"><a href="https://buymeacoffee.com/zafrem" target="_blank" rel="noopener noreferrer">buy me a coffee</a></p>
+    <p>Bastion RAG &middot; Open-source AI &amp; Systems Security Study &middot; Apache 2.0 &middot; <a href="/quickstart.html">Quickstart</a> &middot; <a href="https://github.com/zafrem/bastion-rag">github.com/zafrem/bastion-rag</a></p>
+    <p class="support"><a href="https://buymeacoffee.com/zafrem" target="_blank" rel="noopener noreferrer">Buy me a coffee</a></p>
   </footer>
 
   <script src="main.js" defer></script>
