@@ -36,6 +36,37 @@ jobs:
         working-directory: ${{ matrix.module }}
         run: go test ./...
 
+  navigator-e2e:
+    name: go (navigator e2e, qdrant)
+    runs-on: ubuntu-24.04
+    services:
+      qdrant:
+        image: qdrant/qdrant:v1.12.4
+        ports: ['6333:6333']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: navigator/go.sum
+      - name: wait for qdrant
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:6333/collections >/dev/null && exit 0
+            sleep 2
+          done
+          echo "qdrant did not become ready" >&2; exit 1
+      - name: end-to-end test
+        working-directory: navigator
+        env:
+          NAVIGATOR_E2E_QDRANT: localhost:6333
+        run: |
+          go test ./internal/api/rest -run QdrantE2E -v -count=1 | tee e2e.log
+          # A skipped test would silently prove nothing.
+          if grep -q -- '--- SKIP' e2e.log; then echo "e2e test was skipped" >&2; exit 1; fi
+
   integration:
     name: go (cross-module tests)
     runs-on: ubuntu-24.04
