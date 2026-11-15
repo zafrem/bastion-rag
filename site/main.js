@@ -25,7 +25,7 @@
         if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
       });
     }, { threshold: 0.1 });
-    document.querySelectorAll(".card, .chips li, .stats div, .diagram").forEach(function (n) {
+    document.querySelectorAll(".card, .chips li, .stats div, .diagram, .study-item, .pipeline-visual").forEach(function (n) {
       n.classList.add("reveal");
       io.observe(n);
     });

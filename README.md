@@ -4,6 +4,8 @@
 
 **Version 0.1.0** &nbsp;·&nbsp; Go 1.25+ / Python 3.11+ &nbsp;·&nbsp; Apache 2.0
 
+> **Origin Note — Security Study Project:** I started this repository to deeply study security engineering for AI and Retrieval-Augmented Generation (RAG) systems. Rather than treating LLM security as a single prompt wrapper, Bastion-RAG explores defense-in-depth from first principles across Go and Python: prompt-injection heuristics, format-preserving PII tokenization, pre-filter tenant isolation, differential privacy on embeddings, HMAC-chained tamper-evident audit logs, and mTLS/JWT zero-trust service boundaries.
+
 ---
 
 ## What problem does this solve?
