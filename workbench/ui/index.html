@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bastion Workbench</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header>
+  <div class="brand"><span class="mark">B</span><div><h1>Bastion Workbench</h1><p>Watch one prompt travel through the security pipeline</p></div></div>
+  <div id="status" class="pills" aria-live="polite"></div>
+</header>
+
+<nav role="tablist" id="tabs">
+  <button role="tab" data-tab="run" aria-selected="true">Run</button>
+  <button role="tab" data-tab="compare" aria-selected="false">Compare profiles</button>
+  <button role="tab" data-tab="suite" aria-selected="false">Suite</button>
+  <button role="tab" data-tab="profiles" aria-selected="false">Profiles</button>
+</nav>
+
+<main>
+<!-- RUN -->
+<section id="tab-run" class="tab">
+  <div class="panel">
+    <label for="run-prompt">Prompt</label>
+    <textarea id="run-prompt" rows="3" placeholder="Ask something, or pick an example below"></textarea>
+    <div id="run-examples" class="chips" aria-label="Examples"></div>
+    <div class="row">
+      <div><label for="run-profile">Caller profile</label><select id="run-profile"></select></div>
+      <label class="check"><input type="checkbox" id="run-observe"> Observe mode <small>keep going after a block to see what would have been prevented</small></label>
+    </div>
+    <details><summary>Context documents and model answer override</summary>
+      <label for="run-context">Context (separate documents with a blank line)</label>
+      <textarea id="run-context" rows="3" placeholder="Optional. Used for grounding checks and given to the model."></textarea>
+      <label for="run-answer">Fixed model answer (skips the model)</label>
+      <textarea id="run-answer" rows="2" placeholder="Optional. Test the output checks with an answer you wrote."></textarea>
+    </details>
+    <button class="primary" id="run-go">Run through pipeline</button>
+  </div>
+  <div id="run-out"></div>
+</section>
+
+<!-- COMPARE -->
+<section id="tab-compare" class="tab" hidden>
+  <div class="panel">
+    <p class="hint">One model answer is shared by every profile, so any difference you see comes from the controls, not from the model's randomness.</p>
+    <label for="cmp-prompt">Prompt</label>
+    <textarea id="cmp-prompt" rows="2"></textarea>
+    <div id="cmp-examples" class="chips"></div>
+    <fieldset><legend>Profiles (2 to 4)</legend><div id="cmp-profiles" class="checks"></div></fieldset>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="cmp-observe"> Observe mode</label>
+    </div>
+    <details><summary>Context and fixed answer</summary>
+      <label for="cmp-context">Context</label><textarea id="cmp-context" rows="2"></textarea>
+      <label for="cmp-answer">Fixed model answer</label><textarea id="cmp-answer" rows="2"></textarea>
+    </details>
+    <button class="primary" id="cmp-go">Compare</button>
+  </div>
+  <div id="cmp-out"></div>
+</section>
+
+<!-- SUITE -->
+<section id="tab-suite" class="tab" hidden>
+  <div class="panel">
+    <p class="hint">Runs the built-in scenarios under each profile. Fast and repeatable with fixed model answers; switch on the live model to see real output.</p>
+    <fieldset><legend>Profiles</legend><div id="suite-profiles" class="checks"></div></fieldset>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="suite-observe"> Observe mode</label>
+      <label class="check"><input type="checkbox" id="suite-llm"> Use the live model <small>slower; answers vary</small></label>
+    </div>
+    <button class="primary" id="suite-go">Run suite</button>
+  </div>
+  <div id="suite-out"></div>
+</section>
+
+<!-- PROFILES -->
+<section id="tab-profiles" class="tab" hidden>
+  <div class="panel">
+    <p class="hint">A profile is a kind of caller. <code>metadata</code> is <code>valid</code> or <code>sloppy</code>. Changes last until the workbench restarts.</p>
+    <label for="prof-json">Profiles (JSON)</label>
+    <textarea id="prof-json" rows="18" spellcheck="false" class="mono"></textarea>
+    <div class="row"><button class="primary" id="prof-save">Save profiles</button><span id="prof-msg" role="status"></span></div>
+  </div>
+</section>
+</main>
+
+<div id="drawer" class="drawer" hidden role="dialog" aria-modal="true" aria-label="Detail">
+  <div class="drawer-body"><button id="drawer-close" class="ghost" aria-label="Close">Close</button><div id="drawer-content"></div></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

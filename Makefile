@@ -1,9 +1,15 @@
-.PHONY: mock-llm test-integration test-flow test-communication run-tests integration \
+.PHONY: workbench test-workbench mock-llm test-integration test-flow test-communication run-tests integration \
         submodule-update start-all stop-all \
         start-sentinel start-vault start-navigator start-anchor start-tracker
 
 mock-llm:
 	go run tests/mock-llm/main.go
+
+# ── Workbench (demo UI + pipeline tests; talks to modules over HTTP only) ──
+workbench:
+	cd workbench && go run .
+test-workbench:
+	cd workbench && go vet ./... && go test ./...
 
 # ── Start modules individually ─────────────────────────────────────────────
 start-sentinel:
