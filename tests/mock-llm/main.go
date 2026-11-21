@@ -70,11 +70,11 @@ func loggerMiddleware(next http.Handler) http.Handler {
 		body, _ := io.ReadAll(r.Body)
 		r.Body = io.NopCloser(bytes.NewReader(body))
 
-		log.Printf("RECEIVED: %s %s | Body: %s", r.Method, r.URL.Path, string(body))
+		log.Printf("RECEIVED: %q %q | Body: %q", r.Method, r.URL.Path, string(body))
 		
 		next.ServeHTTP(w, r)
 		
-		log.Printf("COMPLETED: %s %s in %v", r.Method, r.URL.Path, time.Since(start))
+		log.Printf("COMPLETED: %q %q in %v", r.Method, r.URL.Path, time.Since(start))
 	})
 }
 
