@@ -377,6 +377,9 @@ which tenant gets which profile.
 - **The response tells you which profile applied:** `"profile"` on REST input responses, `"Profile"` on
   output. gRPC returns it in `ValidateResponse.profile`; clients built from the older proto ignore the new
   field, which is safe.
+- **Metrics are labelled by profile:** `sentinel_requests_total`, `sentinel_output_requests_total`,
+  `sentinel_request_duration_ms` and `sentinel_injection_score` carry a `profile` label, so you can watch the
+  block rate and latency of each audience separately (see Sentinel's operations guide).
 - **Shared rules stay shared.** Whatever a profile does not override still applies: the injection rules, the
   decoder, PII masking and the content filter block the same things for everyone.
 
