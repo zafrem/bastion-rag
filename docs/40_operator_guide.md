@@ -380,6 +380,10 @@ which tenant gets which profile.
 - **Metrics are labelled by profile:** `sentinel_requests_total`, `sentinel_output_requests_total`,
   `sentinel_request_duration_ms` and `sentinel_injection_score` carry a `profile` label, so you can watch the
   block rate and latency of each audience separately (see Sentinel's operations guide).
+- **Events say which profile applied.** Sentinel's NATS events gain an optional top-level `profile` field
+  (omitted when no policy is configured). It is an additive field specific to Sentinel; consumers that ignore
+  unknown fields, which all of this repository's do, are unaffected. Use it to audit which audience a block
+  or an exception applied to.
 - **Shared rules stay shared.** Whatever a profile does not override still applies: the injection rules, the
   decoder, PII masking and the content filter block the same things for everyone.
 
