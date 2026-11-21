@@ -38,6 +38,10 @@ make workbench            # http://127.0.0.1:8090
 
 Set a URL to empty to leave that stage out.
 
+To see **policy profiles** (different standards for staff and the public), start Sentinel with
+`--config ../workbench/configs/sentinel-policy.yaml`: each Sentinel stage then shows the `policy_profile` it applied,
+chosen by the caller profile's tenant. See [`data/README.md`](data/README.md#policy-cases).
+
 ## What the UI does
 
 - **Run**: one prompt under one caller profile, with every stage laid out. Click a stage for its

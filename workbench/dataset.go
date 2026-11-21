@@ -56,6 +56,7 @@ var Categories = map[string]string{
 	"grounding": "Answers checked against supplied documents",
 	"content":   "Harmful content in an answer",
 	"metadata":  "Callers whose request metadata is malformed",
+	"policy":    "Cases where the policy profile decides the outcome: the same input is expected to be treated differently by audience",
 	"unlabeled": "Real traffic without labels: measured for behaviour and latency, not graded",
 }
 

@@ -107,6 +107,9 @@ func (p Pipeline) Run(ctx context.Context, pr Profile, rq RunRequest) RunResult 
 			"patterns":        r.Checks.PromptInjection.MatchedPatterns,
 			"metadata_errors": r.Checks.MetadataValidation.FormatErrors,
 		}
+		if r.Profile != "" {
+			in.Detail["policy_profile"] = r.Profile
+		}
 		in.Notice = r.UserNotice
 		switch r.Status {
 		case "BLOCKED":
@@ -197,6 +200,9 @@ func (p Pipeline) Run(ctx context.Context, pr Profile, rq RunRequest) RunResult 
 				"permission":      r.Checks.PermissionCheck.Status,
 				"response_level":  r.Checks.PermissionCheck.ResponseLevel,
 				"user_level":      r.Checks.PermissionCheck.UserAccessLevel,
+			}
+			if r.Profile != "" {
+				out.Detail["policy_profile"] = r.Profile
 			}
 			out.Notice = r.Notice
 			switch r.Status {

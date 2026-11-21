@@ -92,6 +92,8 @@ type sentinelInResp struct {
 	} `json:"checks"`
 	UserNotice       map[string]any `json:"user_notice"`
 	ProcessingTimeMs float64        `json:"processing_time_ms"`
+	// Profile is the policy profile Sentinel held this caller to (empty when no policy is configured).
+	Profile string `json:"profile"`
 }
 
 func (c Config) sentinelInput(ctx context.Context, query string, meta map[string]string, strict bool) (sentinelInResp, error) {
@@ -135,6 +137,7 @@ type sentinelOutResp struct {
 	ErrorMessage     string         `json:"ErrorMessage"`
 	Notice           map[string]any `json:"Notice"`
 	ProcessingTimeMs float64        `json:"ProcessingTimeMs"`
+	Profile          string         `json:"Profile"`
 }
 
 func (c Config) sentinelOutput(ctx context.Context, p Profile, answer, query string, docs []string) (sentinelOutResp, error) {

@@ -163,3 +163,38 @@ verdict and score every time, which the 4B did not. Latency is about 0.6 s per u
 
 The `qwen3.5:4b` model was deleted from this machine at the user's request; the workbench's default answer
 model is now `qwen3.5:9b`.
+
+## Policy profiles (`before-policy.md`, `after-policy.md`, `after-policy-full.md`, `experiment-threshold-0.5.md`)
+
+Sentinel can hold different tenants to different controls (see `docs/40_operator_guide.md`, section 9). The sample
+policy (`workbench/configs/sentinel-policy.yaml`) maps the workbench's three caller tenants: `internal-corp` to an
+`internal` profile (the base controls, with explanatory notices) and `public-web` and `partner-x` to an `external`
+profile (the LLM judge, generic notices, ungrounded answers withheld).
+
+**Policy dataset** (`data/policy.jsonl`, 10 runs): the same prompts under both audiences.
+
+| Sentinel | Pass rate | Failing |
+|---|---|---|
+| no policy | 80% (8/10) | `policy-semantic-external`, `policy-ungrounded-external` (by design: nothing makes external stricter) |
+| sample policy | **100%** (10/10) | none |
+
+**Full dataset** (85 cases, 168 runs) under the policy, against the same dataset with no policy
+(`after-relevance.md`):
+
+| Measure | No policy | Sample policy |
+|---|---|---|
+| Pass rate | 93% (156/168) | **96%** (162/168) |
+| Failing runs, internal-staff | 6 | 6 (unchanged) |
+| Failing runs, external-customer | 6 | **0** |
+| Harmless requests refused | 0 of 54 | 0 of 54 |
+| Sentinel input stage, internal-staff (mean) | 0.4 ms | 0.7 ms |
+| Sentinel input stage, external-customer (mean / p95) | 0.4 ms | **1519 ms / 2287 ms** |
+
+The external profile caught all six hard attacks that the built-in scorer misses; staff are untouched, which is the
+point of a profile. The price is the judge's latency on the external side only.
+
+**An experiment worth keeping** (`experiment-threshold-0.5.md`): the first sample external profile lowered
+`block_threshold` to 0.5 instead of using the judge. It turned out to be a poor lever with the built-in scorer: it
+refused **6 harmless prompts** (questions about prompt injection and system prompts, "ignore the previous email", an
+iPhone jailbreak question) to catch one more attack, taking the full-dataset pass rate to 90%. The sample was changed
+to use the judge and the experiment report was kept so the trade-off stays visible.

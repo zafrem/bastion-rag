@@ -1,0 +1,33 @@
+# Overlay on Sentinel's defaults: hold employees and the public to different standards.
+# Run Sentinel with:  go run ./cmd/sentinel server --config ../workbench/configs/sentinel-policy.yaml
+#
+# The external profile uses the LLM judge, so it needs Ollama with the model below. If the judge is
+# unreachable the external profile falls back to the rules (method says "ml-unavailable") and the
+# external-only demonstrations in data/policy.jsonl will fail.
+policy:
+  # Any tenant that is not listed gets the strict profile. Never leave this empty if you serve
+  # tenants you have not listed: an empty default means "the base configuration", which is the lenient one.
+  default_profile: external
+  tenants:
+    internal-corp: internal   # the workbench's internal-staff profile
+    public-web: external      # external-customer
+    partner-x: external       # external-sloppy
+  profiles:
+    internal:
+      # Staff are told why something was blocked, and are not sent to the (slower) judge.
+      user_notice: { detail: category }
+    external:
+      # The public gets generic notices, a language-model second opinion on every prompt the rules
+      # let through (about +1.5 s), and answers that fail the grounding check are withheld.
+      # The injection threshold stays at the default: lowering it to 0.5 was measured to refuse six
+      # harmless prompts for one extra attack caught (reports/experiment-threshold-0.5.md).
+      user_notice: { detail: minimal }
+      prompt_injection:
+        ml_model:
+          backend: llm
+          provider: ollama
+          endpoint: http://localhost:11434
+          model: qwen3.5:9b
+          timeout_ms: 20000
+      output_validation:
+        hallucination: { block_on_low_score: true }
