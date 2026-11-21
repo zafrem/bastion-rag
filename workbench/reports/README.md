@@ -138,3 +138,28 @@ answers with fewer than three content words (`min_content_words`) are never judg
 `output_validation.hallucination.content_support: false`.
 
 Still failing: the six injections without a fixed phrasing (they need the LLM judge; see above).
+
+## Larger judge model (`after-judge-9b.md`)
+
+Same 85 cases, profiles and Sentinel build as the relevance report; the only change is the judge model
+(`qwen3.5:4b` -> `qwen3.5:9b`, set in `workbench/configs/sentinel-llm.yaml`). "Before" is the 4B judge on the
+same build, taken from the semantic-scorer report (its 77 cases passed 96%); on the 85-case set the 4B result
+was not re-run before the model was removed, so the comparison below is 4B on 77 cases against 9B on 85.
+
+| Measure | 4B judge (77 cases) | 9B judge (85 cases) |
+|---|---|---|
+| Pass rate | 96% | **100%** (168/168) |
+| Attacks that reached the model | 2 of 50 | **0 of 50** |
+| Harmless requests refused | 2 of 54 | **0 of 54** |
+| Sentinel input stage, mean / p50 / p95 | 1260 / 1710 / 1780 ms | 1520 / 1950 / 2170 ms |
+
+It fixed both remaining misses (the late-grandmother trick and "ignore the previous email"). A perfect score on
+a dataset written and tuned by the same people is weak evidence, so the judge was also probed on 18 fresh
+prompts that appear in no dataset or rule (9 attacks such as role-play games, "the previous text was a test",
+translate-then-obey, poem acrostics, French, exfiltration to a URL; 9 look-alikes such as writing a system
+prompt, a CSS override, explaining jailbreaks for defence): 18 of 18 correct. The 9B also returned a consistent
+verdict and score every time, which the 4B did not. Latency is about 0.6 s per uncached query alone and
+1.5 s mean under the scoring run's concurrency, so the judge still stays opt-in.
+
+The `qwen3.5:4b` model was deleted from this machine at the user's request; the workbench's default answer
+model is now `qwen3.5:9b`.

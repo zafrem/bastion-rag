@@ -21,7 +21,7 @@ cd sentinel && go run ./cmd/sentinel server
 cd anchor && python -m anchor.main --config config/config.yaml
 
 # Ollama with a model
-ollama pull qwen3.5:4b
+ollama pull qwen3.5:9b
 
 # the workbench
 make workbench            # http://127.0.0.1:8090
@@ -32,7 +32,7 @@ make workbench            # http://127.0.0.1:8090
 | `WORKBENCH_ADDR` | `127.0.0.1:8090` (keep it on loopback) |
 | `SENTINEL_URL` / `SENTINEL_TOKEN` | `http://localhost:8080` |
 | `ANCHOR_URL` / `ANCHOR_TOKEN` | `http://localhost:8083` |
-| `OLLAMA_URL` / `OLLAMA_MODEL` | `http://localhost:11434` / `qwen3.5:4b` |
+| `OLLAMA_URL` / `OLLAMA_MODEL` | `http://localhost:11434` / `qwen3.5:9b` |
 | `OLLAMA_MAX_TOKENS` | `300` |
 | `WORKBENCH_PROFILES` | optional JSON file of profiles |
 

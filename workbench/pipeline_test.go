@@ -103,7 +103,7 @@ func newFakes(t *testing.T) *fakes {
 
 func (f *fakes) cfg() Config {
 	return Config{SentinelURL: f.sentinel.URL, AnchorURL: f.anchor.URL, OllamaURL: f.ollama.URL,
-		OllamaModel: "qwen3.5:4b", LLMTimeout: 5 * time.Second, MaxTokens: 50}
+		OllamaModel: "qwen3.5:9b", LLMTimeout: 5 * time.Second, MaxTokens: 50}
 }
 
 func profile(name string) Profile {

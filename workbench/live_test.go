@@ -23,7 +23,7 @@ func liveConfig(t *testing.T) Config {
 	cfg := Config{
 		SentinelURL: env("SENTINEL_URL", "http://localhost:8080"), SentinelToken: os.Getenv("SENTINEL_TOKEN"),
 		AnchorURL: env("ANCHOR_URL", "http://localhost:8083"), AnchorToken: os.Getenv("ANCHOR_TOKEN"),
-		OllamaModel: env("OLLAMA_MODEL", "qwen3.5:4b"), LLMTimeout: 180 * time.Second, MaxTokens: 200,
+		OllamaModel: env("OLLAMA_MODEL", "qwen3.5:9b"), LLMTimeout: 180 * time.Second, MaxTokens: 200,
 	}
 	if os.Getenv("WORKBENCH_LIVE_LLM") != "" {
 		cfg.OllamaURL = env("OLLAMA_URL", "http://localhost:11434")

@@ -27,7 +27,7 @@ func loadConfig() Config {
 	return Config{
 		SentinelURL: env("SENTINEL_URL", "http://localhost:8080"), SentinelToken: os.Getenv("SENTINEL_TOKEN"),
 		AnchorURL: env("ANCHOR_URL", "http://localhost:8083"), AnchorToken: os.Getenv("ANCHOR_TOKEN"),
-		OllamaURL: env("OLLAMA_URL", "http://localhost:11434"), OllamaModel: env("OLLAMA_MODEL", "qwen3.5:4b"),
+		OllamaURL: env("OLLAMA_URL", "http://localhost:11434"), OllamaModel: env("OLLAMA_MODEL", "qwen3.5:9b"),
 		LLMTimeout: 120 * time.Second, MaxTokens: maxTok,
 	}
 }

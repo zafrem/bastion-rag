@@ -6,5 +6,5 @@ prompt_injection:
     backend: llm
     provider: ollama
     endpoint: http://localhost:11434
-    model: qwen3.5:4b
+    model: qwen3.5:9b
     timeout_ms: 20000
