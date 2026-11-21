@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: gomod
+    directory: /
+    schedule: { interval: weekly }
+  # Opens PRs that bump the submodule pointers. Each module's own dependencies
+  # (go.mod / pyproject.toml) need a dependabot.yml in that module's repository.
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule: { interval: weekly }

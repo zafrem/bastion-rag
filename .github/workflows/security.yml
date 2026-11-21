@@ -1,0 +1,202 @@
+name: Security
+
+# Static analysis, dependency/vulnerability audits, secret and IaC scanning.
+# Runs on every push/PR (so required checks always report) and weekly, because
+# new advisories appear against code that has not changed.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  codeql:
+    name: codeql (${{ matrix.language }})
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [go, python, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        if: matrix.language == 'go'
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+          build-mode: ${{ matrix.language == 'go' && 'manual' || 'none' }}
+      # The Go code is several modules with no go.work, so build each one.
+      - name: build go modules
+        if: matrix.language == 'go'
+        run: |
+          for m in . sentinel vault tracker navigator; do
+            (cd "$m" && go build ./...)
+          done
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
+
+  govulncheck:
+    name: govulncheck (${{ matrix.module }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [., sentinel, vault, tracker, navigator]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+      - name: govulncheck
+        working-directory: ${{ matrix.module }}
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
+          govulncheck ./...
+
+  gosec:
+    name: gosec (${{ matrix.module }})
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [sentinel, vault, tracker, navigator]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: ${{ matrix.module }}/go.sum
+      - name: gosec
+        working-directory: ${{ matrix.module }}
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.22.0
+          # Generated protobuf code is excluded; medium+ severity and confidence fail the build.
+          gosec -exclude-generated -severity medium -confidence medium \
+            -fmt sarif -out gosec.sarif ./... || echo "GOSEC_FAILED=1" >> "$GITHUB_ENV"
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles(format('{0}/gosec.sarif', matrix.module)) != ''
+        with:
+          sarif_file: ${{ matrix.module }}/gosec.sarif
+          category: gosec-${{ matrix.module }}
+      - name: fail on findings
+        if: env.GOSEC_FAILED == '1'
+        run: echo "gosec reported findings; see the Security tab" >&2 && exit 1
+
+  python-audit:
+    name: python (${{ matrix.module }} audit + bandit)
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [anchor, navigator]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: install tools and project
+        working-directory: ${{ matrix.module }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit==2.7.3 bandit==1.8.0
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu -e .
+      - name: pip-audit (known vulnerable dependencies)
+        working-directory: ${{ matrix.module }}
+        run: pip-audit --skip-editable --progress-spinner off
+      - name: bandit (insecure code patterns)
+        working-directory: ${{ matrix.module }}
+        run: bandit -r . --exclude ./tests,./.venv -ll -ii
+
+  secrets:
+    name: secret scan (gitleaks)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trivy:
+    name: trivy (filesystem, secrets, IaC)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: dependencies, secrets and misconfigurations (Dockerfiles, k8s, compose)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-dirs: tests,docs,archive
+
+  trivy-images:
+    name: trivy (container images)
+    runs-on: ubuntu-24.04
+    # Advisory for now: the module Dockerfiles pin golang 1.21/1.23 while go.mod
+    # needs 1.25 and the old alpine bases carry known CVEs. Drop continue-on-error
+    # once the Dockerfiles are updated.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: build images
+        run: |
+          docker build -t bastion/sentinel sentinel
+          docker build -t bastion/tracker tracker
+          docker build -t bastion/navigator navigator
+          docker build -t bastion/anchor anchor
+          docker build -t bastion/vault -f vault/deployments/Dockerfile vault
+      - name: scan images
+        run: |
+          for i in sentinel tracker navigator anchor vault; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              aquasec/trivy:0.57.1 image --severity HIGH,CRITICAL --ignore-unfixed \
+              --exit-code 1 "bastion/$i"
+          done
+
+  dependency-review:
+    name: dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
