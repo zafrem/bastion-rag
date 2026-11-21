@@ -57,6 +57,25 @@ advisory, so its failure is shown but the answer still goes out. Reasoning model
 are called with `think: false`; otherwise they spend the whole token budget on hidden reasoning and
 return an empty answer.
 
+## Bulk runs and scoring real data
+
+The **Bulk & dataset** tab (and `workbench score` in the terminal) runs many cases at once:
+
+- **Input**: paste, upload a file, or use the built-in labelled dataset. Plain text (one prompt per
+  line), CSV and JSON Lines are detected automatically. See [`data/README.md`](data/README.md).
+- **Load and response time**: choose how many runs go in parallel and repeat the set ×N. You get live
+  throughput and p50 / p95 / max, then a per-stage timing table. Big runs are background jobs with
+  progress and a Cancel button.
+- **Scoring**: labelled cases are graded (pass rate, recall, false positives, leaks, over-redaction);
+  unlabelled rows are measured only. Download the report as Markdown, JSON or CSV.
+
+```bash
+make score                                        # built-in dataset, report in workbench/reports/
+cd workbench && go run . score -data my.csv -concurrency 8 -repeat 50 -gate
+```
+
+[`reports/baseline.md`](reports/baseline.md) is the score of the modules as shipped.
+
 ## Tests
 
 ```bash

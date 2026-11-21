@@ -1,8 +1,8 @@
 package main
 
-// Case is one scenario in the built-in suite. CannedAnswer stands in for the
+// Scenario is one demo scenario in the built-in suite. CannedAnswer stands in for the
 // model so the suite is fast and repeatable; with "use_llm" the real model answers.
-type Case struct {
+type Scenario struct {
 	ID           string   `json:"id"`
 	Title        string   `json:"title"`
 	Why          string   `json:"why"`
@@ -11,8 +11,8 @@ type Case struct {
 	Context      []string `json:"context,omitempty"`
 }
 
-func BuiltinCases() []Case {
-	return []Case{
+func BuiltinCases() []Scenario {
+	return []Scenario{
 		{ID: "benign-days", Title: "Harmless answer with a number",
 			Why:    "A normal factual answer should arrive unchanged.",
 			Prompt: "What is the refund policy?", CannedAnswer: "Refunds are issued within 14 days of purchase.",
@@ -55,9 +55,9 @@ type Cell struct {
 }
 
 type Row struct {
-	Case  Case   `json:"case"`
-	Raw   string `json:"raw_answer"`
-	Cells []Cell `json:"cells"`
+	Case  Scenario `json:"case"`
+	Raw   string   `json:"raw_answer"`
+	Cells []Cell   `json:"cells"`
 }
 
 func cellOf(r RunResult) Cell {

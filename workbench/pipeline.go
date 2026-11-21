@@ -158,7 +158,11 @@ func (p Pipeline) Run(ctx context.Context, pr Profile, rq RunRequest) RunResult 
 	}
 	if res.Outcome == "error" || res.RawAnswer == "" {
 		if res.Outcome == "delivered" {
-			res.Outcome = "blocked" // nothing to deliver
+			if p.Cfg.OllamaURL == "" && rq.Answer == "" {
+				res.Outcome = "input_only" // only the input check could run: there is no model answer
+			} else {
+				res.Outcome = "blocked" // nothing to deliver
+			}
 		}
 		p.fillRemaining(&res, true)
 		return finish(res, start)

@@ -16,7 +16,8 @@
 <nav role="tablist" id="tabs">
   <button role="tab" data-tab="run" aria-selected="true">Run</button>
   <button role="tab" data-tab="compare" aria-selected="false">Compare profiles</button>
-  <button role="tab" data-tab="suite" aria-selected="false">Suite</button>
+  <button role="tab" data-tab="bulk" aria-selected="false">Bulk &amp; dataset</button>
+  <button role="tab" data-tab="suite" aria-selected="false">Demo suite</button>
   <button role="tab" data-tab="profiles" aria-selected="false">Profiles</button>
 </nav>
 
@@ -60,6 +61,44 @@
     <button class="primary" id="cmp-go">Compare</button>
   </div>
   <div id="cmp-out"></div>
+</section>
+
+<!-- BULK -->
+<section id="tab-bulk" class="tab" hidden>
+  <div class="panel">
+    <p class="hint">Run many prompts at once to demo the pipeline, check response times, or score a labelled dataset. Real data works: paste it, upload a file, or use the built-in labelled set.</p>
+    <div class="seg" role="group" aria-label="Input source" id="bulk-source">
+      <button type="button" class="on" data-src="paste">Paste</button>
+      <button type="button" data-src="file">Upload file</button>
+      <button type="button" data-src="builtin">Built-in dataset <span id="bulk-builtin-n"></span></button>
+    </div>
+    <div id="bulk-paste">
+      <label for="bulk-text">Prompts or dataset</label>
+      <textarea id="bulk-text" rows="8" class="mono" spellcheck="false" placeholder="One prompt per line, or paste JSON Lines / CSV (see Formats below)"></textarea>
+    </div>
+    <div id="bulk-upload" hidden>
+      <label for="bulk-file">File (.txt, .csv, .jsonl)</label>
+      <input type="file" id="bulk-file" accept=".txt,.csv,.jsonl,.json,.tsv,text/*">
+      <p id="bulk-file-info" class="hint"></p>
+    </div>
+    <details><summary>Formats</summary>
+      <p class="hint"><b>Plain text</b>: one prompt per line. Unlabelled, so it is measured (what was blocked or rewritten, how fast) but not graded.</p>
+      <pre class="code" id="fmt-lines"></pre>
+      <p class="hint"><b>CSV</b>: header row with a <code>prompt</code> column. Optional: id, category, profiles, context, model_answer, outcome, blocked_at, unchanged, must_not_contain, must_contain, bias, grounding. Lists use <code>|</code>.</p>
+      <pre class="code" id="fmt-csv"></pre>
+      <p class="hint"><b>JSON Lines</b>: one case per line, with the expectations that say what should happen.</p>
+      <pre class="code" id="fmt-jsonl"></pre>
+    </details>
+    <fieldset><legend>Run under these profiles</legend><div id="bulk-profiles" class="checks"></div></fieldset>
+    <div class="row">
+      <div><label for="bulk-conc">Parallel runs</label><input type="number" id="bulk-conc" min="1" max="32" value="4"></div>
+      <div><label for="bulk-repeat">Repeat the set ×</label><input type="number" id="bulk-repeat" min="1" max="1000" value="1"></div>
+      <label class="check"><input type="checkbox" id="bulk-llm"> Live model answers rows with no model answer <small>slower; adds model time</small></label>
+    </div>
+    <div class="row"><button class="primary" id="bulk-go">Run</button><button class="ghost" id="bulk-cancel" hidden>Cancel</button></div>
+  </div>
+  <div id="bulk-progress" hidden class="panel"></div>
+  <div id="bulk-out"></div>
 </section>
 
 <!-- SUITE -->

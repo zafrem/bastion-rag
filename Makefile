@@ -1,4 +1,4 @@
-.PHONY: workbench test-workbench mock-llm test-integration test-flow test-communication run-tests integration \
+.PHONY: workbench test-workbench score mock-llm test-integration test-flow test-communication run-tests integration \
         submodule-update start-all stop-all \
         start-sentinel start-vault start-navigator start-anchor start-tracker
 
@@ -10,6 +10,9 @@ workbench:
 	cd workbench && go run .
 test-workbench:
 	cd workbench && go vet ./... && go test ./...
+# Score the built-in dataset against running Sentinel and Anchor.
+score:
+	cd workbench && go run . score -profiles internal-staff,external-customer -out reports
 
 # ── Start modules individually ─────────────────────────────────────────────
 start-sentinel:

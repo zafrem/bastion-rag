@@ -22,18 +22,25 @@ func env(k, def string) string {
 	return def
 }
 
-func main() {
-	addr := flag.String("addr", env("WORKBENCH_ADDR", "127.0.0.1:8090"), "listen address (keep it on loopback)")
-	profiles := flag.String("profiles", env("WORKBENCH_PROFILES", ""), "optional JSON file of profiles")
-	flag.Parse()
-
+func loadConfig() Config {
 	maxTok, _ := strconv.Atoi(env("OLLAMA_MAX_TOKENS", "300"))
-	cfg := Config{
+	return Config{
 		SentinelURL: env("SENTINEL_URL", "http://localhost:8080"), SentinelToken: os.Getenv("SENTINEL_TOKEN"),
 		AnchorURL: env("ANCHOR_URL", "http://localhost:8083"), AnchorToken: os.Getenv("ANCHOR_TOKEN"),
 		OllamaURL: env("OLLAMA_URL", "http://localhost:11434"), OllamaModel: env("OLLAMA_MODEL", "qwen3.5:4b"),
 		LLMTimeout: 120 * time.Second, MaxTokens: maxTok,
 	}
+}
+
+func main() {
+	if len(os.Args) > 1 && os.Args[1] == "score" {
+		os.Exit(runScore(loadConfig(), DefaultProfiles(), os.Args[2:]))
+	}
+	addr := flag.String("addr", env("WORKBENCH_ADDR", "127.0.0.1:8090"), "listen address (keep it on loopback)")
+	profiles := flag.String("profiles", env("WORKBENCH_PROFILES", ""), "optional JSON file of profiles")
+	flag.Parse()
+
+	cfg := loadConfig()
 
 	var ps []Profile
 	if *profiles != "" {

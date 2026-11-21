@@ -20,13 +20,14 @@ type Server struct {
 	Cfg      Config
 	mu       sync.RWMutex
 	profiles []Profile
+	jobs     *JobManager
 }
 
 func NewServer(cfg Config, profiles []Profile) *Server {
 	if len(profiles) == 0 {
 		profiles = DefaultProfiles()
 	}
-	return &Server{Cfg: cfg, profiles: profiles}
+	return &Server{Cfg: cfg, profiles: profiles, jobs: NewJobManager()}
 }
 
 func (s *Server) profile(name string) (Profile, bool) {
@@ -50,6 +51,11 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/api/run", s.handleRun)
 	mux.HandleFunc("/api/compare", s.handleCompare)
 	mux.HandleFunc("/api/suite", s.handleSuite)
+	mux.HandleFunc("/api/dataset", s.handleDataset)
+	mux.HandleFunc("POST /api/jobs", s.handleJobStart)
+	mux.HandleFunc("GET /api/jobs/{id}", s.handleJobGet)
+	mux.HandleFunc("POST /api/jobs/{id}/cancel", s.handleJobCancel)
+	mux.HandleFunc("GET /api/jobs/{id}/report.md", s.handleJobMarkdown)
 	return guard(mux)
 }
 
@@ -83,11 +89,15 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 }
 
 func decode(w http.ResponseWriter, r *http.Request, v any) bool {
+	return decodeLimit(w, r, v, 1<<20)
+}
+
+func decodeLimit(w http.ResponseWriter, r *http.Request, v any, limit int64) bool {
 	if r.Method != http.MethodPost {
 		writeJSON(w, 405, map[string]string{"error": "use POST"})
 		return false
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+	r.Body = http.MaxBytesReader(w, r.Body, limit)
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		writeJSON(w, 400, map[string]string{"error": err.Error()})
 		return false
@@ -299,4 +309,151 @@ func (s *Server) handleSuite(w http.ResponseWriter, r *http.Request) {
 		rows = append(rows, row)
 	}
 	writeJSON(w, 200, rows)
+}
+
+// ── dataset runs ─────────────────────────────────────────────────────────────
+
+type datasetInfo struct {
+	Cases      []Case            `json:"cases"`
+	Categories map[string]string `json:"categories"`
+	Counts     map[string]int    `json:"counts"`
+}
+
+func (s *Server) handleDataset(w http.ResponseWriter, r *http.Request) {
+	cases, err := LoadDatasetFile("")
+	if err != nil {
+		writeJSON(w, 500, map[string]string{"error": err.Error()})
+		return
+	}
+	_, counts := CategoryCounts(cases)
+	writeJSON(w, 200, datasetInfo{Cases: cases, Categories: Categories, Counts: counts})
+}
+
+type jobReq struct {
+	Builtin    bool     `json:"builtin"`
+	Data       string   `json:"data"` // pasted or uploaded text: JSONL, CSV or one prompt per line
+	Name       string   `json:"name"`
+	Profiles   []string `json:"profiles"`
+	Categories []string `json:"categories"`
+	// Concurrency is how many runs go at once (1 to 32).
+	Concurrency int `json:"concurrency"`
+	// Repeat runs the whole set that many times, for load and response-time checks.
+	Repeat int `json:"repeat"`
+	// UseLLM lets the live model answer cases that have no model_answer.
+	UseLLM bool `json:"use_llm"`
+}
+
+const maxRunsPerJob = 200000
+
+func (s *Server) handleJobStart(w http.ResponseWriter, r *http.Request) {
+	var rq jobReq
+	if !decodeLimit(w, r, &rq, 64<<20) {
+		return
+	}
+	var cases []Case
+	var err error
+	name := rq.Name
+	switch {
+	case rq.Builtin:
+		cases, err = LoadDatasetFile("")
+		if name == "" {
+			name = "built-in dataset"
+		}
+	case strings.TrimSpace(rq.Data) != "":
+		cases, err = LoadAuto([]byte(rq.Data))
+		if name == "" {
+			name = "pasted data"
+		}
+	default:
+		writeJSON(w, 400, map[string]string{"error": "send data, or set builtin"})
+		return
+	}
+	if err != nil {
+		writeJSON(w, 400, map[string]string{"error": err.Error()})
+		return
+	}
+	s.mu.RLock()
+	ps := append([]Profile(nil), s.profiles...)
+	s.mu.RUnlock()
+	if probs := ValidateDataset(cases, nameSet(ps)); len(probs) > 0 {
+		if len(probs) > 8 {
+			probs = append(probs[:8], fmt.Sprintf("… and %d more", len(probs)-8))
+		}
+		writeJSON(w, 400, map[string]string{"error": "invalid data: " + strings.Join(probs, "; ")})
+		return
+	}
+	// Chosen profiles replace each case's own, unless the case pins its profiles.
+	use := map[string]Profile{}
+	chosen := rq.Profiles
+	if len(chosen) == 0 {
+		chosen = []string{ps[0].Name}
+	}
+	all := profileMap(ps)
+	for _, n := range chosen {
+		p, ok := all[n]
+		if !ok {
+			writeJSON(w, 400, map[string]string{"error": "unknown profile " + n})
+			return
+		}
+		use[n] = p
+	}
+	for i := range cases {
+		if len(cases[i].Profiles) == 0 {
+			cases[i].Profiles = chosen
+		} else {
+			for _, pn := range cases[i].Profiles {
+				if p, ok := all[pn]; ok {
+					use[pn] = p // a case that names a profile gets it even if it was not ticked
+				}
+			}
+		}
+	}
+	opt := ScoreOptions{Categories: rq.Categories, Profiles: use, Concurrency: min(max(rq.Concurrency, 1), 32), Repeat: min(max(rq.Repeat, 1), 1000)}
+	if n := CountRuns(cases, opt); n == 0 {
+		writeJSON(w, 400, map[string]string{"error": "nothing to run with these choices"})
+		return
+	} else if n > maxRunsPerJob {
+		writeJSON(w, 400, map[string]string{"error": fmt.Sprintf("%d runs is over the limit of %d", n, maxRunsPerJob)})
+		return
+	}
+	cfg := s.Cfg
+	if !rq.UseLLM {
+		cfg.OllamaURL = "" // cases without an answer get the input check only
+	}
+	j := s.jobs.Start(Pipeline{cfg}, name, cases, opt)
+	writeJSON(w, 200, j.Status())
+}
+
+func (s *Server) handleJobGet(w http.ResponseWriter, r *http.Request) {
+	j, ok := s.jobs.Get(r.PathValue("id"))
+	if !ok {
+		writeJSON(w, 404, map[string]string{"error": "no such job (it may have been replaced by newer ones)"})
+		return
+	}
+	writeJSON(w, 200, j.Status())
+}
+
+func (s *Server) handleJobCancel(w http.ResponseWriter, r *http.Request) {
+	j, ok := s.jobs.Get(r.PathValue("id"))
+	if !ok {
+		writeJSON(w, 404, map[string]string{"error": "no such job"})
+		return
+	}
+	j.Cancel()
+	writeJSON(w, 200, j.Status())
+}
+
+func (s *Server) handleJobMarkdown(w http.ResponseWriter, r *http.Request) {
+	j, ok := s.jobs.Get(r.PathValue("id"))
+	if !ok {
+		http.Error(w, "no such job", 404)
+		return
+	}
+	st := j.Status()
+	if st.Report == nil {
+		http.Error(w, "the run has not finished", 409)
+		return
+	}
+	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
+	_, _ = w.Write([]byte(st.Report.Markdown(DefaultGate())))
 }
