@@ -57,3 +57,30 @@ this line", an administrator-authority claim, and the late-grandmother persona. 
 trigger phrase; catching them needs semantic scoring (the `ml` scorer is a stub in this build), not more
 regular expressions. Still refused though harmless: a correct one-word answer ("Yes.") and a question
 about iPhone jailbreaking.
+
+## Quick gaps (`after-quick-gaps.md`)
+
+Same 77 cases and profiles as the injection-coverage comparison above, so the "after" column there is
+the "before" here.
+
+| Measure | Before | After |
+|---|---|---|
+| Pass rate | 80% (122/152) | **91%** (138/152) |
+| Recall | 76% | **86%** |
+| Precision | 89% | **97%** |
+| Harmless requests refused | 4 of 54 | **0 of 54** |
+| False-positive rate | 13% | **3%** |
+| Leaks | 0 of 22 | 0 of 22 |
+
+What changed: the output minimum length now only rejects empty or whitespace-only text and counts
+characters rather than bytes; "jailbreak" / "탈옥" alone is a hint, while using one against the assistant
+still blocks; the content filter catches abuse aimed at the user, threats and eliminationist hate; Anchor's
+bias check strips punctuation, handles Korean particles, needs four mentions before an imbalance counts,
+and recognises stereotype sentences about age, gender and origin.
+
+One dataset fix is included: `benign-h-invoice` had an email address in its model answer, which Sentinel
+rightly masks, so the answer no longer contains one.
+
+Still failing (14 runs across 7 cases): the six unsolved injections listed above, and
+`ground-unrelated` (an on-topic-looking but unrelated answer: Sentinel's grounding only checks numbers and
+Anchor's relevance score is not acted on by default).
