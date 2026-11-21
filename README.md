@@ -374,6 +374,7 @@ Example source documents (customer, manufacturing, HR records with PII) used by 
 | Pipeline execution examples | [docs/pipeline_execution_examples.md](./docs/pipeline_execution_examples.md) |
 | Modular RAG requirements | [docs/31_modular_rag_requirements.md](./docs/31_modular_rag_requirements.md) |
 | Injection defense architecture | [docs/32_injection_defense_architecture.md](./docs/32_injection_defense_architecture.md) |
+| Operators: tuning, the LLM judge, measuring a change | [docs/40_operator_guide.md](./docs/40_operator_guide.md) |
 
 ---
 
