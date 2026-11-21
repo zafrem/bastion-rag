@@ -109,3 +109,32 @@ model, which should cut the false refusals. If the judge is unreachable Sentinel
 reports `ml-unavailable` in the result's method.
 
 Still failing: `inj-h-grandma`, `benign-h-ignore-email`, and `ground-unrelated` (see above).
+
+## Relevance threshold (`before-relevance.md` vs `after-relevance.md`)
+
+Eight held-out grounding cases were added first (dataset now 85 cases, 168 runs), then scored before and after.
+Sentinel's grounding check used to look only at numbers, dates and percentages, so an answer on a different
+subject with no digits ("We are open around the clock" against "Opening hours are 9 to 6...") scored 1.0.
+It now also scores the share of the answer's ordinary words that appear in the sources (matching on the
+first four letters, so open/opening match) and uses the **existing** thresholds: below 0.5 is suspicious
+(a disclaimer is added), below 0.3 is failed (blocked only if `block_on_low_score` is on). The answer's grounding
+is the lower of the number score and the word score.
+
+| Measure | Before | After |
+|---|---|---|
+| Pass rate | 89% (150/168) | **93%** (156/168) |
+| Grounding cases passed | 18 of 24 | **24 of 24** |
+| Harmless answers rewritten | 0 of 54 | 0 of 54 |
+| False-positive rate | | **0%** |
+
+How wide the margin is: faithful answers scored 0.57 to 1.00 and unfaithful ones 0.00 to 0.40, with the 0.5
+threshold between them. That gap is 0.17 on 12 cases, so treat 0.5 as a reasonable default, not a proven one;
+check it on your own documents before turning on `block_on_low_score`.
+
+Limits, by design: it measures words, not meaning (an answer that reuses the source's words with the opposite
+meaning still passes, and "The device is waterproof" against "water resistant" only fails because of its other
+words); it reads Latin-script words only, so Korean answers are checked on their numbers but not their words;
+answers with fewer than three content words (`min_content_words`) are never judged. It can be switched off with
+`output_validation.hallucination.content_support: false`.
+
+Still failing: the six injections without a fixed phrasing (they need the LLM judge; see above).
