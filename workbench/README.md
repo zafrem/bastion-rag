@@ -88,9 +88,10 @@ WORKBENCH_FAIL_ON_KNOWN=1 ...                          # turn documented known i
 
 ## Known issues it surfaced
 
-- Sentinel output rules `latitude_01` and `longitude_01` redact ordinary integers, so
-  "within 14 days" is delivered as "within [DECIMAL LATITUDE …] days". Harmless answers differ from
-  the raw model for every profile.
+- (Fixed in Sentinel; see `reports/`.) Output rules such as `latitude_01`, `longitude_01` and
+  `date_iso_01` are declared `report` upstream, but Sentinel masked them anyway, so "within 14 days"
+  was delivered as "within [DECIMAL LATITUDE …] days". Sentinel now honours the declared action.
+  Still open: detection gaps in injection coverage, bias word lists and the content filter.
 - Sentinel-IN rejects metadata with a user id under 3 characters, a non-UUID-v4 context id, or a
   timestamp outside ±1 hour. A careless client is blocked regardless of the prompt.
 - With the default configuration, the internal and external profiles behave identically: the
