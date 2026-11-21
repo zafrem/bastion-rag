@@ -375,7 +375,8 @@ which tenant gets which profile.
 - **Input and output follow the profile separately.** Input validation reads `metadata.tenant_id`, output
   validation reads `user.TenantID`. Send the same tenant on both calls or the two halves will disagree.
 - **The response tells you which profile applied:** `"profile"` on REST input responses, `"Profile"` on
-  output. gRPC routes the same way but does not return the name.
+  output. gRPC returns it in `ValidateResponse.profile`; clients built from the older proto ignore the new
+  field, which is safe.
 - **Shared rules stay shared.** Whatever a profile does not override still applies: the injection rules, the
   decoder, PII masking and the content filter block the same things for everyone.
 
