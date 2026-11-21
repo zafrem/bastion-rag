@@ -73,7 +73,7 @@ admin ──POST /v1/exceptions──▶ Tracker ──signs (Ed25519)──▶ 
                                                           verify → persist → enforce
 ```
 
-1. Only an **admin** can create or revoke (`/v1/exceptions`). Each change is written to the
+1. Only an **admin** can create or revoke, in the Tracker UI (**Exceptions** page) or via `/v1/exceptions`. Each change is written to the
    Tracker audit log as `exception_created` / `exception_revoked`.
 2. Tracker signs every change with its private key. Modules hold only the **public** key,
    so a module (or anything on the bus) cannot forge an exception.
@@ -109,15 +109,21 @@ SENTINEL_EXCEPTIONS_PUBLIC_KEY=<public>    # config: exceptions.public_key / exc
 VAULT_EXCEPTIONS_PUBLIC_KEY=<public>
 ```
 
-## 3. Known limitations (first version)
+## 3. Testing
 
-- No Tracker UI page for exceptions yet; use the REST API.
+- Unit tests cover signing, forgery, tampering, replay, scope, expiry and standalone restart.
+- `tracker/internal/exceptions/e2e_test.go` runs against a real NATS server (live push, late-join
+  snapshot, revocation, forged bus messages, standalone restart). It runs in CI (`exceptions-e2e`
+  job, NATS service container) and locally with `EXCEPTIONS_E2E_NATS=localhost:4222`.
+- `tests/exceptions_sync_test.go` fails if the shared `types.go` / `client.go` drift between
+  tracker, sentinel and vault.
+
+## 4. Known limitations (first version)
+
 - Only Sentinel and Vault enforce. Navigator and Anchor are not wired up.
 - Vault's anonymize path is covered; the output view generator is not.
 - Sentinel's gRPC responses do not carry the notice (REST only; the proto is unchanged).
 - Sentinel industry filters are not exemptable.
 - Tracker keeps its own exception list in a plain JSON file (trusted local storage); only
   the module side re-verifies signatures from disk.
-- The NATS push and snapshot path is covered by unit tests with direct envelope passing,
-  not by an end-to-end test against a real NATS server.
 - A key rotation story is not implemented (one key pair).

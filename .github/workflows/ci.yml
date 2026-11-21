@@ -67,6 +67,37 @@ jobs:
           # A skipped test would silently prove nothing.
           if grep -q -- '--- SKIP' e2e.log; then echo "e2e test was skipped" >&2; exit 1; fi
 
+  exceptions-e2e:
+    name: go (exceptions e2e, nats)
+    runs-on: ubuntu-24.04
+    services:
+      nats:
+        image: nats:2.10-alpine
+        ports: ['4222:4222']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: tracker/go.sum
+      - name: wait for nats
+        run: |
+          for i in $(seq 1 30); do
+            (echo > /dev/tcp/localhost/4222) 2>/dev/null && exit 0
+            sleep 2
+          done
+          echo "nats did not become ready" >&2; exit 1
+      - name: end-to-end test
+        working-directory: tracker
+        env:
+          EXCEPTIONS_E2E_NATS: localhost:4222
+        run: |
+          go test ./internal/exceptions -run E2E -v -count=1 | tee e2e.log
+          # A skipped test would silently prove nothing.
+          if grep -q -- '--- SKIP' e2e.log; then echo "e2e test was skipped" >&2; exit 1; fi
+
   integration:
     name: go (cross-module tests)
     runs-on: ubuntu-24.04
