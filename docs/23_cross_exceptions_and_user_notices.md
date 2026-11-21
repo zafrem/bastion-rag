@@ -59,9 +59,18 @@ Wildcard rules are rejected, and a rule's module prefix must be in `modules`.
 | `sentinel.out.permission` | the access-level boundary check |
 | `sentinel.out.content:<violation>` | a content-filter violation (only if all violations are exempt) |
 | `sentinel.out.grounding` | the hallucination / grounding check |
+| `sentinel.industry:<filter_id>` | an industry-filter block |
 | `vault.mask:<pii_type>` | masking of a PII type, e.g. `vault.mask:email` |
+| `vault.view:<pii_type>` | transformation of a PII type in the output view (anonymized level only) |
+| `navigator.purpose:<purpose>` | the purpose pre-filter, for one declared purpose |
+| `anchor.bias:<category>` | one bias category (`gender`, `ethnicity`, `age`) in output verification |
 
-The format check is deliberately not exemptable.
+Deliberately not exemptable: tenant isolation, Vault permission filtering, the Sentinel format
+check, and the aggregated / audit views. Tracker refuses to create exceptions for them.
+
+Navigator and Anchor use a Python copy of the client (`navigator/navigator/exceptions.py`,
+`anchor/anchor/exceptions.py`, kept identical by the sync test). It is verified against an
+envelope signed by the Go implementation.
 
 ### Flow
 
@@ -107,7 +116,21 @@ TRACKER_EXCEPTIONS_SIGNING_KEY=<private>   # config: exceptions.signing_key / ex
 # Sentinel / Vault (public)
 SENTINEL_EXCEPTIONS_PUBLIC_KEY=<public>    # config: exceptions.public_key / exceptions.file
 VAULT_EXCEPTIONS_PUBLIC_KEY=<public>
+NAVIGATOR_EXCEPTIONS_PUBLIC_KEY=<public>
+ANCHOR_EXCEPTIONS_PUBLIC_KEY=<public>
 ```
+
+### Key rotation
+
+Modules accept several comma-separated public keys. To rotate: give modules `new,old`; set
+Tracker's `exceptions.signing_key` to the new key and `exceptions.previous_public_keys` to the old
+public key. Tracker loads state saved under the old key and re-signs it with the new one. Once
+everything is re-signed, drop the old key from the modules.
+
+### Tracker state
+
+Tracker's own state file is a signed envelope too. If its signature does not verify, Tracker
+refuses to start (`ErrStateTampered`) rather than trusting an edited file.
 
 ## 3. Testing
 
@@ -116,14 +139,13 @@ VAULT_EXCEPTIONS_PUBLIC_KEY=<public>
   snapshot, revocation, forged bus messages, standalone restart). It runs in CI (`exceptions-e2e`
   job, NATS service container) and locally with `EXCEPTIONS_E2E_NATS=localhost:4222`.
 - `tests/exceptions_sync_test.go` fails if the shared `types.go` / `client.go` drift between
-  tracker, sentinel and vault.
+  tracker, sentinel and vault, or `exceptions.py` between navigator and anchor.
+- `navigator/tests/test_exceptions.py` also runs a live NATS test with `EXCEPTIONS_E2E_NATS=host:port`.
 
-## 4. Known limitations (first version)
+## 4. Known limitations
 
-- Only Sentinel and Vault enforce. Navigator and Anchor are not wired up.
-- Vault's anonymize path is covered; the output view generator is not.
-- Sentinel's gRPC responses do not carry the notice (REST only; the proto is unchanged).
-- Sentinel industry filters are not exemptable.
-- Tracker keeps its own exception list in a plain JSON file (trusted local storage); only
-  the module side re-verifies signatures from disk.
-- A key rotation story is not implemented (one key pair).
+- Sentinel's gRPC notice is sent as trailing metadata (`x-bastion-user-notice-bin`) on unary
+  `Validate` only. Streaming and batch calls cannot carry a per-message trailer, and the proto is
+  unchanged (no `protoc` in this environment).
+- The Python live-NATS test is not yet a CI job (the Go one is).
+- The Docker images have not been built or tested locally.
