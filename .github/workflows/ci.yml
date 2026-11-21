@@ -22,7 +22,7 @@ jobs:
       matrix:
         module: [sentinel, vault, tracker, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -44,7 +44,7 @@ jobs:
         image: qdrant/qdrant:v1.12.4
         ports: ['6333:6333']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -75,7 +75,7 @@ jobs:
         image: nats:2.10-alpine
         ports: ['4222:4222']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -106,7 +106,7 @@ jobs:
       matrix:
         module: [anchor, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -140,7 +140,7 @@ jobs:
     name: go (workbench)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-go@v5
         with:
           go-version-file: workbench/go.mod
@@ -154,7 +154,7 @@ jobs:
     name: go (cross-module tests)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -175,7 +175,7 @@ jobs:
       matrix:
         module: [anchor, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-python@v5
@@ -200,7 +200,7 @@ jobs:
     name: shell scripts
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: syntax check
         run: for f in scripts/*.sh; do bash -n "$f"; done
       - name: shellcheck
