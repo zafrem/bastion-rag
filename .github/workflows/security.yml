@@ -30,7 +30,7 @@ jobs:
       matrix:
         language: [go, python, javascript-typescript]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -62,7 +62,7 @@ jobs:
       matrix:
         module: [., sentinel, vault, tracker, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -89,7 +89,7 @@ jobs:
       matrix:
         module: [sentinel, vault, tracker, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-go@v5
@@ -123,7 +123,7 @@ jobs:
       matrix:
         module: [anchor, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - uses: actions/setup-python@v5
@@ -146,7 +146,7 @@ jobs:
     name: secret scan (gitleaks)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
@@ -158,7 +158,7 @@ jobs:
     name: trivy (filesystem, secrets, IaC)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: dependencies, secrets and misconfigurations (Dockerfiles, k8s, compose)
@@ -179,7 +179,7 @@ jobs:
     # once the Dockerfiles are updated.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: build images
@@ -202,7 +202,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
