@@ -98,6 +98,44 @@ jobs:
           # A skipped test would silently prove nothing.
           if grep -q -- '--- SKIP' e2e.log; then echo "e2e test was skipped" >&2; exit 1; fi
 
+  exceptions-nats-python:
+    name: python (exceptions over live nats, ${{ matrix.module }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [anchor, navigator]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      # The tests start their own nats-server (they must stop and restart it to prove the client
+      # catches up after an outage, which a service container cannot do). Same release line as the
+      # nats:2.10 image used by the Go job, pinned to an exact version.
+      - name: install nats-server
+        working-directory: ${{ runner.temp }}
+        run: |
+          GOBIN="$RUNNER_TEMP/bin" go install github.com/nats-io/nats-server/v2@v2.10.22
+          "$RUNNER_TEMP/bin/nats-server" --version
+      # Only what the client needs: the full module install pulls in torch, which these tests do not use.
+      - name: install
+        run: python -m pip install --upgrade pip 'nats-py>=2.7' cryptography pytest pytest-timeout
+      - name: exceptions over a live bus
+        working-directory: ${{ matrix.module }}
+        env:
+          NATS_SERVER_BIN: ${{ runner.temp }}/bin/nats-server
+        run: |
+          python -m pytest tests/test_exceptions_nats.py -q -rs --timeout=120 | tee nats.log
+          # A skipped test would silently prove nothing.
+          if grep -Eq '[0-9]+ skipped' nats.log; then echo "live NATS tests were skipped" >&2; exit 1; fi
+
   workbench:
     name: go (workbench)
     runs-on: ubuntu-24.04
