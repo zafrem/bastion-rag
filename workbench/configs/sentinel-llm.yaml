@@ -1,0 +1,10 @@
+# Overlay on Sentinel's defaults: turns on the language-model judge for prompt injection.
+# Run Sentinel with:  go run ./cmd/sentinel server --config ../workbench/configs/sentinel-llm.yaml
+prompt_injection:
+  ml_model:
+    enabled: true
+    backend: llm
+    provider: ollama
+    endpoint: http://localhost:11434
+    model: qwen3.5:4b
+    timeout_ms: 20000
