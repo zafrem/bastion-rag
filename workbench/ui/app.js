@@ -112,6 +112,32 @@ function banner(res) {
   const extra = res.would_block_at ? 'Observe mode: would have been blocked at ' + stageName(res, res.would_block_at) : '';
   return h('div', { class: 'banner ' + cls }, text, extra ? h('small', { text: extra }) : null, h('small', { text: res.total_ms.toFixed(0) + ' ms total' }));
 }
+// Strain: how far the text the model receives is stretched from what the user typed.
+function strainPanel(res) {
+  const inp = res.input; if (!inp || !inp.transform) return null;
+  const t = inp.transform, pctf = (x) => Math.round(x * 100) + '%';
+  const called = res.stages.some((s) => s.id === 'llm' && s.status !== 'skipped');
+  const head = t.unchanged
+    ? 'Strain 0%: the model ' + (called ? 'received' : 'would receive') + ' exactly what was typed'
+    : 'Strain ' + pctf(t.strain) + ': the model ' + (called ? 'received' : 'would receive') + ' ' + t.expansion.toFixed(1) + '× the text that was typed';
+  // Widths are set through the CSSOM: the page's CSP forbids inline style attributes.
+  const seg = (cls, share, label) => {
+    if (!(share > 0)) return null;
+    const el = h('span', { class: 'seg ' + cls, title: label + ' ' + pctf(share), text: share >= 0.12 ? label + ' ' + pctf(share) : '' });
+    el.style.flexGrow = String(Math.max(share, 0.01));
+    return el;
+  };
+  const bar = h('div', { class: 'strainbar', role: 'img', 'aria-label': 'Share of the model input: question ' + pctf(t.share_question) + ', documents ' + pctf(t.share_context) + ', labels ' + pctf(t.share_template) },
+    seg('q', t.share_question, 'typed'), seg('c', t.share_context, 'documents'), seg('t', t.share_template, 'labels'));
+  const facts = h('p', { class: 'hint', text: t.raw_chars + ' characters typed → ' + t.augmented_chars + ' sent' +
+    (t.docs ? '; ' + t.docs + ' document' + (t.docs > 1 ? 's' : '') + '; ' + pctf(t.question_covered) + ' of the question’s words appear in them' : '') +
+    '. The question is added to, never rewritten.' });
+  const look = h('details', {}, h('summary', { text: 'Show the two texts' }),
+    h('div', { class: 'answers' },
+      h('div', { class: 'answer' }, h('h3', { text: 'What was typed' }), h('pre', { class: 'code', text: inp.raw })),
+      h('div', { class: 'answer' }, h('h3', { text: 'What the model receives' }), h('pre', { class: 'code', text: inp.model_input }))));
+  return h('div', { class: 'strain' }, h('strong', { text: head }), bar, facts, t.unchanged ? null : look);
+}
 function stageName(res, id) { const s = res.stages.find((x) => x.id === id); return s ? s.name : id || 'a stage'; }
 
 function openStage(s) {
@@ -147,7 +173,7 @@ $('run-go').addEventListener('click', async () => {
   try {
     const res = await api('/api/run', { prompt: $('run-prompt').value, profile: $('run-profile').value,
       context: splitContext($('run-context').value), observe: $('run-observe').checked, answer: $('run-answer').value.trim() });
-    clear(out).append(banner(res), h('div', { class: 'strip' }, res.stages.map((s) => stageCard(s))), answers(res));
+    clear(out).append(banner(res), strainPanel(res), h('div', { class: 'strip' }, res.stages.map((s) => stageCard(s))), answers(res));
   } catch (e) { clear(out).append(errBox(e)); } finally { busy(btn, false, 'Run through pipeline'); }
 });
 
@@ -167,7 +193,7 @@ $('cmp-go').addEventListener('click', async () => {
     else out.append(h('p', { class: 'hint', text: 'The profiles behaved identically at every stage.' }));
     out.append(h('div', { class: 'cols' }, r.results.map((res) => {
       const p = profiles.find((x) => x.name === res.profile) || {};
-      return h('div', { class: 'col' }, h('h3', { text: res.profile }), h('div', { class: 'desc', text: p.description || '' }), banner(res),
+      return h('div', { class: 'col' }, h('h3', { text: res.profile }), h('div', { class: 'desc', text: p.description || '' }), banner(res), strainPanel(res),
         h('div', { class: 'strip vertical' }, res.stages.map((s) => stageCard(s, { diverge: s.id === r.first_divergence }))),
         h('div', { class: 'answer' }, h('h3', { text: 'User receives' }), res.final_answer ? h('p', {}, ...(res.altered ? diffPair(res.raw_answer, res.final_answer).right : [res.final_answer])) : h('p', { class: 'none', text: 'No answer delivered.' })));
     })));

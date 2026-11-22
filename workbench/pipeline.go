@@ -53,6 +53,8 @@ type RunResult struct {
 	BlockedAt string `json:"blocked_at,omitempty"`
 	// WouldBlockAt is the first stage that would have blocked, in observe mode.
 	WouldBlockAt string `json:"would_block_at,omitempty"`
+	// Input compares what was typed with what the model receives.
+	Input InputView `json:"input"`
 	// Altered is true when the user receives different text than the model wrote.
 	Altered bool    `json:"altered"`
 	TotalMs float64 `json:"total_ms"`
@@ -64,7 +66,7 @@ func ms(t time.Time) float64 { return float64(time.Since(t).Microseconds()) / 10
 
 func (p Pipeline) Run(ctx context.Context, pr Profile, rq RunRequest) RunResult {
 	start := time.Now()
-	res := RunResult{Profile: pr.Name, Prompt: rq.Prompt, Outcome: "delivered"}
+	res := RunResult{Profile: pr.Name, Prompt: rq.Prompt, Outcome: "delivered", Input: ViewInput(rq.Prompt, rq.Context)}
 	blocked := false // true once a stage blocked (enforce mode)
 
 	block := func(s *Stage, id string) {

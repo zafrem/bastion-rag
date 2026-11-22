@@ -94,10 +94,10 @@ workbench compare -show ground-supported   # one case, side by side
 ```
 
 When a case supplies documents, the model is sent `Context:` + the documents + `Question:` + the original prompt
-(the same function the pipeline uses). `compare` reports how much that adds: growth in characters, the share of the
+(the same function the pipeline uses). `compare` reports how much that adds as **strain**, `(sent − typed) / typed` (0% = untouched), the share of the
 message that is retrieved text, and how many of the question's content words also occur in the documents. The question
 is never rewritten, only appended to. The built-in documents are one short sentence each, so its growth numbers
-(about 4x) understate real retrieval, where chunks run to kilobytes; run it on your own data for real figures.
+(a strain of roughly 300%) understate real retrieval, where chunks run to kilobytes; run it on your own data for real figures.
 
 ## How it is scored
 

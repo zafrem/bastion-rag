@@ -344,10 +344,19 @@ bastion-rag/
 ├── anchor/              Python — embedding noise, bias detection
 ├── tracker/             Go — observability, audit, monitoring mode, embedded web UI
 ├── tests/               End-to-end, scenario, and latency tests
+├── workbench/           Demo UI and scoring tool: run a prompt through the pipeline, compare profiles, measure input strain
+├── site/                Showcase website with the request trace simulator
 ├── scripts/             Per-module start/stop and integration runners
 ├── docs/                SRS specification library (16 documents, v3.0)
 └── BASTION_OVERVIEW.md  Plain-English architecture guide
 ```
+
+**Try the pipeline and see the strain.** `make workbench` (then open http://127.0.0.1:8090) runs one prompt through
+Sentinel, the model and Anchor, stage by stage. Each run shows the **input strain**: how far the text the model
+receives is stretched from what the user typed, `(sent − typed) / typed`, so 0% means untouched and 290% means the
+model received 3.9× as much text because documents were added. `go run ./workbench compare` measures a whole dataset
+the same way without any services running; see [`workbench/README.md`](workbench/README.md). The showcase website's
+request trace simulator (`site/`) shows the same readout for its scripted scenarios.
 
 Example source documents (customer, manufacturing, HR records with PII) used by the demo scenarios: [`navigator/tests/fixtures/source_documents.jsonl`](https://github.com/zafrem/bastion-navigator/blob/main/tests/fixtures/source_documents.jsonl)
 

@@ -27,6 +27,9 @@ type Transform struct {
 
 	// Expansion is augmented size divided by raw size (1.0 means unchanged).
 	Expansion float64 `json:"expansion"`
+	// Strain is how far the input was stretched relative to what was typed: (sent - typed) / typed.
+	// 0 means the model received exactly the typed text; 2.9 means it received 3.9 times as much.
+	Strain float64 `json:"strain"`
 	// Shares of the augmented message, by characters. They add up to 1.
 	ShareQuestion float64 `json:"share_question"`
 	ShareContext  float64 `json:"share_context"`
@@ -69,6 +72,7 @@ func MeasureTransform(c Case) Transform {
 		Unchanged: aug == c.Prompt}
 	if t.RawChars > 0 {
 		t.Expansion = float64(t.AugmentedChars) / float64(t.RawChars)
+		t.Strain = t.Expansion - 1
 	}
 	if t.AugmentedChars > 0 {
 		ctx := 0
@@ -96,20 +100,20 @@ func MeasureTransform(c Case) Transform {
 
 // TransformSummary aggregates a set of measurements.
 type TransformSummary struct {
-	Cases           int     `json:"cases"`
-	WithContext     int     `json:"with_context"`
-	Unchanged       int     `json:"unchanged"`
-	MedianExpansion float64 `json:"median_expansion"` // among cases with context
-	MaxExpansion    float64 `json:"max_expansion"`
-	MeanShareCtx    float64 `json:"mean_share_context"`
-	MeanCovered     float64 `json:"mean_question_covered"`
-	RawChars        int     `json:"raw_chars_total"`
-	AugmentedChars  int     `json:"augmented_chars_total"`
+	Cases          int     `json:"cases"`
+	WithContext    int     `json:"with_context"`
+	Unchanged      int     `json:"unchanged"`
+	MedianStrain   float64 `json:"median_strain"` // among cases with context
+	MaxStrain      float64 `json:"max_strain"`
+	MeanShareCtx   float64 `json:"mean_share_context"`
+	MeanCovered    float64 `json:"mean_question_covered"`
+	RawChars       int     `json:"raw_chars_total"`
+	AugmentedChars int     `json:"augmented_chars_total"`
 }
 
 func Summarize(ts []Transform) TransformSummary {
 	s := TransformSummary{Cases: len(ts)}
-	var exp []float64
+	var strain []float64
 	for _, t := range ts {
 		s.RawChars += t.RawChars
 		s.AugmentedChars += t.AugmentedChars
@@ -118,16 +122,16 @@ func Summarize(ts []Transform) TransformSummary {
 			continue
 		}
 		s.WithContext++
-		exp = append(exp, t.Expansion)
+		strain = append(strain, t.Strain)
 		s.MeanShareCtx += t.ShareContext
 		s.MeanCovered += t.QuestionCovered
-		if t.Expansion > s.MaxExpansion {
-			s.MaxExpansion = t.Expansion
+		if t.Strain > s.MaxStrain {
+			s.MaxStrain = t.Strain
 		}
 	}
-	if n := len(exp); n > 0 {
-		sort.Float64s(exp)
-		s.MedianExpansion = exp[n/2]
+	if n := len(strain); n > 0 {
+		sort.Float64s(strain)
+		s.MedianStrain = strain[n/2]
 		s.MeanShareCtx /= float64(n)
 		s.MeanCovered /= float64(n)
 	}
@@ -138,11 +142,12 @@ func compareMarkdown(name string, ts []Transform, sum TransformSummary, examples
 	var b strings.Builder
 	fmt.Fprintf(&b, "# Raw input vs model input: %s\n\n", name)
 	b.WriteString("What the user typed compared with the message the model actually receives once documents are added. ")
+	b.WriteString("**Strain** is the deformation: (sent - typed) / typed, so 0% means untouched and 290% means the model received 3.9 times as much text as was typed. ")
 	b.WriteString("The message is built by the same function the pipeline uses, so these numbers describe real traffic shape.\n\n")
 	b.WriteString("| Measure | Value |\n|---|---|\n")
 	fmt.Fprintf(&b, "| Cases | %d |\n| Sent to the model unchanged (no documents) | %d |\n| Augmented with documents | %d |\n", sum.Cases, sum.Unchanged, sum.WithContext)
 	if sum.WithContext > 0 {
-		fmt.Fprintf(&b, "| Median growth of an augmented message | **%.1fx** |\n| Largest growth | %.1fx |\n", sum.MedianExpansion, sum.MaxExpansion)
+		fmt.Fprintf(&b, "| Median strain of an augmented message | **%s** |\n| Largest strain | %s |\n", pct(sum.MedianStrain), pct(sum.MaxStrain))
 		fmt.Fprintf(&b, "| Share of an augmented message that is retrieved text (mean) | **%s** |\n", pct(sum.MeanShareCtx))
 		fmt.Fprintf(&b, "| Question words that also appear in the documents (mean) | %s |\n", pct(sum.MeanCovered))
 	}
@@ -155,14 +160,14 @@ func compareMarkdown(name string, ts []Transform, sum TransformSummary, examples
 			aug = append(aug, t)
 		}
 	}
-	sort.Slice(aug, func(i, j int) bool { return aug[i].Expansion > aug[j].Expansion })
+	sort.Slice(aug, func(i, j int) bool { return aug[i].Strain > aug[j].Strain })
 	if len(aug) > 0 {
-		b.WriteString("\n## Augmented cases, most expanded first\n\n| Case | Docs | Typed | Sent | Growth | Retrieved text | Question covered |\n|---|---|---|---|---|---|---|\n")
+		b.WriteString("\n## Augmented cases, most strained first\n\n| Case | Docs | Typed | Sent | Strain | Retrieved text | Question covered |\n|---|---|---|---|---|---|---|\n")
 		for i, t := range aug {
 			if examples > 0 && i >= examples+10 {
 				break
 			}
-			fmt.Fprintf(&b, "| %s | %d | %d | %d | %.1fx | %s | %s |\n", t.ID, t.Docs, t.RawChars, t.AugmentedChars, t.Expansion, pct(t.ShareContext), pct(t.QuestionCovered))
+			fmt.Fprintf(&b, "| %s | %d | %d | %d | %s | %s | %s |\n", t.ID, t.Docs, t.RawChars, t.AugmentedChars, pct(t.Strain), pct(t.ShareContext), pct(t.QuestionCovered))
 		}
 	}
 	return b.String()
@@ -218,4 +223,17 @@ func runCompare(args []string) int {
 		}
 	}
 	return 0
+}
+
+// InputView is the raw prompt, the exact message the model receives, and how far apart they are.
+type InputView struct {
+	Raw        string    `json:"raw"`
+	ModelInput string    `json:"model_input"`
+	Transform  Transform `json:"transform"`
+}
+
+// ViewInput builds the comparison shown with every run. It does not depend on whether the model is called.
+func ViewInput(prompt string, docs []string) InputView {
+	return InputView{Raw: prompt, ModelInput: userMessage(prompt, docs),
+		Transform: MeasureTransform(Case{ID: "run", Prompt: prompt, Context: docs})}
 }

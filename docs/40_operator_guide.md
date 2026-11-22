@@ -312,6 +312,12 @@ A labelled case says what **should** happen (`blocked` at the input, `delivered`
 `grounding: low`, `bias: flagged`), which is what makes recall, false positives and leaks computable.
 Unlabelled rows are only timed.
 
+To see how much retrieval stretches what users type, every workbench run shows its **input strain**,
+`(sent − typed) / typed`, and `go run . compare` measures a whole dataset with no services running (see
+`workbench/README.md`). Strain is a cost signal as much as a quality one: a high-strain prompt spends more model
+time and context window, and a prompt whose words barely occur in its documents is a sign the retrieval is not
+about what was asked.
+
 How the shipped defaults moved as the work progressed (same two profiles; run counts differ because the
 dataset grew, so compare within a row pair, not down the whole column):
 

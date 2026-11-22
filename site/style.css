@@ -1145,3 +1145,33 @@ table.spec th {
   .cursor { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* Input strain readout in the request trace simulator */
+.demo-strain {
+  margin: 0 0 16px;
+  padding: 11px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel-alt);
+}
+.strain-head { display: flex; align-items: baseline; gap: 10px; }
+.strain-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+.strain-head b { font-family: var(--mono); font-size: 18px; color: var(--text); }
+.strain-bar {
+  display: flex;
+  height: 10px;
+  margin: 8px 0 6px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--line);
+}
+.strain-bar .seg { flex-basis: 0; }
+.strain-bar .q { background: var(--ok); }
+.strain-bar .c { background: var(--accent-light); }
+.strain-bar .t { background: var(--warn); }
+.strain-note { margin: 6px 0 0; color: var(--dim); font-size: 12.5px; }

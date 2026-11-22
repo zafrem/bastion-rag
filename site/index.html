@@ -211,10 +211,14 @@
         <span class="sec-num">03</span>
         <h2>Request Trace Simulator</h2>
       </div>
-      <p class="sub">Select a scenario below to step through how each service inspects, transforms, or blocks the request. Click any log entry to inspect its structured wire payload.</p>
+      <p class="sub">Select a scenario below to step through how each service inspects, transforms, or blocks the request. Click any log entry to inspect its structured wire payload. The <b>input strain</b> readout shows how much the retrieved documents stretch what the user typed before the model sees it.</p>
       <div class="demo" id="demo-root">
         <div class="demo-picker" role="group" aria-label="Scenario"><span class="dim">Enable JavaScript to switch scenarios.</span></div>
         <p class="demo-query"><span>Query</span> <b>What are our customer satisfaction trends for Q4?</b></p>
+        <div class="demo-strain" aria-live="polite">
+          <div class="strain-head"><span class="strain-label">Input strain</span><b>…</b></div>
+          <p class="strain-note">Strain is how far the text the model receives is stretched from what was typed. Measured when the request reaches the model.</p>
+        </div>
         <ul class="demo-nodes" aria-hidden="true">
           <li data-node="sentinel">Sentinel</li>
           <li data-node="vault">Vault</li>

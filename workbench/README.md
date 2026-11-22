@@ -48,6 +48,12 @@ chosen by the caller profile's tenant. See [`data/README.md`](data/README.md#pol
   detail and the notice the end user would see. The two answers are diffed, so you see exactly which
   words a control changed. *Observe mode* keeps going after a block to show what would have been
   prevented.
+- **Input strain** (under the result banner on **Run** and **Compare**): how far the text the model receives
+  is stretched from what was typed, `(sent − typed) / typed`. A prompt with no documents has strain 0%; a prompt plus
+  one 100-character document typically shows a few hundred percent. A bar splits the model's input into what was
+  typed, the documents, and the `Context:`/`Question:` labels, and *Show the two texts* displays both. The text
+  shown is the exact message sent to the model. It is also shown for blocked runs (as what the model *would* have
+  received). The question is added to, never rewritten.
 - **Compare profiles**: the same prompt under 2 to 4 profiles with **one shared model answer**, so a
   difference comes from the controls and not from the model's randomness. The first stage where the
   profiles diverge is outlined.
@@ -60,6 +66,18 @@ Notes on behaviour: if Sentinel is configured but fails, nothing is delivered (f
 advisory, so its failure is shown but the answer still goes out. Reasoning models such as `qwen3.5`
 are called with `think: false`; otherwise they spend the whole token budget on hidden reasoning and
 return an empty answer.
+
+## Measuring strain without running anything
+
+```bash
+go run . compare                         # the built-in dataset: no services needed
+go run . compare -data my.jsonl -out reports/
+go run . compare -show ground-supported  # one case, the typed text and the model's input side by side
+```
+
+Reports the median and largest strain, how much of the model's input is retrieved text, and how many of the
+question's words occur in the documents. The workbench's own documents are short, so its numbers understate real
+retrieval; point it at your own data. See [`reports/raw-vs-model-input.md`](reports/raw-vs-model-input.md).
 
 ## Bulk runs and scoring real data
 
