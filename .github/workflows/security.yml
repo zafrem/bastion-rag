@@ -75,7 +75,7 @@ jobs:
       - name: govulncheck
         working-directory: ${{ matrix.module }}
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
+          go install golang.org/x/vuln/cmd/govulncheck@v1.10.0
           govulncheck ./...
 
   gosec:
@@ -102,7 +102,7 @@ jobs:
       - name: gosec
         working-directory: ${{ matrix.module }}
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@v2.22.0
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.30.0
           # Generated protobuf code is excluded; medium+ severity and confidence fail the build.
           # external/ holds vendored third-party submodules (sentinel/external/pii-pattern-engine), which are
           # scanned in their own repository, not here. Nothing under external/ is first-party code.
@@ -164,8 +164,10 @@ jobs:
         with:
           submodules: recursive
       - name: dependencies, secrets and misconfigurations (Dockerfiles, k8s, compose)
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
+          # The action's old default (v0.65.0) was deleted upstream, so installing it failed with exit 1.
+          version: v0.76.2
           scan-type: fs
           scanners: vuln,secret,misconfig
           severity: HIGH,CRITICAL
@@ -176,9 +178,8 @@ jobs:
   trivy-images:
     name: trivy (container images)
     runs-on: ubuntu-24.04
-    # Advisory for now: the module Dockerfiles pin golang 1.21/1.23 while go.mod
-    # needs 1.25 and the old alpine bases carry known CVEs. Drop continue-on-error
-    # once the Dockerfiles are updated.
+    # Advisory for now: the old alpine bases may carry known CVEs. Drop continue-on-error
+    # once an image scan has run clean. The Go builder images must stay at or above go.mod.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
