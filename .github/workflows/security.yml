@@ -173,7 +173,9 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
-          skip-dirs: tests,docs,archive
+          # sentinel/external is the vendored pii-pattern-engine submodule, scanned in its own repository;
+          # its test fixtures are deliberately token-shaped strings that trivy reports as secrets.
+          skip-dirs: tests,docs,archive,sentinel/external
 
   trivy-images:
     name: trivy (container images)
