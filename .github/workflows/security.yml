@@ -196,11 +196,14 @@ jobs:
           docker build -t bastion/vault -f vault/deployments/Dockerfile vault
       - name: scan images
         run: |
+          # Scan every image even if one has findings, then fail: stopping at the first hid the rest.
+          failed=0
           for i in sentinel tracker navigator anchor vault; do
             docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
               aquasec/trivy:0.57.1 image --severity HIGH,CRITICAL --ignore-unfixed \
-              --exit-code 1 "bastion/$i"
+              --exit-code 1 "bastion/$i" || failed=1
           done
+          exit $failed
 
   dependency-review:
     name: dependency review
