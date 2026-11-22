@@ -85,6 +85,20 @@ cd workbench && go run . score -data data/policy.jsonl -profiles internal-staff,
 
 Without the policy the two external-only cases fail by design, which is how you tell the policy made the difference.
 
+## Raw input vs what the model receives
+
+```bash
+workbench compare                          # measure the built-in dataset (no services needed)
+workbench compare -data mine.jsonl -out reports/
+workbench compare -show ground-supported   # one case, side by side
+```
+
+When a case supplies documents, the model is sent `Context:` + the documents + `Question:` + the original prompt
+(the same function the pipeline uses). `compare` reports how much that adds: growth in characters, the share of the
+message that is retrieved text, and how many of the question's content words also occur in the documents. The question
+is never rewritten, only appended to. The built-in documents are one short sentence each, so its growth numbers
+(about 4x) understate real retrieval, where chunks run to kilobytes; run it on your own data for real figures.
+
 ## How it is scored
 
 - **Pass rate**: runs where every expectation held.

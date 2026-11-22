@@ -36,6 +36,9 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "score" {
 		os.Exit(runScore(loadConfig(), DefaultProfiles(), os.Args[2:]))
 	}
+	if len(os.Args) > 1 && os.Args[1] == "compare" {
+		os.Exit(runCompare(os.Args[2:]))
+	}
 	addr := flag.String("addr", env("WORKBENCH_ADDR", "127.0.0.1:8090"), "listen address (keep it on loopback)")
 	profiles := flag.String("profiles", env("WORKBENCH_PROFILES", ""), "optional JSON file of profiles")
 	flag.Parse()

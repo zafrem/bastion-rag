@@ -193,10 +193,7 @@ func (c Config) anchorVerify(ctx context.Context, p Profile, answer, query strin
 // qwen3.5 otherwise spend the whole token budget on hidden thinking and return
 // an empty answer.
 func (c Config) generate(ctx context.Context, system, prompt string, docs []string) (string, error) {
-	user := prompt
-	if len(docs) > 0 {
-		user = "Context:\n" + strings.Join(docs, "\n\n") + "\n\nQuestion: " + prompt
-	}
+	user := userMessage(prompt, docs)
 	msgs := []map[string]string{}
 	if system != "" {
 		msgs = append(msgs, map[string]string{"role": "system", "content": system})
@@ -221,4 +218,20 @@ func (c Config) generate(ctx context.Context, system, prompt string, docs []stri
 		return "", fmt.Errorf("ollama: %s", out.Error)
 	}
 	return strings.TrimSpace(out.Message.Content), nil
+}
+
+// Parts of the message the model receives when documents are supplied.
+const (
+	contextHeader  = "Context:\n"
+	contextToQuery = "\n\nQuestion: "
+	docSeparator   = "\n\n"
+)
+
+// userMessage is exactly what the model is sent as the user turn: the question alone, or the documents
+// followed by the question. `workbench compare` measures the difference.
+func userMessage(prompt string, docs []string) string {
+	if len(docs) == 0 {
+		return prompt
+	}
+	return contextHeader + strings.Join(docs, docSeparator) + contextToQuery + prompt
 }
