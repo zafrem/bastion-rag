@@ -123,7 +123,7 @@ function strainPanel(res) {
   // Widths are set through the CSSOM: the page's CSP forbids inline style attributes.
   const seg = (cls, share, label) => {
     if (!(share > 0)) return null;
-    const el = h('span', { class: 'seg ' + cls, title: label + ' ' + pctf(share), text: share >= 0.12 ? label + ' ' + pctf(share) : '' });
+    const el = h('span', { class: 'sseg ' + cls, title: label + ' ' + pctf(share), text: share >= 0.12 ? label + ' ' + pctf(share) : '' });
     el.style.flexGrow = String(Math.max(share, 0.01));
     return el;
   };
