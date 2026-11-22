@@ -22,10 +22,10 @@ jobs:
       matrix:
         module: [sentinel, vault, tracker, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache-dependency-path: ${{ matrix.module }}/go.sum
@@ -44,10 +44,10 @@ jobs:
         image: qdrant/qdrant:v1.12.4
         ports: ['6333:6333']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache-dependency-path: navigator/go.sum
@@ -75,10 +75,10 @@ jobs:
         image: nats:2.10-alpine
         ports: ['4222:4222']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache-dependency-path: tracker/go.sum
@@ -106,14 +106,14 @@ jobs:
       matrix:
         module: [anchor, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       # The tests start their own nats-server (they must stop and restart it to prove the client
@@ -140,8 +140,8 @@ jobs:
     name: go (workbench)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: workbench/go.mod
       - name: vet and test (fake Sentinel, Anchor and Ollama)
@@ -154,10 +154,10 @@ jobs:
     name: go (cross-module tests)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache-dependency-path: |
@@ -175,10 +175,10 @@ jobs:
       matrix:
         module: [anchor, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: pip
@@ -200,7 +200,7 @@ jobs:
     name: shell scripts
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: syntax check
         run: for f in scripts/*.sh; do bash -n "$f"; done
       - name: shellcheck
