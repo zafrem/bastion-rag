@@ -150,6 +150,44 @@ jobs:
           go vet ./...
           go test -count=1 ./...
 
+  tracker-monitoring:
+    name: tracker monitoring stack
+    runs-on: ubuntu-24.04
+    env:
+      GRAFANA_ADMIN_PASSWORD: ci-only-not-a-secret
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - name: validate configuration
+        working-directory: tracker/monitoring
+        run: |
+          # Same image versions as tracker/docker-compose.yml.
+          image() { sed -n "s|^ *image: \($1:.*\)$|\1|p" ../docker-compose.yml; }
+          docker run --rm --entrypoint promtool \
+            -v "$PWD/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro" \
+            -v "$PWD/prometheus/rules:/etc/prometheus/rules:ro" \
+            "$(image prom/prometheus)" check config /etc/prometheus/prometheus.yml
+          docker run --rm --entrypoint amtool -v "$PWD/alertmanager:/etc/alertmanager:ro" \
+            "$(image prom/alertmanager)" check-config /etc/alertmanager/alertmanager.yml
+      - name: start the stack
+        working-directory: tracker
+        run: |
+          export TRACKER_AUDIT_SECRET="$(openssl rand -hex 32)"
+          echo "TRACKER_AUDIT_SECRET=$TRACKER_AUDIT_SECRET" >> "$GITHUB_ENV"
+          docker compose --profile monitoring up -d --build
+      - name: check scraping, rules, alert path and dashboard
+        working-directory: tracker
+        run: python3 monitoring/check_stack.py
+      - name: logs on failure
+        if: failure()
+        working-directory: tracker
+        run: docker compose --profile monitoring logs --no-color --tail 100
+      - name: stop
+        if: always()
+        working-directory: tracker
+        run: docker compose --profile monitoring down -v
+
   integration:
     name: go (cross-module tests)
     runs-on: ubuntu-24.04
