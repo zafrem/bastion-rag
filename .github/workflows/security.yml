@@ -30,10 +30,10 @@ jobs:
       matrix:
         language: [go, python, javascript-typescript]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         if: matrix.language == 'go'
         with:
           go-version-file: go.mod
@@ -62,10 +62,10 @@ jobs:
       matrix:
         module: [., sentinel, vault, tracker, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           # go.mod pins the minimum (1.25.0); scan with the newest toolchain so
           # standard-library advisories reflect current patch releases.
@@ -89,10 +89,10 @@ jobs:
       matrix:
         module: [sentinel, vault, tracker, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           # go.mod pins the minimum (1.25.0); scan with the newest toolchain so
           # standard-library advisories reflect current patch releases.
@@ -125,10 +125,10 @@ jobs:
       matrix:
         module: [anchor, navigator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - name: install tools and project
@@ -148,11 +148,11 @@ jobs:
     name: secret scan (gitleaks)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           submodules: recursive
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -160,7 +160,7 @@ jobs:
     name: trivy (filesystem, secrets, IaC)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: dependencies, secrets and misconfigurations (Dockerfiles, k8s, compose)
@@ -184,7 +184,7 @@ jobs:
     # once an image scan has run clean. The Go builder images must stay at or above go.mod.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: build images
@@ -210,7 +210,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/dependency-review-action@v4
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
