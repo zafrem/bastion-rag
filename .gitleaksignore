@@ -1,0 +1,9 @@
+# Reviewed false positives, one fingerprint (commit:file:rule:line) each, so nothing else is silenced.
+# The scheduled scan reads the whole history, which is why these show up there and not on a push.
+
+# A placeholder master key (0123456789abcdef repeated) in the test configuration for Vault's local KMS.
+9638735d2f5928944622bbf7ade56a2507eff3d5:tests/configs/vault.yaml:generic-api-key:10
+
+# The example honey-token ("api_key_TRAP_...") in the honey-token requirements document and its archived copy.
+9638735d2f5928944622bbf7ade56a2507eff3d5:docs/20_cross_honey_token_srs.md:generic-api-key:44
+9638735d2f5928944622bbf7ade56a2507eff3d5:docs/archive/v2/20_cross_honey_token_srs.md:generic-api-key:44
