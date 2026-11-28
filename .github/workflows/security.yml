@@ -38,7 +38,7 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           queries: security-extended
@@ -50,7 +50,7 @@ jobs:
           for m in . sentinel vault tracker navigator; do
             (cd "$m" && go build ./...)
           done
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
         with:
           category: /language:${{ matrix.language }}
 
@@ -108,7 +108,7 @@ jobs:
           # scanned in their own repository, not here. Nothing under external/ is first-party code.
           gosec -exclude-generated -exclude-dir=external -severity medium -confidence medium \
             -fmt sarif -out gosec.sarif ./... || echo "GOSEC_FAILED=1" >> "$GITHUB_ENV"
-      - uses: github/codeql-action/upload-sarif@v3
+      - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles(format('{0}/gosec.sarif', matrix.module)) != ''
         with:
           sarif_file: ${{ matrix.module }}/gosec.sarif
